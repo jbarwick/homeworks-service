@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "hw.host",
+      "type": "java.lang.String",
+      "description": "Hostname of the Lutron processor."
+    },
+    {
+      "name": "hw.username",
+      "type": "java.lang.String",
+      "description": "Username for the Lutron processor: Lutron."
+    },
+    {
+      "name": "hw.password",
+      "type": "java.lang.String",
+      "description": "Password for the Lutron processor."
+    },
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Do not put secret keys in your configuration file.  You know better than that!."
+    }
+  ]
+}

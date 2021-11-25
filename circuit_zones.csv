@@ -1,0 +1,37 @@
+id,name,address,room,lights,watts,type
+1,Toilet/Show/Tub,01:05:01:01,Master Bathroom,3,150,dimmed
+2,Master Bathroom Basin,01:05:01:02,Master Bathroom,2,100,dimmed
+3,Makeup Center,01:05:01:03,Master Bedroom,1,50,dimmed
+4,Dressing Mirror,01:05:01:04,Master Bedroom,1,50,dimmed
+5,Master Wardrobe,01:05:01:05,Master Bedroom,2,100,dimmed
+6,Hallway Painting,01:05:03:01,Hallway,1,50,dimmed
+7,Common Bath Ceiling,01:05:03:02,Common Bath,2,100,dimmed
+8,Niche,01:05:03:03,Hallway,1,50,dimmed
+9,Powder Room Ceiling,01:05:03:04,Powder Room,2,100,dimmed
+10,Laundry Room,01:05:06:01,Laundry,2,100,dimmed
+11,Kitchen Counter,01:05:06:02,Kitchen,2,100,dimmed
+12,Kitchen Sink,01:05:06:03,Kitchen,1,50,dimmed
+13,Kitchen,01:05:06:04,Kitchen,3,150,dimmed
+14,Pantry/Refrigerator,01:05:06:05,Foyer,2,100,dimmed
+15,Balcony Entrance,01:05:06:06,Balcony,1,50,dimmed
+16,Bar Counter,01:05:05:01,Foyer,3,150,dimmed
+17,Balcony Garden,01:05:05:02,Balcony,9,450,dimmed
+18,Entertainment Console,01:05:05:03,Living Room,1,50,dimmed
+19,Entertainment Console Shelves,01:05:05:04,Living Room,2,100,dimmed
+20,Living Room Couch,01:05:05:05,Living Room,3,150,dimmed
+21,Living Room Sides,01:05:05:06,Living Room,6,300,dimmed
+22,Living Room Shelf Spot,01:05:04:01,Living Room,1,50,switched
+23,Dining Room Sides,01:05:04:02,Dining,6,300,dimmed
+24,Dining Painting,01:05:04:03,Dining,1,50,switched
+25,Dining Table,01:05:04:04,Dining,5,250,dimmed
+26,Living room Walkway,01:05:04:05,Living Room,4,200,dimmed
+27,Jacquelyn Office Pendant,01:05:03:06,Jacquelyn's Room,1,50,dimmed
+28,Jacquelyn Cube Light,01:05:03:05,Jacquelyn's Room,1,50,switched
+29,Jacquelyn Office Ceiling,01:05:02:01,Jacquelyn's Room,4,200,dimmed
+30,Hallway,01:05:04:06,Hallway,4,200,dimmed
+31,Jacquelyn Ceiling,01:05:02:02,Jacquelyn's Room,4,200,dimmed
+32,Jacquelyn Painting,01:05:02:03,Jacquelyn's Room,1,50,switched
+33,Master Beside Tables,01:05:02:04,Master Bedroom,2,100,dimmed
+34,Master Bed,01:05:02:05,Master Bedroom,1,50,dimmed
+35,Master Ceiling,01:05:02:06,Master Bedroom,4,200,dimmed
+36,Master TV Console,01:05:01:06,Master Bedroom,1,50,switched

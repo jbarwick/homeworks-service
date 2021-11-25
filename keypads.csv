@@ -1,0 +1,9 @@
+id,name,address
+8,Common Bath,1:6:1
+7,Dining,1:6:5
+3,Kitchen,1:6:7
+2,Living Room,1:6:6
+6,Master Batch,1:6:2
+5,Master Bedroom,1:6:3
+4,Study Room,1:6:4
+1,Unknown,0:0:0
