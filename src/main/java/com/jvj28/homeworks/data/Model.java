@@ -155,9 +155,9 @@ public class Model {
     }
 
     /**
-     * Throws a runtime exceptin "timeout" if the request takes longer than 30 seconds.
-     * @param entity
-     * @param <E>
+     * Throws a runtime exception "timeout" if the request takes longer than 30 seconds.
+     * @param entity the DataObject to save to the REDIS database
+     * @param <E> The Class type of the DataObject entity
      */
     public <E extends DataObject<E>> void save(E entity) {
         save(entity, 30);
@@ -210,7 +210,7 @@ public class Model {
         // reading it while we are trying to update.
         if (forUpdate) {
             try {
-                rlock.lockInterruptibly(10, TimeUnit.SECONDS);
+                rlock.lockInterruptibly(30, TimeUnit.SECONDS);
                 rlock.lock();
                 log.debug("Lock acquired: {}", rlock.getName());
             } catch (InterruptedException e) {

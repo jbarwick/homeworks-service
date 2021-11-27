@@ -6,7 +6,7 @@
 
     <groupId>com.jvj28.homeworks</groupId>
     <artifactId>homeworks-service</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <name>homeworks-service</name>
     <description>Provides a REST API for integration with Homeworks Console</description>
     <properties>

@@ -22,7 +22,7 @@ public class NetstatHandler implements MetricHandler {
         NetstatData netstat = model.get(NetstatData.class);
         if (netstat == null)
             return null;
-
+        log.debug("Returning 4 metrics for Netstat: {}", netstat);
         return Set.of(
             new Metric("receive_error", netstat.getErrorRx()),
             new Metric("receive_success", netstat.getSuccessfulRx()),
