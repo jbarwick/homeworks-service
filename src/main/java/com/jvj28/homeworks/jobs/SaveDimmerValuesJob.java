@@ -1,7 +1,6 @@
 package com.jvj28.homeworks.jobs;
 
-import com.jvj28.homeworks.data.db.UsageByMinuteRepository;
-import com.jvj28.homeworks.data.model.UsageByMinute;
+import com.jvj28.homeworks.data.model.UsageByMinuteEntity;
 import com.jvj28.homeworks.data.Model;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -27,9 +26,9 @@ public class SaveDimmerValuesJob extends QuartzJobBean {
     protected void executeInternal(@NonNull JobExecutionContext jobExecutionContext) {
         log.debug("Save Watts to Db Job Started");
         int watts = model.getCurrentUsage();
-        UsageByMinute usage = new UsageByMinute(Instant.now());
+        UsageByMinuteEntity usage = new UsageByMinuteEntity(Instant.now());
         usage.setWatts(watts);
-        log.debug("Saving " + usage);
+        log.debug("Saving {}W", usage);
         model.saveUsage(usage);
     }
 }

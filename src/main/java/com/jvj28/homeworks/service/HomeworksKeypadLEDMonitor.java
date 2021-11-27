@@ -25,7 +25,7 @@ public class HomeworksKeypadLEDMonitor implements HomeworksMonitor {
         if (!isEnabled() || Strings.isEmpty(line) || !line.startsWith("KL,"))
             return;
 
-        log.debug("Keypad LED Received: " + line);
+        log.debug("Keypad LED Received: {}", line);
     }
 
     @Override

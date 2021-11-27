@@ -42,12 +42,13 @@ class PromiseImpl<T extends HomeworksCommand> implements Promise<T> {
         callbackLatch = new CountDownLatch(1);
         promiseThread = new Thread(() -> {
             try {
-                if (this.processorLatch.await(TIMEOUT, TimeUnit.SECONDS)) {
-                    if (!this.cancelled)
-                        callback.onComplete(command);
+                if (this.processorLatch.await(TIMEOUT, TimeUnit.SECONDS) && !this.cancelled) {
+                    callback.onComplete(command);
                 }
             }
-            catch (InterruptedException ignore) { }
+            catch (InterruptedException ignore) {
+                // Ignored
+            }
             finally {
                 promiseThread = null;
                 callbackLatch.countDown();

@@ -6,7 +6,7 @@
 
     <groupId>com.jvj28.homeworks</groupId>
     <artifactId>homeworks-service</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>homeworks-service</name>
     <description>Provides a REST API for integration with Homeworks Console</description>
     <properties>
@@ -15,11 +15,19 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <tomcat.version>9.0.38</tomcat.version>
-        <nexus.server>https://monster-jj.jvj28.com:9091</nexus.server>
+        <sonar.organization>jbarwick</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
+    <licenses>
+        <license>
+            <name>GNU General Public License Version 3</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+        </license>
+    </licenses>
+
     <scm>
-        <url>https://monster-jj.jvj28.com:3080</url>
+        <url>https://github.com/jbarwick/homeworks-service.git</url>
     </scm>
 
     <parent>
@@ -210,11 +218,11 @@
     <distributionManagement>
         <repository>
             <id>releases</id>
-            <url>${nexus.server}/repository/maven-releases</url>
+            <url>${nexus.repository}/maven-releases</url>
         </repository>
         <snapshotRepository>
             <id>snapshots</id>
-            <url>${nexus.server}/repository/maven-snapshots</url>
+            <url>${nexus.repository}/maven-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 

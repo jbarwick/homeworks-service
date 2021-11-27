@@ -21,6 +21,6 @@ public class TestBuffer {
         gos.parseLine("Processor 01 O/S Rev : 01.64.00 T13");
         assertEquals("01", gos.getProcessorId());
         assertEquals("T13", gos.getModel());
-        assertEquals("01.64.00", gos.getOsRevision());
+        assertEquals("01.64.00", gos.getRevision());
     }
 }

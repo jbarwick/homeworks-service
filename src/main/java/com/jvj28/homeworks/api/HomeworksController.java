@@ -1,25 +1,21 @@
 package com.jvj28.homeworks.api;
 
-import com.jvj28.homeworks.command.Cmd;
 import com.jvj28.homeworks.data.db.UsageByDayRepository;
 import com.jvj28.homeworks.data.db.UsageByHourRepository;
 import com.jvj28.homeworks.data.db.UsageByMinuteRepository;
 import com.jvj28.homeworks.data.model.*;
 import com.jvj28.homeworks.data.Model;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.jvj28.homeworks.data.model.Status;
+import com.jvj28.homeworks.data.model.StatusData;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.Date;
-import java.util.concurrent.TimeoutException;
 
 @RestController
 @RequestMapping("/api")
@@ -40,115 +36,88 @@ public class HomeworksController {
     }
 
     @GetMapping("/help")
-    public ResponseEntity<?> getHelp() {
-        HelpResponse response = new HelpResponse();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public HelpResponse getHelp() {
+        return new HelpResponse();
     }
 
     @GetMapping("/status")
-    public ResponseEntity<?> getStatus() {
-        try {
-            // Pull this and ensure it's cached for 24 hours
-            Status result = model.get(Status.class, 86400);
-            if (result != null) {
-                return new ResponseEntity<>(result, HttpStatus.OK);
-            }
-            return new ResponseEntity<>("Status Unavailable", HttpStatus.BAD_REQUEST);
-        } catch (TimeoutException e) {
-            return new ResponseEntity<>( "Timeout", HttpStatus.REQUEST_TIMEOUT);
-        } catch (InterruptedException e) {
-            return new ResponseEntity<>( "Interrupted", HttpStatus.GONE);
-        }
+    public StatusData getStatus() {
+        StatusData result = model.get(StatusData.class);
+        if (result == null)
+            throw new NotFoundException(new StatusData());
+        return result;
     }
 
     @GetMapping("/netstat")
-    public ResponseEntity<?> getNetstat() {
-        try {
-            Netstat result = model.get(Netstat.class);
-            if (result != null) {
-                return new ResponseEntity<>(result, HttpStatus.OK);
-            }
-            return new ResponseEntity<>("Status Unavailable", HttpStatus.BAD_REQUEST);
-        } catch (TimeoutException e) {
-            return new ResponseEntity<>( "Timeout", HttpStatus.REQUEST_TIMEOUT);
-        } catch (InterruptedException e) {
-            return new ResponseEntity<>( "Interrupted", HttpStatus.GONE);
-        }
+    public NetstatData getNetstat() {
+        NetstatData result = model.get(NetstatData.class);
+        if (result == null)
+            throw new NotFoundException(new NetstatData());
+        return result;
     }
 
     @GetMapping("/linkstatus")
-    public ResponseEntity<?> getLinkStatus() {
-        try {
-            LinkStatus result = model.get(LinkStatus.class);
-            if (result != null) {
-                return new ResponseEntity<>(result, HttpStatus.OK);
-            }
-            return new ResponseEntity<>("Status Unavailable", HttpStatus.BAD_REQUEST);
-        } catch (TimeoutException e) {
-            return new ResponseEntity<>( "Timeout", HttpStatus.REQUEST_TIMEOUT);
-        } catch (InterruptedException e) {
-            return new ResponseEntity<>( "Interrupted", HttpStatus.GONE);
-        }
+    public LinkStatusData getLinkStatus() {
+        LinkStatusData result = model.get(LinkStatusData.class);
+        if (result == null)
+            throw new NotFoundException(new LinkStatusData());
+        return result;
     }
 
     @GetMapping("/usagebyday")
-    public ResponseEntity<?> getUsageByDay(
+    public List<UsageByDayEntity> getUsageByDay(
             @RequestParam(name = "start", required = false, defaultValue = "-7d") String start,
             @RequestParam(name = "end", required = false, defaultValue = "0d") String end) {
         Date startDate = convertToDate(start);
         Date endDate = convertToDate(end);
-        List<UsageByDay> ubd = usageByDay.findUsageBetweenDate(startDate, endDate);
-        return new ResponseEntity<>(ubd, HttpStatus.OK);
+        return usageByDay.findUsageBetweenDate(startDate, endDate);
     }
     
     @GetMapping("/circuits")
-    public ResponseEntity<?> getCircuits(@RequestParam(name = "address", required = false) String address) {
+    public List<CircuitEntity> getCircuits(@RequestParam(name = "address", required = false) String address) {
         if (Strings.isBlank(address)) {
-            List<Circuit> data = model.getCircuits();
+            List<CircuitEntity> data = model.getCircuits();
             if (data == null)
-                return new ResponseEntity<>("No circuits found", HttpStatus.NOT_FOUND);
-            List<CircuitRank> ranks = model.findRanksByUserId(UUID.fromString("aad7b0bf-b210-4fbb-8a1b-b01622df52df"));
-            ArrayList<Circuit> zones = new ArrayList<>();
-            ranks.forEach(rank -> {
-                data.stream().filter(c -> c.getAddress().equals(rank.getAddress())).findFirst()
-                        .ifPresent(k -> {
-                            k.setRank(rank.getRank());
-                            zones.add(k);
-                        });
-            });
-            return new ResponseEntity<>(zones.toArray(), HttpStatus.OK);
+                throw new NotFoundException(new ArrayList<CircuitEntity>());
+            List<CircuitRankEntity> ranks = model.findRanksByUserId(UUID.fromString("aad7b0bf-b210-4fbb-8a1b-b01622df52df"));
+            ArrayList<CircuitEntity> zones = new ArrayList<>();
+            ranks.forEach(rank -> data.stream().filter(c -> c.getAddress().equals(rank.getAddress())).findFirst()
+                    .ifPresent(k -> {
+                        k.setRank(rank.getRank());
+                        zones.add(k);
+                    }));
+            return zones.stream().toList();
+        } else {
+            CircuitEntity zone = model.findCircuitByAddress(address);
+            if (zone == null)
+                throw new NotFoundException(List.of(new CircuitEntity()), String.format("Circuit [%s] not found", address));
+            return List.of(zone);
         }
-        Circuit zone = model.findCircuitByAddress(address);
-        if (zone == null)
-            return new ResponseEntity<>(String.format("Circuit [%s] not found", address), HttpStatus.NOT_FOUND);
-
-        return new ResponseEntity<>(List.of(zone).toArray(),  HttpStatus.OK);
     }
 
     @GetMapping("/usagebyhour")
-    public ResponseEntity<?> getUsageByHour(
+    public List<UsageByHourEntity> getUsageByHour(
             @RequestParam(name = "start", required = false, defaultValue = "-24h") String start,
             @RequestParam(name = "end", required = false, defaultValue = "0h") String end) {
         Date startDate = convertToDate(start);
         Date endDate = convertToDate(end);
-        List<UsageByHour> ubh = usageByHour.findUsageBetweenDate(startDate, endDate);
-        return new ResponseEntity<>(ubh, HttpStatus.OK);
+        return usageByHour.findUsageBetweenDate(startDate, endDate);
     }
 
     @GetMapping("/usagebyminute")
-    public ResponseEntity<?> getUsageByMinute(
+    public List<UsageByMinuteEntity> getUsageByMinute(
             @RequestParam(name = "start", required = false, defaultValue = "-1h") String start,
             @RequestParam(name = "end", required = false, defaultValue = "0h") String end) {
         Date startDate = convertToDate(start);
         Date endDate = convertToDate(end);
-        List<UsageByMinute> ubh = usageByMinute.findUsageBetweenDate(startDate, endDate);
-        return new ResponseEntity<>(ubh, HttpStatus.OK);
+        return usageByMinute.findUsageBetweenDate(startDate, endDate);
     }
 
     @GetMapping("/usage")
-    public ResponseEntity<?> getUsage() {
-        int watts = model.getCurrentUsage();
-        return new ResponseEntity<>(String.format("{\"watts\": %d}", watts), HttpStatus.OK);
+    public TotalUsage getUsage() {
+        TotalUsage usage = new TotalUsage();
+        usage.setWatts(model.getCurrentUsage());
+        return usage;
     }
 
     public static Date convertToDate(String relative) {

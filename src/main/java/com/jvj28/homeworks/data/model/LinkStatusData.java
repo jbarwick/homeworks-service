@@ -4,18 +4,21 @@ import com.jvj28.homeworks.command.RequestLinkShortStatus;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import lombok.Data;
 
+import java.io.Serial;
 import java.util.concurrent.ExecutionException;
 
 @Data
-public class LinkStatus implements DataObject<LinkStatus> {
+public class LinkStatusData implements DataObject<LinkStatusData> {
 
+    @Serial
     private static final long serialVersionUID = -657472216331498686L;
 
     private String processorId;
     private String linkStatus;
+    private String error;
 
     @Override
-    public LinkStatus generate(HomeworksProcessor processor) throws InterruptedException, ExecutionException {
+    public LinkStatusData generate(HomeworksProcessor processor) throws InterruptedException, ExecutionException {
         processor.sendCommand(RequestLinkShortStatus.class)
                 .onComplete(p -> {
                     this.setLinkStatus(p.getLinkStatus());

@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -22,8 +23,9 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Table(name = "usage_by_minute")
-public class UsageByMinute implements Serializable {
+public class UsageByMinuteEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -2463817720193015011L;
 
     @Id
@@ -68,7 +70,7 @@ public class UsageByMinute implements Serializable {
     @Column
     private int week;
 
-    public UsageByMinute(Instant instant) {
+    public UsageByMinuteEntity(Instant instant) {
         ZonedDateTime dtm = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).truncatedTo(ChronoUnit.MINUTES);
         this.date = Date.from(dtm.toInstant());
         id =  dtm.toEpochSecond();
@@ -89,7 +91,7 @@ public class UsageByMinute implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        UsageByMinute that = (UsageByMinute) o;
+        UsageByMinuteEntity that = (UsageByMinuteEntity) o;
         return id != null && Objects.equals(id, that.id);
     }
 

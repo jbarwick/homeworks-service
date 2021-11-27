@@ -1,10 +1,9 @@
 package com.jvj28.homeworks;
 
 import com.jvj28.homeworks.command.*;
-import com.jvj28.homeworks.data.model.Circuit;
-import com.jvj28.homeworks.data.model.Keypad;
-import com.jvj28.homeworks.service.HomeworksConfiguration;
-import com.jvj28.homeworks.data.model.Status;
+import com.jvj28.homeworks.data.model.CircuitEntity;
+import com.jvj28.homeworks.data.model.KeypadData;
+import com.jvj28.homeworks.data.model.StatusData;
 import com.jvj28.homeworks.data.Model;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import com.jvj28.homeworks.util.Promise;
@@ -36,13 +35,15 @@ public class TestService {
             processor.sendCommand(new RequestSystemTime()).onComplete(System.out::println);
             Promise<RequestSystemDate> rd = processor.sendCommand(new RequestSystemDate()).onComplete(System.out::println);
 
-            while (!processor.isQueueEmpty()) Thread.sleep(1000);
+            while (processor.queueIsNotEmpty())
+                //noinspection BusyWait
+                Thread.sleep(1000);
             assertNotNull(rd.getCommand().getDate());
             System.out.println("Processor date = " + rd.getCommand().getDate());
 
             System.out.println("All command initialized.... retrieving status class");
 
-            Status hw = model.get(Status.class);
+            StatusData hw = model.get(StatusData.class);
             assertNotNull(hw);
             System.out.println(hw);
         } catch (Exception e) {
@@ -58,20 +59,22 @@ public class TestService {
             Thread.sleep(10000); // Let the system warm up
 
             System.out.println("Getting Zone Details for Test");
-            Circuit zone = model.findCircuitByAddress("01:05:05:01");
+            CircuitEntity zone = model.findCircuitByAddress("01:05:05:01");
             processor.sendCommand(new RequestZoneLevel(zone.getAddress())).onComplete(
                     p -> {
-                        Circuit circuit = model.findCircuitByAddress(p.getAddress());
+                        CircuitEntity circuit = model.findCircuitByAddress(p.getAddress());
                         circuit.setLevel(p.getLevel());
                         model.saveCircuit(circuit);
                         System.out.printf("Circuit [%s] at %d%% %n", p.getAddress(), p.getLevel());
                     }
             ).get();
             System.out.println("Waiting for all commands to complete");
-            while (!processor.isQueueEmpty()) Thread.sleep(1000);
+            while (processor.queueIsNotEmpty())
+                //noinspection BusyWait
+                Thread.sleep(1000);
             System.out.println("Done Waiting!");
 
-            List<Circuit> alldata = model.getCircuits();
+            List<CircuitEntity> alldata = model.getCircuits();
             alldata.forEach(System.out::println);
 
             System.out.println("Total Watts: " + model.getCurrentUsage());
@@ -81,19 +84,19 @@ public class TestService {
             model.saveCircuit(zone);
             System.out.println(zone);
 
-            List<Keypad> kpData = model.getKeypadsSeedData();
+            List<KeypadData> kpData = model.getKeypadsSeedData();
             assertNotNull(kpData);
             assertTrue(kpData.size() > 0);
             model.saveKeypads(kpData);
             System.out.println(kpData);
-            List<Keypad> allkeys = model.geKeypads();
+            List<KeypadData> allkeys = model.geKeypads();
             allkeys.forEach(System.out::println);
 
-            Keypad kp = kpData.stream().filter(k -> k.getId() == 2).findFirst().orElse(null);
+            KeypadData kp = kpData.stream().filter(k -> k.getId() == 2).findFirst().orElse(null);
             assertNotNull(kp);
             assertEquals("1:6:6", kp.getAddress());
 
-            Keypad keypad = model.findKeypadByAddress("1:6:6");
+            KeypadData keypad = model.findKeypadByAddress("1:6:6");
             assertNotNull(keypad);
             model.saveKeypad(keypad);
             System.out.println(keypad);

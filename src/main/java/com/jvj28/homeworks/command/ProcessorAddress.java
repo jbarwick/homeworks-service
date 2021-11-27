@@ -7,7 +7,7 @@ import static com.jvj28.homeworks.command.Cmd.PROCADDR;
 @Data
 public class ProcessorAddress implements HomeworksCommand {
 
-    private String processorAddress;
+    private String address;
     private String mode;
 
     @Override
@@ -26,7 +26,7 @@ public class ProcessorAddress implements HomeworksCommand {
         if (line != null && line.length() > 0) {
             String[] parts = line.split(" ");
             if (parts.length>3)
-                processorAddress=parts[3];
+                address =parts[3];
             if (parts.length>5)
                 mode=parts[5];
         }

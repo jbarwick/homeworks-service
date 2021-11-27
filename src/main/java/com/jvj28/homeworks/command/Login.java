@@ -30,8 +30,7 @@ public class Login implements HomeworksCommand {
 
     @Override
     public void parseLine(String line) {
-        if ("login successful".equals(line)) {
+        if ("login successful".equals(line))
             this.succeeded = true;
-        }
     }
 }

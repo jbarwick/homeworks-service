@@ -2,6 +2,8 @@ package com.jvj28.homeworks.command;
 
 import lombok.Data;
 
+import java.util.Arrays;
+
 import static com.jvj28.homeworks.command.Cmd.HELP;
 
 @Data
@@ -31,11 +33,11 @@ public class Help implements HomeworksCommand {
     public String toJson() {
         StringBuilder sb = new StringBuilder();
         sb.append("{\"Commands\": [");
-        int z = 0;
-        for (Cmd c : Cmd.values()) {
-            if (z == 1) sb.append(','); else z = 1;
+        Arrays.stream(Cmd.values()).forEach(c -> {
+            if (sb.length()>0)
+                sb.append(',');
             sb.append(c.toJson());
-        }
+        });
         sb.append("]}");
         return sb.toString();
     }

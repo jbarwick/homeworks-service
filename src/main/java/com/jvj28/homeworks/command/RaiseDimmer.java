@@ -1,5 +1,8 @@
 package com.jvj28.homeworks.command;
 
+import lombok.Data;
+
+@Data
 public class RaiseDimmer implements HomeworksCommand {
     @Override
     public String getName() {
@@ -13,6 +16,8 @@ public class RaiseDimmer implements HomeworksCommand {
 
     @Override
     public void parseLine(String line) {
+
+        // I don't know how to do this yet
 
     }
 }

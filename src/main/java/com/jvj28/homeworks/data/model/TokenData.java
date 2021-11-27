@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Data
 @RequiredArgsConstructor
-public class JwtResponse implements Serializable {
+public class TokenData implements Serializable {
 
     private static final long serialVersionUID = 8733015036749179327L;
 

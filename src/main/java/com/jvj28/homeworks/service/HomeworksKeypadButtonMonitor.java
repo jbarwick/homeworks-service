@@ -26,7 +26,7 @@ public class HomeworksKeypadButtonMonitor implements HomeworksMonitor {
         if (!isEnabled() || Strings.isEmpty(line) || !line.startsWith("KB,"))
             return;
 
-        log.debug("Keypad Button Received: " + line);
+        log.debug("Keypad Button Received: {}", line);
     }
 
     public void setEnabled(boolean enabled) {

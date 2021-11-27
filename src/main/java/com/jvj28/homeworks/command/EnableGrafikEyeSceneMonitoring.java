@@ -21,6 +21,5 @@ public class EnableGrafikEyeSceneMonitoring implements HomeworksCommand {
     public void parseLine(String line) {
         if ("GrafikEye scene monitoring enabled".equals(line))
             this.enabled = true;
-
     }
 }

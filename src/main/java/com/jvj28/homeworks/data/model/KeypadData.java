@@ -19,7 +19,7 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Table(name = "keypads")
-public class Keypad implements Serializable {
+public class KeypadData implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -5996194456256045358L;
@@ -41,7 +41,7 @@ public class Keypad implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Keypad keypads = (Keypad) o;
+        KeypadData keypads = (KeypadData) o;
         return id != null && Objects.equals(id, keypads.id);
     }
 
@@ -50,7 +50,7 @@ public class Keypad implements Serializable {
         return getClass().hashCode();
     }
 
-    public void copy(Keypad keypad) {
+    public void copy(KeypadData keypad) {
         this.id = keypad.id;
         this.name = keypad.name;
         this.address = keypad.address;

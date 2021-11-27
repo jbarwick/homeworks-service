@@ -1,10 +1,9 @@
 package com.jvj28.homeworks.jobs;
 
 import com.jvj28.homeworks.data.Model;
-import com.jvj28.homeworks.data.model.Netstat;
+import com.jvj28.homeworks.data.model.NetstatData;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
@@ -27,14 +26,15 @@ public class UpdateNetstatJob extends QuartzJobBean {
     }
 
     @Override
-    protected void executeInternal(@NonNull JobExecutionContext context) throws JobExecutionException {
-        log.debug("Update Network Status");
-        Netstat ns = model.get(Netstat.class, true);
+    protected void executeInternal(@NonNull JobExecutionContext context) {
+        log.debug("Update Network Status (with forUpdate)");
+        NetstatData ns = model.get(NetstatData.class, true);
         try {
             ns.generate(processor);
         } catch (ExecutionException | InterruptedException e) {
-            log.warn(e.getMessage());
+            log.warn("Could not generate data object: {}", e.getMessage());
         }
+        log.debug("Saving Network status to DB");
         model.save(ns);
     }
 }

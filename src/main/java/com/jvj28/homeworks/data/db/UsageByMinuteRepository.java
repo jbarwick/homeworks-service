@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.data.db;
 
-import com.jvj28.homeworks.data.model.UsageByMinute;
+import com.jvj28.homeworks.data.model.UsageByMinuteEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -10,9 +10,9 @@ import java.util.Date;
 import java.util.List;
 
 @Repository
-public interface UsageByMinuteRepository extends CrudRepository<UsageByMinute, Long> {
+public interface UsageByMinuteRepository extends CrudRepository<UsageByMinuteEntity, Long> {
 
-    @Query("select c from UsageByMinute c where c.date >= :start_date and c.date < :end_date order by c.date")
-    List<UsageByMinute> findUsageBetweenDate(@Param("start_date") Date start, @Param("end_date") Date end);
+    @Query("select c from UsageByMinuteEntity c where c.date >= :start_date and c.date < :end_date order by c.date")
+    List<UsageByMinuteEntity> findUsageBetweenDate(@Param("start_date") Date start, @Param("end_date") Date end);
 
 }

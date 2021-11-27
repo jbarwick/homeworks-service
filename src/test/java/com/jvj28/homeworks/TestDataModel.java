@@ -3,7 +3,7 @@ package com.jvj28.homeworks;
 import com.jvj28.homeworks.command.Netstat;
 import com.jvj28.homeworks.command.RequestZoneLevel;
 import com.jvj28.homeworks.data.Model;
-import com.jvj28.homeworks.data.model.Circuit;
+import com.jvj28.homeworks.data.model.CircuitEntity;
 import com.jvj28.homeworks.service.HomeworksConfiguration;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ public class TestDataModel {
 
             processor.sendCommand(Netstat.class).onComplete(System.out::println).get();
 
-            Circuit circuit = model.findCircuitByAddress(zone_name);
+            CircuitEntity circuit = model.findCircuitByAddress(zone_name);
             assertNotNull(circuit);
             System.out.println(circuit);
             processor.sendCommand(new RequestZoneLevel(circuit.getAddress())).onComplete(System.out::println).get();
@@ -48,7 +48,7 @@ public class TestDataModel {
             System.out.println(circuit);
             assertEquals(23, circuit.getLevel());
 
-            List<Circuit> circuits = model.getCircuits();
+            List<CircuitEntity> circuits = model.getCircuits();
             circuit = circuits.stream().filter(c -> c.getId()==20).findFirst().orElse(null);
             assertNotNull(circuit);
             assertEquals(20, circuit.getId());

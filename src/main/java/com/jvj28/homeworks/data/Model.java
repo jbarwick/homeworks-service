@@ -17,11 +17,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -29,9 +27,9 @@ public class Model {
 
     private static final Logger log = LoggerFactory.getLogger(Model.class);
 
-    private static final String CIRCUITS = "CIRCUITS";
-    private static final String KEYPADS = "KEYPADS";
-    private static final String RANKS = "RANKS";
+    private static final String CIRCUITLIST = "CIRCUITS";
+    private static final String KEYPADLIST = "KEYPADS";
+    private static final String RANKLIST = "RANKS";
 
     private final RedissonClient redis;
     private final HomeworksConfiguration config;
@@ -39,8 +37,6 @@ public class Model {
     private final CircuitZoneRepository circuits;
     private final KeypadsRepository keypads;
     private final CircuitRankRepository ranks;
-    private final UsageByDayRepository usageByDay;
-    private final UsageByHourRepository usageByHour;
     private final UsageByMinuteRepository usageByMinute;
 
     ThreadLocal<UUID> currentUser = new ThreadLocal<>();
@@ -51,8 +47,6 @@ public class Model {
                  CircuitZoneRepository circuits,
                  CircuitRankRepository ranks,
                  KeypadsRepository keypads,
-                 UsageByDayRepository usageByDay,
-                 UsageByHourRepository usageByHour,
                  UsageByMinuteRepository usageByMinute) {
         this.config = config;
         this.redis = redis;
@@ -60,8 +54,6 @@ public class Model {
         this.circuits = circuits;
         this.keypads = keypads;
         this.ranks = ranks;
-        this.usageByDay = usageByDay;
-        this.usageByHour = usageByHour;
         this.usageByMinute = usageByMinute;
     }
 
@@ -69,51 +61,76 @@ public class Model {
     private void modelStartupSequence() {
 
         log.info("Clearing CIRCUITS cache");
-        RMap<String, Circuit> finalList = redis.getMap(CIRCUITS);
+        RMap<String, CircuitEntity> finalList = redis.getMap(CIRCUITLIST);
         finalList.clear();
 
         log.info("Clearing KEYPADS cache");
-        RMap<String, Keypad> finalKeypads = redis.getMap(KEYPADS);
+        RMap<String, KeypadData> finalKeypads = redis.getMap(KEYPADLIST);
         finalKeypads.clear();
 
         // Do note you see a "promise" here, the actual command is sent in QUEUE.
         // The promise command system guarantees only one command
         // will be running at a time.  So, the below 6 commands will execute immediately
         // and this method will instantly return.  The commands will complete at their leisure.
-        processor.sendCommand(new Login(config.getUsername(), config.getConsolePassword()))
-                .onComplete(p -> {
-                    Status hw = get(Status.class, true);
-                    hw.setLoggedIn(p.isSucceeded());
-                    save(hw);
-                });
-        // TODO - BUG: Assumes login was successful.  Bad...very bad.
+
+        // NOTE: these setup and configuration commands are here and not in 'processor' because
+        // the Model relies on the processor, the processor does not know the model
+
+        log.debug("Performing login to processor");
+        Login loginResult = null;
+        while (loginResult == null || !loginResult.isSucceeded()) {
+            try {
+                log.info("Waiting for login prompt");
+                if (!processor.waitForLoginPrompt()) {
+                    log.warn("Did not receive login prompt for 30 seconds");
+                    continue;
+                }
+                loginResult = processor.sendCommand(
+                        new Login(config.getUsername(), config.getConsolePassword())).onComplete(p -> {
+                            StatusData hw = get(StatusData.class, true);
+                            hw.setLoggedIn(p.isSucceeded());
+                            save(hw);
+                        }).get();
+                if (!loginResult.isSucceeded()) {
+                    log.debug("Login failed.  Retrying...");
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException("Login Process Interrupted");
+            }
+        }
+        log.info("Model beginning initialization");
+        try {
+            processor.waitForReady();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted while waiting for command prompt");
+        }
         processor.sendCommand(PromptOn.class);
         processor.sendCommand(ReplyOn.class);
         processor.sendCommand(ProcessorAddress.class)
                 .onComplete(p -> {
-                    Status hw = get(Status.class, true);
-                    hw.setProcessorAddress(p.getProcessorAddress());
+                    StatusData hw = get(StatusData.class, true);
+                    hw.setProcessorAddress(p.getAddress());
                     hw.setMode(p.getMode());
                     save(hw);
                 });
         processor.sendCommand(OSRevision.class)
                 .onComplete(p -> {
-                    Status hw = get(Status.class, true);
-                    hw.setOsRevision(p.getOsRevision());
+                    StatusData hw = get(StatusData.class, true);
+                    hw.setOsRevision(p.getRevision());
                     hw.setProcessorId(p.getProcessorId());
                     hw.setModel((p.getModel()));
                     save(hw);
                 });
         processor.sendCommand(RequestBootRevisions.class)
                 .onComplete(p -> {
-                    Status hw = get(Status.class, true);
+                    StatusData hw = get(StatusData.class, true);
                     hw.setProcessorId(p.getProcessorId());
                     hw.setBootRevision(p.getBootRevision());
                     save(hw);
                 });
         processor.sendCommand(RequestAllProcessorStatusInformation.class)
                 .onComplete(p -> {
-                    Status hw = get(Status.class,true);
+                    StatusData hw = get(StatusData.class,true);
                     hw.setProcessorInfo(p.getProcessorInfo());
                     save(hw);
                 });
@@ -137,72 +154,70 @@ public class Model {
         return this.currentUser.get();
     }
 
-    public <E extends DataObject<E>> E save(E entity) {
-        return save(entity, 300);
+    /**
+     * Throws a runtime exceptin "timeout" if the request takes longer than 30 seconds.
+     * @param entity
+     * @param <E>
+     */
+    public <E extends DataObject<E>> void save(E entity) {
+        save(entity, 30);
     }
 
-    public <E extends DataObject<E>> E save(E entity, int timeout) {
-        String redis_key = entity.getClass().getName();
+    public <E extends DataObject<E>> void save(E entity, int timeout) {
+        String rkey = entity.getClass().getName();
         // Make sure we can retrieve the lock, if locked.  We won't lock 'save' records.
         // We expect the get(forUpdate == true) will actually lock records.
-        RLock lock = redis.getLock(redis_key + "Lock");
+        RLock rlock = redis.getLock(rkey + "Lock");
         try {
-            log.debug("Saving entity with id: " + redis_key);
-            log.debug(entity.toString());
-            RBucket<DataObject<E>> bucket = redis.getBucket(redis_key);
+            if (log.isDebugEnabled()) {
+                log.debug("Saving entity with id: {}", rkey);
+                log.debug(entity.toString());
+            }
+            RBucket<DataObject<E>> bucket = redis.getBucket(rkey);
             bucket.set(entity, timeout, TimeUnit.SECONDS);
-            return entity;
         } finally {
             // This should have been locked in the "find forUpdate" function.
-            if (lock.isLocked())
-                lock.unlock();
+            if (rlock.isLocked()) {
+                rlock.unlock();
+                log.debug("Lock released: {}", rlock.getName());
+            }
         }
     }
 
-    public <S extends DataObject<S>> S get(final Class<S> clazz) throws TimeoutException, InterruptedException {
+    public <S extends DataObject<S>> S get(final Class<S> clazz) {
         return get(clazz, false);
     }
 
-    public <S extends DataObject<S>> S get(final Class<S> clazz, int timeout) throws TimeoutException, InterruptedException {
-        return get(clazz, timeout, false);
-    }
-
     /**
      * Returns the object stored in redis for the given class.  If forUpdate is true,
      * this class always returns an object, found or not.  If forUpdate is false, this
      * class may return a null if the class is not in Redis.
      *
      * @param clazz     name of the object to retrieve
-     * @param forUpdate true if this is to be updated and a write-lock is required
-     * @param <S>       the type of class to work with
-     * @return the object for S or null.
-     */
-    public <S extends DataObject<S>> S get(Class<S> clazz, boolean forUpdate) {
-        return get(clazz, 300, forUpdate);
-    }
-
-    /**
-     * Returns the object stored in redis for the given class.  If forUpdate is true,
-     * this class always returns an object, found or not.  If forUpdate is false, this
-     * class may return a null if the class is not in Redis.
-     *
-     * @param clazz     name of the object to retrieve
-     * @param timeout   the amount of time to wait for the response
      * @param forUpdate true if this is to be updated and a write-lock is required
      * @param <S>       the class to work with
      * @return the object for S or null.
      */
-    public <S extends DataObject<S>> S get(Class<S> clazz, int timeout, boolean forUpdate) {
+    @SuppressWarnings({"java:S2629","java:S2222"})  // Why?  Because we have a LONG wait for this lock and will be unlocked in "save"
+    public <S extends DataObject<S>> S get(Class<S> clazz, boolean forUpdate) {
 
-        String redis_key = clazz.getName();
-        log.debug("Getting data with id: " + redis_key);
-        log.debug("For Update: " + forUpdate);
-        RLock lock = redis.getLock(redis_key + "Lock");
+        String rkey = clazz.getName();
+        if (log.isDebugEnabled()) {
+            log.debug("Getting data with id: {}{}", rkey, forUpdate ? " (for update)" : "");
+        }
+        RLock rlock = redis.getLock(rkey + "Lock");
         // Lock the record if we are going to be doing updates.  This prevents another thread from updating or
         // reading it while we are trying to update.
-        if (forUpdate)
-            lock.lock();
-        RBucket<S> bucket = redis.getBucket(redis_key);
+        if (forUpdate) {
+            try {
+                rlock.lockInterruptibly(10, TimeUnit.SECONDS);
+                rlock.lock();
+                log.debug("Lock acquired: {}", rlock.getName());
+            } catch (InterruptedException e) {
+                throw new RecordLockException(e);
+            }
+        }
+        RBucket<S> bucket = redis.getBucket(rkey);
         S object = bucket.get();
         if (object == null)
             return generate(clazz);
@@ -214,11 +229,9 @@ public class Model {
         try {
             S dataObject = clazz.getConstructor().newInstance();
             return dataObject.generate(processor);
-        } catch (InstantiationException | IllegalAccessException |
-                InvocationTargetException | NoSuchMethodException |
-                ExecutionException | TimeoutException | InterruptedException ignored) {
+        } catch (Exception ignored) {
+            return null;
         }
-        return null;
     }
 
     public int getCurrentUsage() {
@@ -229,67 +242,62 @@ public class Model {
 
     /************* KEYPADS ************************/
 
-    public void saveKeypads(List<Keypad> keypads) {
-        RLock rlock = redis.getLock(KEYPADS + "Lock");
+    public void saveKeypads(List<KeypadData> keypads) {
+        RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
         try {
-            RMap<String, Keypad> map = getKeypadMap();
+            RMap<String, KeypadData> map = getKeypadMap();
             keypads.forEach(keypad -> map.fastPut(keypad.getAddress(), keypad));
         } finally {
-            if (rlock.isLocked())
-                rlock.unlock();
+            rlock.unlock();
         }
     }
 
-    public void saveKeypad(Keypad keypad) {
-        RLock rlock = redis.getLock(KEYPADS + "Lock");
+    public void saveKeypad(KeypadData keypad) {
+        RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
         try {
-
-            RMap<String, Keypad> map = getKeypadMap();
+            RMap<String, KeypadData> map = getKeypadMap();
             map.fastPut(keypad.getAddress(), keypad);
         } finally {
-            if (rlock.isLocked())
-                rlock.unlock();
+            rlock.unlock();
         }
     }
 
-    public List<Keypad> geKeypads() {
-        RLock rlock = redis.getLock(KEYPADS + "Lock");
+    public List<KeypadData> geKeypads() {
+        RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
         try {
-            RMap<String, Keypad> map = getKeypadMap();
+            RMap<String, KeypadData> map = getKeypadMap();
             if (map.isEmpty())
                 loadAllKeypads(map);
             return map.values().stream().toList();
         } finally {
-            if (rlock.isLocked())
-                rlock.unlock();
+            rlock.unlock();
         }
     }
 
-    public Keypad findKeypadByAddress(String address) {
-        RLock rlock = redis.getLock(KEYPADS + "Lock");
+    public KeypadData findKeypadByAddress(String address) {
+        RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
         try {
-            RMap<String, Keypad> map = getKeypadMap();
+            RMap<String, KeypadData> map = getKeypadMap();
             if (map.isEmpty())
                 loadAllKeypads(map);
             return map.get(address);
         } finally {
-            if (rlock.isLocked())
-                rlock.unlock();
+            rlock.unlock();
         }
     }
 
-    private RMap<String, Keypad> getKeypadMap() {
-        return  redis.getMap(KEYPADS, MapOptions.<String, Keypad>defaults()
+    private RMap<String, KeypadData> getKeypadMap() {
+        return  redis.getMap(KEYPADLIST, MapOptions.<String, KeypadData>defaults()
                 .writer(keypadMapWriter)
                 .loader(keypadMapLoader));
     }
 
-    private void loadAllKeypads(RMap<String, Keypad> map) {
-        List<Keypad> data = getKeypadsSeedData();
+    private void loadAllKeypads(RMap<String, KeypadData> map) {
+        List<KeypadData> data = getKeypadsSeedData();
         if (data == null || data.isEmpty())
             // do we need to convert to a list first to prevent DB record lock race condition?
             keypads.findAll().forEach(k -> map.fastPut(k.getAddress(), k));
@@ -297,36 +305,33 @@ public class Model {
             data.forEach(k -> map.fastPut(k.getAddress(), k));
     }
 
-    public List<Keypad> getKeypadsSeedData() {
+    public List<KeypadData> getKeypadsSeedData() {
 
         String seedFile = config.getKeypadSeedFilename();
 
         if (seedFile == null) {
             log.info("Seed file not specified.  Skipping DB initialization of keypads");
-            return null;
+        } else {
+            try (Reader reader = new FileReader(seedFile)) {
+                // create csv bean reader
+                CsvToBean<KeypadData> csvToBean = new CsvToBeanBuilder<KeypadData>(reader)
+                        .withType(KeypadData.class)
+                        .withIgnoreLeadingWhiteSpace(true)
+                        .build();
+                // convert `CsvToBean` object to list of users
+                return csvToBean.parse();
+            } catch (Exception ex) {
+                log.info("Error reading Keypad seed data.  Skipping.  Reason: {}", ex.getMessage());
+            }
         }
-
-        try (Reader reader = new FileReader(seedFile)) {
-
-            // create csv bean reader
-            CsvToBean<Keypad> csvToBean = new CsvToBeanBuilder<Keypad>(reader)
-                    .withType(Keypad.class)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .build();
-
-            // convert `CsvToBean` object to list of users
-            return csvToBean.parse();
-        } catch (Exception ex) {
-            log.info("Error reading Keypad seed data.  Skipping.  Reason: " + ex.getMessage());
-            // silently return if there is not a file to read or there is a read error
-            return null;
-        }
+        // silently return if there is not a file to read or there is a read error
+        return new ArrayList<>();
     }
 
     // Note that REDIS keys or not the DB keys.  The REDIS keys is the "Address" and the DB key is the "Id"
-    private final MapWriter<String, Keypad> keypadMapWriter = new MapWriter<>() {
+    private final MapWriter<String, KeypadData> keypadMapWriter = new MapWriter<>() {
         @Override
-        public void write(Map<String, Keypad> map) {
+        public void write(Map<String, KeypadData> map) {
             keypads.saveAll(map.values());
         }
 
@@ -337,9 +342,9 @@ public class Model {
     };
 
     // The keys in REDIS are the "Address" of the circuit.  This is not the DB key which is "ID"
-    private final MapLoader<String, Keypad> keypadMapLoader = new MapLoader<>() {
+    private final MapLoader<String, KeypadData> keypadMapLoader = new MapLoader<>() {
         @Override
-        public Keypad load(String key) {
+        public KeypadData load(String key) {
             return keypads.findByAddress(key).orElse(null);
         }
 
@@ -356,47 +361,45 @@ public class Model {
      *
      * @return a List of Circuit records
      */
-    public List<Circuit> getCircuits() {
-        RLock rlock = redis.getLock(CIRCUITS + "Lock");
+    public List<CircuitEntity> getCircuits() {
+        RLock rlock = redis.getLock(CIRCUITLIST + "Lock");
         rlock.lock();
         try {
-            RMap<String, Circuit> map = getCircuitMap();
+            RMap<String, CircuitEntity> map = getCircuitMap();
             return map.values().stream().toList();
         } finally {
-            if (rlock.isLocked())
-                rlock.unlock();
+            rlock.unlock();
         }
     }
 
-    public Circuit findCircuitByAddress(String address) {
-        RLock rlock = redis.getLock(CIRCUITS + "Lock");
+    public CircuitEntity findCircuitByAddress(String address) {
+        RLock rlock = redis.getLock(CIRCUITLIST + "Lock");
         rlock.lock();
         try {
-            RMap<String, Circuit> map = getCircuitMap();
+            RMap<String, CircuitEntity> map = getCircuitMap();
             return map.get(address);
         } finally {
-            if (rlock.isLocked())
-                rlock.unlock();
+            rlock.unlock();
         }
     }
 
-    public void saveCircuit(@NonNull Circuit circuit) {
-        RLock rlock = redis.getLock(CIRCUITS + "Lock");
+    public void saveCircuit(@NonNull CircuitEntity circuit) {
+        RLock rlock = redis.getLock(CIRCUITLIST + "Lock");
         rlock.lock();
         try {
-            RMap<String, Circuit> map = getCircuitMap();
+            RMap<String, CircuitEntity> map = getCircuitMap();
             map.put(circuit.getAddress(), circuit);
         } finally {
-            if (rlock.isLocked())
-                rlock.unlock();
+            rlock.unlock();
         }
     }
+
     // The way MapLoader works is nonsense.  So, we will not use the map.loadAll() function.  We will write our own loader.
-    private void loadAllCircuits(RMap<String, Circuit> map) {
+    private void loadAllCircuits(RMap<String, CircuitEntity> map) {
         // ALWAYS seed from the CSV file.  Why? well, we want to give the users
         // the ability to change the data in the database such as descriptions, etc.  This seed data will use the
         // Primary Key ID not the Address to overwrite content.  So, you CAN change an address if needed.
-        List<Circuit> data = getCircuitSeedData();
+        List<CircuitEntity> data = getCircuitSeedData();
         if (data == null || data.isEmpty())
             // do we need to convert to a list first to prevent DB record lock race condition?
             circuits.findAll().forEach(c -> map.put(c.getAddress(), c));
@@ -405,44 +408,41 @@ public class Model {
             data.forEach(c -> map.fastPut(c.getAddress(), c));
     }
 
-    public List<Circuit> getCircuitSeedData() {
+    public List<CircuitEntity> getCircuitSeedData() {
 
         String seedFile = config.getCircuitsSeedFilename();
 
         if (seedFile == null) {
             log.info("Seed file not specified.  Skipping DB initialization of circuits");
-            return null;
+        } else {
+            try (Reader reader = new FileReader(seedFile)) {
+                // create csv bean reader
+                CsvToBean<CircuitEntity> csvToBean = new CsvToBeanBuilder<CircuitEntity>(reader)
+                        .withType(CircuitEntity.class)
+                        .withIgnoreLeadingWhiteSpace(true)
+                        .build();
+                // convert `CsvToBean` object to list of users
+                return csvToBean.parse();
+            } catch (Exception e) {
+                log.info("Error reading Circuit seed data.  Skipping.  Reason: {}", e.getMessage());
+            }
         }
-
-        try (Reader reader = new FileReader(seedFile)) {
-            // create csv bean reader
-            CsvToBean<Circuit> csvToBean = new CsvToBeanBuilder<Circuit>(reader)
-                    .withType(Circuit.class)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .build();
-
-            // convert `CsvToBean` object to list of users
-            return csvToBean.parse();
-
-        } catch (Exception ex) {
-            log.info("Error reading Circuit seed data.  Skipping.  Reason: " + ex.getMessage());
-            // silently return if there is not a file to read or there is a read error
-            return null;
-        }
+        // silently return if there is not a file to read or there is a read error
+        return new ArrayList<>();
     }
 
-    private RMap<String, Circuit> getCircuitMap() {
-        RMap<String, Circuit> map = redis.getMap(CIRCUITS,
-                MapOptions.<String, Circuit>defaults()
+    private RMap<String, CircuitEntity> getCircuitMap() {
+        RMap<String, CircuitEntity> map = redis.getMap(CIRCUITLIST,
+                MapOptions.<String, CircuitEntity>defaults()
                         .writer(circuitMapWriter)
                         .loader(circuitMapLoader));
         if (map.isEmpty()) loadAllCircuits(map);
         return map;
     }
 
-    private final MapWriter<String, Circuit> circuitMapWriter = new MapWriter<>() {
+    private final MapWriter<String, CircuitEntity> circuitMapWriter = new MapWriter<>() {
         @Override
-        public void write(Map<String, Circuit> map) {
+        public void write(Map<String, CircuitEntity> map) {
             circuits.saveAll(map.values());
         }
 
@@ -454,9 +454,9 @@ public class Model {
 
     // Actually never used because this is a HORRIBLE way to interact with a database!  The methodology is nonsense.
     // So, I wrote my own loadAllCircuitsToRedis() function above.
-    private final MapLoader<String, Circuit> circuitMapLoader = new MapLoader<>() {
+    private final MapLoader<String, CircuitEntity> circuitMapLoader = new MapLoader<>() {
         @Override
-        public Circuit load(String key) {
+        public CircuitEntity load(String key) {
             return circuits.findByAddress(key).orElse(null);
         }
 
@@ -469,15 +469,15 @@ public class Model {
     // ***************** RANKS ***********************
 
     // err...user is a global variable.  One-at-a-time please.
-    public List<CircuitRank> findRanksByUserId(UUID user) {
+    public List<CircuitRankEntity> findRanksByUserId(UUID user) {
 
         // Set the ThreadLocal for the current user as we need it in the MapOptions
         setCurrentUser(user);
 
-        RLock lock = redis.getLock(RANKS + "Lock");
-        lock.lock();
+        RLock rlock = redis.getLock(RANKLIST + "Lock");
+        rlock.lock();
         try {
-            RMap<Integer, CircuitRank> rankMap = redis.getMap(RANKS, MapOptions.<Integer, CircuitRank>defaults()
+            RMap<Integer, CircuitRankEntity> rankMap = redis.getMap(RANKLIST, MapOptions.<Integer, CircuitRankEntity>defaults()
                     .writer(rankMapWriter)
                     .loader(rankMapLoader));
             if (rankMap.isEmpty())
@@ -486,14 +486,13 @@ public class Model {
             //the map should already be sorted correctly
             return rankMap.values().stream().toList();
         } finally {
-            if (lock.isLocked())
-                lock.unlock();
+            rlock.unlock();
         }
     }
 
-    private final MapWriter<Integer, CircuitRank> rankMapWriter = new MapWriter<>() {
+    private final MapWriter<Integer, CircuitRankEntity> rankMapWriter = new MapWriter<>() {
         @Override
-        public void write(Map<Integer, CircuitRank> map) {
+        public void write(Map<Integer, CircuitRankEntity> map) {
             ranks.saveAll(map.values());
         }
 
@@ -503,9 +502,9 @@ public class Model {
         }
     };
 
-    private final MapLoader<Integer, CircuitRank> rankMapLoader = new MapLoader<>() {
+    private final MapLoader<Integer, CircuitRankEntity> rankMapLoader = new MapLoader<>() {
         @Override
-        public CircuitRank load(Integer id) {
+        public CircuitRankEntity load(Integer id) {
             return ranks.findById(id).orElse(null);
         }
 
@@ -516,7 +515,7 @@ public class Model {
         }
     };
 
-    public void saveUsage(UsageByMinute usage) {
+    public void saveUsage(UsageByMinuteEntity usage) {
         usageByMinute.save(usage);
     }
 }

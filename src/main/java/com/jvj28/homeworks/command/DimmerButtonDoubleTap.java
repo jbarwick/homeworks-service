@@ -14,5 +14,7 @@ public class DimmerButtonDoubleTap implements HomeworksCommand {
     @Override
     public void parseLine(String line) {
 
+        // I don't know how to do this yet
+
     }
 }

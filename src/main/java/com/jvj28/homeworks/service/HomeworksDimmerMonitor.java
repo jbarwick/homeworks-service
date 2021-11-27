@@ -3,7 +3,7 @@ package com.jvj28.homeworks.service;
 import com.jvj28.homeworks.command.DisableDimmerLevelMonitoring;
 import com.jvj28.homeworks.command.EnableDimmerLevelMonitoring;
 import com.jvj28.homeworks.command.RequestZoneLevel;
-import com.jvj28.homeworks.data.model.Circuit;
+import com.jvj28.homeworks.data.model.CircuitEntity;
 import com.jvj28.homeworks.data.Model;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ public class HomeworksDimmerMonitor implements HomeworksMonitor {
         if (!isEnabled() || Strings.isEmpty(line) || !line.startsWith("DL,"))
             return;
 
-        log.debug("New Dimmer value received: " + line);
+        log.debug("New Dimmer value received: {}", line);
 
         RequestZoneLevel zoneLevel = new RequestZoneLevel();
         zoneLevel.parseLine(line);
@@ -46,13 +46,13 @@ public class HomeworksDimmerMonitor implements HomeworksMonitor {
         int level = zoneLevel.getLevel();
 
         // Get the circuit from the model and update it's level
-        Circuit circuit = model.findCircuitByAddress(address);
+        CircuitEntity circuit = model.findCircuitByAddress(address);
         if (circuit != null) {
             circuit.setLevel(level);
             model.saveCircuit(circuit);
-            log.debug(String.format("Circuit [%s] at %d%%", address, level));
+            log.debug("Circuit [{}] at {}%", address, level);
         } else {
-            log.warn(String.format("Cannot find circuit [%s] while attempting to update levels", address));
+            log.warn("Cannot find circuit [{}] while attempting to update levels", address);
         }
     }
 

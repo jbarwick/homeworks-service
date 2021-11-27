@@ -15,7 +15,7 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Table(name = "circuit_zones")
-public class Circuit implements Serializable {
+public class CircuitEntity implements Serializable {
 
     private static final long serialVersionUID = -4838814670155025772L;
 
@@ -55,11 +55,14 @@ public class Circuit implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private int rank;
 
+    @Transient
+    private String error;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Circuit that = (Circuit) o;
+        CircuitEntity that = (CircuitEntity) o;
         return id != null && Objects.equals(id, that.id);
     }
 

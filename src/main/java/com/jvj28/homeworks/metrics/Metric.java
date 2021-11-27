@@ -34,19 +34,32 @@ public class Metric {
     @NonNull
     String value;
 
-    public Metric(@NonNull Metrics metric, LabelList label, int value) {
-        this.name = metric.toString();
+    public Metric(@NonNull String name, LabelList label, @NonNull String value) {
+        this.name = name;
         this.label = label;
-        this.value = ""+value;
+        this.value = value;
     }
+
+    public Metric(@NonNull String name, @NonNull String value) {
+        this.name = name;
+        this.value =value;
+    }
+
+    public Metric(@NonNull Metrics metric, LabelList label, int value) {
+        this(metric.toString(), label, Integer.toString(value));
+    }
+
     public Metric(@NonNull Metrics metric, int value) {
-        this.name = metric.toString();
-        this.value = ""+value;
+        this(metric.toString(), Integer.toString(value));
     }
 
     public Metric(@NonNull Metrics metric, @NonNull String value) {
         this.name = metric.toString();
         this.value = value;
+    }
+
+    public Metric(@NonNull String name, long value) {
+        this(name, Long.toString(value));
     }
 
     @Override

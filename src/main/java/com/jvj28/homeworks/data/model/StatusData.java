@@ -4,11 +4,13 @@ import com.jvj28.homeworks.command.*;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import lombok.Data;
 
+import java.io.Serial;
 import java.util.concurrent.ExecutionException;
 
 @Data
-public class Status implements DataObject<Status> {
+public class StatusData implements DataObject<StatusData> {
 
+    @Serial
     private static final long serialVersionUID = -9166231701068973133L;
 
     private boolean LoggedIn;
@@ -19,19 +21,20 @@ public class Status implements DataObject<Status> {
     private String mode;
     private String processorInfo;
     private String bootRevision;
+    private String error;
 
     @Override
-    public Status generate(HomeworksProcessor processor) throws InterruptedException, ExecutionException {
+    public StatusData generate(HomeworksProcessor processor) throws InterruptedException, ExecutionException {
         // Queue the command
         processor.sendCommand(ProcessorAddress.class)
                 .onComplete(p -> {
-                    this.setProcessorAddress(p.getProcessorAddress());
+                    this.setProcessorAddress(p.getAddress());
                     this.setMode(p.getMode());
                 });
         // Queue the command
         processor.sendCommand(OSRevision.class)
                 .onComplete(p -> {
-                    this.setOsRevision(p.getOsRevision());
+                    this.setOsRevision(p.getRevision());
                     this.setProcessorId(p.getProcessorId());
                     this.setModel((p.getModel()));
                 });

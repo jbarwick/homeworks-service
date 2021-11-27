@@ -1,6 +1,5 @@
 package com.jvj28.homeworks.command;
 
-import com.google.gson.Gson;
 import lombok.Data;
 
 @Data

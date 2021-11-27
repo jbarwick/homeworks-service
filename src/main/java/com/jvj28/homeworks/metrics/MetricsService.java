@@ -18,7 +18,8 @@ public class MetricsService {
 
     private MetricsService add(Metrics metric) {
         MetricHandler handler = metric.handler();
-        add(handler.getMetricValues(model));
+        if (handler!=null)
+            add(handler.getMetricValues(model));
         return this;
     }
 

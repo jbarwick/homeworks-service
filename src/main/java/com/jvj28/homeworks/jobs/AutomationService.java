@@ -51,7 +51,7 @@ public class AutomationService {
 
     private JobDetail getJobDetail(Class<? extends QuartzJobBean> clazz) {
         String name = clazz.getName();
-        log.debug("Scheduling Job: " + name);
+        log.debug("Scheduling Job: {}", name);
         return JobBuilder.newJob(clazz)
                 .withIdentity(UUID.randomUUID().toString(), "hw-jobs")
                 .withDescription(name)

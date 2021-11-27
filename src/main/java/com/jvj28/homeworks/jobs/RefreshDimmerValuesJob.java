@@ -1,7 +1,7 @@
 package com.jvj28.homeworks.jobs;
 
 import com.jvj28.homeworks.command.RequestZoneLevel;
-import com.jvj28.homeworks.data.model.Circuit;
+import com.jvj28.homeworks.data.model.CircuitEntity;
 import com.jvj28.homeworks.data.Model;
 import com.jvj28.homeworks.service.HomeworksDimmerMonitor;
 import com.jvj28.homeworks.service.HomeworksProcessor;
@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class RefreshDimmerValuesJob extends QuartzJobBean {
@@ -37,18 +35,16 @@ public class RefreshDimmerValuesJob extends QuartzJobBean {
         log.debug("Dimmer refresh job execute");
 
         dimmerMonitor.setEnabled(false);
-        model.getCircuits().forEach(circuit -> {
-            processor.sendCommand(new RequestZoneLevel(circuit.getAddress())).onComplete(
-                    request -> {
-                        Circuit c = model.findCircuitByAddress(request.getAddress());
-                        if (c!= null) {
-                            c.setLevel(request.getLevel());
-                            model.saveCircuit(c);
-                            log.debug(String.format("Circuit [%s] at %d%%", request.getAddress(), request.getLevel()));
-                        }
+        model.getCircuits().forEach(circuit -> processor.sendCommand(
+                new RequestZoneLevel(circuit.getAddress())).onComplete(request -> {
+                    CircuitEntity c = model.findCircuitByAddress(request.getAddress());
+                    if (c != null) {
+                        c.setLevel(request.getLevel());
+                        model.saveCircuit(c);
+                        log.debug("Circuit [{}] at {}%", request.getAddress(), request.getLevel());
                     }
-            );
-        });
+                }
+        ));
         // This is not synchronous.  It simply adds the command to the command queue
         dimmerMonitor.setEnabled(true);
     }

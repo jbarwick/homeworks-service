@@ -15,10 +15,6 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 @EnableRedisRepositories
 public class ServiceMain {
 
-    public ServiceMain() {
-
-    }
-
     @Bean(name = "encryptorBean")
     public StringEncryptor stringEncryptor() {
         PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();

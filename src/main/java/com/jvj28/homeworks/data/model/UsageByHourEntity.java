@@ -2,44 +2,40 @@ package com.jvj28.homeworks.data.model;
 
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID;
 
-@Entity
+@Immutable
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-@Table(name = "circuit_rank")
-public class CircuitRank {
+@Entity
+@Table(name = "watts_by_hour")
+public class UsageByHourEntity implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -6747807612111577660L;
 
     @Id
-    private Integer id;
+    private java.util.Date date;
 
     @Column
-    @org.hibernate.annotations.Type(type="org.hibernate.type.PostgresUUIDType")
-    private UUID uid;
-
-    @Column
-    private int circuit_id;
-
-    @Column
-    private int rank;
-
-    @Column
-    private String address;
+    private int watts;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        CircuitRank that = (CircuitRank) o;
-        return id != null && Objects.equals(id, that.id);
+        UsageByHourEntity that = (UsageByHourEntity) o;
+        return date != null && Objects.equals(date, that.date);
     }
 
     @Override

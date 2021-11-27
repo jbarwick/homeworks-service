@@ -8,7 +8,7 @@ import static com.jvj28.homeworks.command.Cmd.OSREV;
 public class OSRevision implements HomeworksCommand {
 
     private String processorId;
-    private String osRevision;
+    private String revision;
     private String model;
 
     @Override
@@ -28,7 +28,7 @@ public class OSRevision implements HomeworksCommand {
             if (parts.length > 1)
                 this.processorId = parts[1];
             if (parts.length > 5)
-                this.osRevision = parts[5];
+                this.revision = parts[5];
             if (parts.length > 6)
                 this.model = parts[6];
         }

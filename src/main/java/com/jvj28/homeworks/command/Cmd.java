@@ -131,39 +131,31 @@ public enum Cmd {
     ENABLENAME("ENABLENAME", "Enables one of the processor's NetBIOS names", Unknown.class),
     RELNAME("RELNAME", "Releases one of the processor's NetBIOS names", Unknown.class);
 
-    private final String _name;
-    private final String _description;
-    private final Class<? extends HomeworksCommand> _class;
+    private final String name;
+    private final String description;
+    private final Class<? extends HomeworksCommand> clazz;
 
     Cmd(String name, String s, Class<? extends HomeworksCommand> c) {
-        this._name = name;
-        this._description = s;
-        this._class = c;
+        this.name = name;
+        this.description = s;
+        this.clazz = c;
     }
 
     public Class<? extends HomeworksCommand> commandClass() {
-        return this._class;
+        return this.clazz;
     }
 
     public String description() {
-        return this._description;
+        return this.description;
     }
 
     @Override
     public String toString() {
-        return this._name;
+        return this.name;
     }
 
     public String toJson() {
-        return String.format("{\"Name\": \"%s\", \"Description\": \"%s\"}", _name, _description);
-    }
-
-    public HomeworksCommand getInstance() {
-        try {
-            return this._class.getConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            return null;
-        }
+        return String.format("{\"Name\": \"%s\", \"Description\": \"%s\"}", this.name, this.description);
     }
 
     public static Stream<Cmd> stream() {

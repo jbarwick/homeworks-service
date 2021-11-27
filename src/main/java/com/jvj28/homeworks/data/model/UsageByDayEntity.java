@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -18,8 +19,9 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Table(name = "watts_by_day")
-public class UsageByDay implements Serializable {
+public class UsageByDayEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 2553304008926973911L;
 
     @Id
@@ -35,7 +37,7 @@ public class UsageByDay implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        UsageByDay that = (UsageByDay) o;
+        UsageByDayEntity that = (UsageByDayEntity) o;
         return date != null && Objects.equals(date, that.date);
     }
 
