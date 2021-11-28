@@ -68,6 +68,10 @@ public class Model {
         RMap<String, KeypadData> finalKeypads = redis.getMap(KEYPADLIST);
         finalKeypads.clear();
 
+        log.info("Clearing RANKS cache");
+        RMap<String, KeypadData> finalRanks = redis.getMap(RANKLIST);
+        finalRanks.clear();
+
         // Do note you see a "promise" here, the actual command is sent in QUEUE.
         // The promise command system guarantees only one command
         // will be running at a time.  So, the below 6 commands will execute immediately
@@ -154,16 +158,7 @@ public class Model {
         return this.currentUser.get();
     }
 
-    /**
-     * Throws a runtime exception "timeout" if the request takes longer than 30 seconds.
-     * @param entity the DataObject to save to the REDIS database
-     * @param <E> The Class type of the DataObject entity
-     */
     public <E extends DataObject<E>> void save(E entity) {
-        save(entity, 30);
-    }
-
-    public <E extends DataObject<E>> void save(E entity, int timeout) {
         String rkey = entity.getClass().getName();
         // Make sure we can retrieve the lock, if locked.  We won't lock 'save' records.
         // We expect the get(forUpdate == true) will actually lock records.
@@ -174,7 +169,7 @@ public class Model {
                 log.debug(entity.toString());
             }
             RBucket<DataObject<E>> bucket = redis.getBucket(rkey);
-            bucket.set(entity, timeout, TimeUnit.SECONDS);
+            bucket.set(entity);
         } finally {
             // This should have been locked in the "find forUpdate" function.
             if (rlock.isLocked()) {
@@ -217,17 +212,20 @@ public class Model {
             }
         }
         RBucket<S> bucket = redis.getBucket(rkey);
+        log.debug("Bucket {} remain TTL: {}", rkey, bucket.remainTimeToLive());
         S object = bucket.get();
-        if (object == null)
+        if (object == null) {
+            log.debug("Object [{}] not found in REDIS.  Regenerating...", rkey);
             return generate(clazz);
+        }
         else
             return object;
     }
 
     private <S extends DataObject<S>> S generate(Class<S> clazz) {
         try {
-            S dataObject = clazz.getConstructor().newInstance();
-            return dataObject.generate(processor);
+            S result = clazz.getConstructor().newInstance();
+            return result.generate(processor);
         } catch (Exception ignored) {
             return null;
         }

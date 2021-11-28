@@ -1,5 +1,6 @@
 package com.jvj28.homeworks.data.model;
 
+import com.jvj28.homeworks.command.Netstat;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import lombok.Data;
 
@@ -30,7 +31,8 @@ public class NetstatData implements DataObject<NetstatData> {
 
     @Override
     public NetstatData generate(HomeworksProcessor processor) throws ExecutionException, InterruptedException {
-         processor.sendCommand(com.jvj28.homeworks.command.Netstat.class)
+
+         processor.sendCommand(Netstat.class)
                 .onComplete(p -> {
                     this.setBufferHWM(p.getBufferHWM());
                     this.setErrorRx(p.getErrorRx());
