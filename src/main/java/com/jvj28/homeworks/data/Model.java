@@ -211,7 +211,6 @@ public class Model {
         if (forUpdate) {
             try {
                 rlock.lockInterruptibly(30, TimeUnit.SECONDS);
-                rlock.lock();
                 log.debug("Lock acquired: {}", rlock.getName());
             } catch (InterruptedException e) {
                 throw new RecordLockException(e);
@@ -242,23 +241,23 @@ public class Model {
 
     /************* KEYPADS ************************/
 
-    public void saveKeypads(List<KeypadData> keypads) {
-        RLock rlock = redis.getLock(KEYPADLIST + "Lock");
-        rlock.lock();
-        try {
-            RMap<String, KeypadData> map = getKeypadMap();
-            keypads.forEach(keypad -> map.fastPut(keypad.getAddress(), keypad));
-        } finally {
-            rlock.unlock();
-        }
-    }
-
     public void saveKeypad(KeypadData keypad) {
         RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
         try {
             RMap<String, KeypadData> map = getKeypadMap();
             map.fastPut(keypad.getAddress(), keypad);
+        } finally {
+            rlock.unlock();
+        }
+    }
+
+    public void saveKeypads(List<KeypadData> keypads) {
+        RLock rlock = redis.getLock(KEYPADLIST + "Lock");
+        rlock.lock();
+        try {
+            RMap<String, KeypadData> map = getKeypadMap();
+            keypads.forEach(keypad -> map.fastPut(keypad.getAddress(), keypad));
         } finally {
             rlock.unlock();
         }

@@ -1,8 +1,10 @@
 @echo off
-set VERSION=1.0.1
+set /p VERSION=<version.txt
 call mvn versions:set -DnewVersion=%VERSION%
 call mvn clean package
-docker build -t jvj/homeworks-service:%VERSION% -m 2GB --build-arg VERSION=%VERSION% .
+set ORGANIZATION=jbarwick
+set NAME=hmoeworks-service
+docker build -t %ORGANIZATION%/%NAME%:%VERSION% -m 2GB --build-arg VERSION=%VERSION% .
 rem I can't afford a subscription
-rem docker scan jvj/homeworks-service:%VERSION%
-docker run -ti -p 8080:8080 jvj/homeworks-service:%VERSION%
+rem docker scan %ORGANIZATION%/%NAME%:%VERSION%
+docker run -ti -p 8080:8080 %ORGANIZATION%/%NAME%:%VERSION%

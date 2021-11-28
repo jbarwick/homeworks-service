@@ -6,8 +6,10 @@
 
     <groupId>com.jvj28.homeworks</groupId>
     <artifactId>homeworks-service</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>homeworks-service</name>
+    <url>https://github.com/jbarwick/homeworks-service</url>
+    <inceptionYear>2019</inceptionYear>
     <description>Provides a REST API for integration with Homeworks Console</description>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
