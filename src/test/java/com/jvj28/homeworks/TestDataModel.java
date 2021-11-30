@@ -15,7 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class TestDataModel {
+class TestDataModel {
 
     @Autowired
     private HomeworksConfiguration service;
@@ -27,7 +27,7 @@ public class TestDataModel {
     private Model model;
 
     @Test
-    public void TestData() {
+    void TestData() {
 
         String zone_name = "01:05:05:05";
 

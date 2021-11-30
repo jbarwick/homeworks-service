@@ -39,13 +39,13 @@ public class HomeworksConfiguration {
     private int port;
 
     @Value("${hw.circuits.seed:circuit_zones.csv}")
-    private String seed_circuits;
+    private String seedCircuits;
 
     @Value("${hw.keypads.seed:keypads.csv}")
-    private String seed_keypads;
+    private String seedKeypads;
 
     @Value("${hw.users.seed:users.csv}")
-    private String seed_users;
+    private String seedUsers;
 
     public String getUsername() {
         return username;
@@ -62,14 +62,14 @@ public class HomeworksConfiguration {
     public int getPort() { return port; }
 
     public String getCircuitsSeedFilename() {
-        return seed_circuits;
+        return seedCircuits;
     }
 
     public String getKeypadSeedFilename() {
-        return seed_keypads;
+        return seedKeypads;
     }
 
     public String getUsersSeedFilename() {
-        return seed_users;
+        return seedUsers;
     }
 }

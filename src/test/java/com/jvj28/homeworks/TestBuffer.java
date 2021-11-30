@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestBuffer {
+class TestBuffer {
 
     @Test
-    public void testParser() {
+    void testParser() {
 
         Gson gson = new Gson();
         Login s = gson.fromJson("{username: abc, password: pwd}", Login.class);

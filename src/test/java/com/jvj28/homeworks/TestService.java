@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-public class TestService {
+class TestService {
 
     @Autowired
     private HomeworksProcessor processor;
@@ -26,7 +26,7 @@ public class TestService {
     private Model model;
 
     @Test
-    public void testTelnetConnection() {
+    void testTelnetConnection() {
 
         try {
 
@@ -52,7 +52,7 @@ public class TestService {
     }
 
     @Test
-    public void testReadSeedData() {
+    void testReadSeedData() {
 
         try {
             System.out.println("Letting the system warm up");

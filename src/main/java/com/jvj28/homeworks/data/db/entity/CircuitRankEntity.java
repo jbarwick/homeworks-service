@@ -87,8 +87,8 @@ public class CircuitRankEntity implements Serializable {
         return circuitId;
     }
 
-    public void setCircuitId(int circuit_id) {
-        this.circuitId = circuit_id;
+    public void setCircuitId(int circuitId) {
+        this.circuitId = circuitId;
     }
 
     public int getRank() {

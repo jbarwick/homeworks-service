@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class TestMetrics {
+class TestMetrics {
 
     @Autowired
     private MockMvc mockMvc;
@@ -24,7 +24,7 @@ public class TestMetrics {
     private HomeworksProcessor processor;
 
     @Test
-    public void TestServiceMetrics() {
+    void TestServiceMetrics() {
         try {
             assertNotNull(mockMvc);
 

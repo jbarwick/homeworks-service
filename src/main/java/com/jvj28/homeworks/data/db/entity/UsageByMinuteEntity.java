@@ -107,24 +107,24 @@ public class UsageByMinuteEntity implements Serializable {
         return yearDow;
     }
 
-    public void setYearDow(String year_dow) {
-        this.yearDow = year_dow;
+    public void setYearDow(String yearDow) {
+        this.yearDow = yearDow;
     }
 
     public String getYearMonth() {
         return yearMonth;
     }
 
-    public void setYearMonth(String year_month) {
-        this.yearMonth = year_month;
+    public void setYearMonth(String yearMonth) {
+        this.yearMonth = yearMonth;
     }
 
     public String getYearDowHour() {
         return yearDowHour;
     }
 
-    public void setYearDowHour(String year_dow_hour) {
-        this.yearDowHour = year_dow_hour;
+    public void setYearDowHour(String yearDowHour) {
+        this.yearDowHour = yearDowHour;
     }
 
     public int getHour() {
@@ -179,16 +179,16 @@ public class UsageByMinuteEntity implements Serializable {
         return yearMonthDay;
     }
 
-    public void setYearMonthDay(String year_month_day) {
-        this.yearMonthDay = year_month_day;
+    public void setYearMonthDay(String yearMonthDay) {
+        this.yearMonthDay = yearMonthDay;
     }
 
     public String getYearWeek() {
         return yearWeek;
     }
 
-    public void setYearWeek(String year_week) {
-        this.yearWeek = year_week;
+    public void setYearWeek(String yearWeek) {
+        this.yearWeek = yearWeek;
     }
 
     public int getWeek() {

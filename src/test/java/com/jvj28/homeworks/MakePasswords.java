@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MakePasswords {
+class MakePasswords {
 
     @Test
-    public void testMakePasswords() {
+    void testMakePasswords() {
 
         StringEncryptor encryptor = stringEncryptor();
 
@@ -23,24 +23,24 @@ public class MakePasswords {
         String original = encryptor.decrypt(result);
         assertEquals("LutronGUI", original);
 
-        result = encryptor.encrypt("master");
+        result = encryptor.encrypt("xxxx");
         System.out.println("hw.password=ENC(" + result + ")");
         original = encryptor.decrypt(result);
-        assertEquals("master", original);
+        assertEquals("xxxx", original);
 
         result = encryptor.encrypt("lutron");
         System.out.println("spring.datasource.username=ENC(" + result + ")");
         original = encryptor.decrypt(result);
         assertEquals("lutron", original);
 
-        result = encryptor.encrypt("ginman");
+        result = encryptor.encrypt("xxxx");
         System.out.println("spring.datasource.password=ENC(" + result + ")");
         original = encryptor.decrypt(result);
-        assertEquals("ginman", original);
+        assertEquals("xxxx", original);
 
     }
 
-    public StringEncryptor stringEncryptor() {
+    StringEncryptor stringEncryptor() {
         PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
         SimpleStringPBEConfig config = new SimpleStringPBEConfig();
         config.setPassword(System.getProperty("jasypt.encryptor.password"));
