@@ -2,31 +2,15 @@ package com.jvj28.homeworks.data.model;
 
 import com.jvj28.homeworks.command.Netstat;
 import com.jvj28.homeworks.service.HomeworksProcessor;
-import lombok.Data;
+import com.jvj28.homeworks.util.NetstatProperties;
 
 import java.io.Serial;
 import java.util.concurrent.ExecutionException;
 
-@Data
-public class NetstatData implements DataObject<NetstatData> {
+public class NetstatData extends NetstatProperties implements DataObject<NetstatData> {
 
     @Serial
     private static final long serialVersionUID = 6866420726145457381L;
-
-    private String macAddress;
-    private String ipAddress;
-    private String subnetMask;
-    private String gateway;
-    private int telnetPort;
-    private int ftpPort;
-    private int httpPort;
-    private boolean pingResponse;
-    private String bufferHWM;
-    private String socketHWM;
-    private long successfulTx;
-    private long errorTx;
-    private long successfulRx;
-    private long errorRx;
 
     @Override
     public NetstatData generate(HomeworksProcessor processor) throws ExecutionException, InterruptedException {
