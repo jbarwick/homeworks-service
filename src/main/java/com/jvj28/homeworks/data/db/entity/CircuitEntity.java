@@ -22,27 +22,27 @@ public class CircuitEntity implements Serializable {
     private Integer id;
 
     @CsvBindByName
-    @Column
+    @Column(name = "name")
     private String name;
 
     @CsvBindByName
-    @Column
+    @Column(name = "address", nullable = false)
     private String address;
 
     @CsvBindByName
-    @Column
+    @Column(name = "room")
     private String room;
 
     @CsvBindByName
-    @Column
+    @Column(name = "lights")
     private int lights;
 
     @CsvBindByName
-    @Column
+    @Column(name = "watts")
     private int watts;
 
     @CsvBindByName
-    @Column
+    @Column(name = "type")
     private String type;
 
     @Transient
@@ -53,8 +53,6 @@ public class CircuitEntity implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private int rank;
 
-    @Lob
-    @Column(name = "type")
     public String getType() {
         return type;
     }
@@ -63,7 +61,6 @@ public class CircuitEntity implements Serializable {
         this.type = type;
     }
 
-    @Column(name = "watts")
     public Integer getWatts() {
         return watts;
     }
@@ -72,7 +69,6 @@ public class CircuitEntity implements Serializable {
         this.watts = watts;
     }
 
-    @Column(name = "lights")
     public Integer getLights() {
         return lights;
     }
@@ -81,8 +77,6 @@ public class CircuitEntity implements Serializable {
         this.lights = lights;
     }
 
-    @Lob
-    @Column(name = "room")
     public String getRoom() {
         return room;
     }
@@ -91,7 +85,6 @@ public class CircuitEntity implements Serializable {
         this.room = room;
     }
 
-    @Column(name = "address")
     public String getAddress() {
         return address;
     }
@@ -100,7 +93,6 @@ public class CircuitEntity implements Serializable {
         this.address = address;
     }
 
-    @Column(name = "name")
     public String getName() {
         return name;
     }

@@ -1,6 +1,7 @@
 package com.jvj28.homeworks.data.db.entity;
 
 import com.opencsv.bean.CsvBindByName;
+import org.springframework.data.redis.core.index.Indexed;
 
 import javax.persistence.*;
 import java.io.Serial;
@@ -18,24 +19,26 @@ public class UsersEntity implements Serializable {
 
     @Id
     @Column(name = "uid", nullable = false)
+    @org.hibernate.annotations.Type(type="org.hibernate.type.PostgresUUIDType")
     @CsvBindByName
     private UUID uid;
 
     @CsvBindByName
     @Column(name = "username", nullable = false)
-    private String username;
+    @Indexed
+    private String userName;
 
     @CsvBindByName
     @Column(name = "userpass")
-    private String userpass;
+    private String userPass;
 
     @CsvBindByName
     @Column(name = "firstname", length = 50)
-    private String firstname;
+    private String firstName;
 
     @CsvBindByName
     @Column(name = "lastname", length = 50)
-    private String lastname;
+    private String lastName;
 
     @CsvBindByName
     @Lob
@@ -50,36 +53,36 @@ public class UsersEntity implements Serializable {
         this.info = info;
     }
 
-    public String getLastname() {
-        return lastname;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
+    public void setLastName(String lastname) {
+        this.lastName = lastname;
     }
 
-    public String getFirstname() {
-        return firstname;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
+    public void setFirstName(String firstname) {
+        this.firstName = firstname;
     }
 
-    public String getUserpass() {
-        return userpass;
+    public String getUserPass() {
+        return userPass;
     }
 
-    public void setUserpass(String userpass) {
-        this.userpass = userpass;
+    public void setUserPass(String userpass) {
+        this.userPass = userpass;
     }
 
-    public String getUsername() {
-        return username;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserName(String username) {
+        this.userName = username;
     }
 
     public UUID getId() {

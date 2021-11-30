@@ -30,40 +30,40 @@ public class UsageByMinuteEntity implements Serializable {
     @Column(name="date", nullable = false)
     private Date date;
 
-    @Column
-    private String year_dow;
+    @Column(name="year_dow")
+    private String yearDow;
 
-    @Column
-    private String year_month;
+    @Column(name="year_month")
+    private String yearMonth;
 
-    @Column
-    private String year_dow_hour;
+    @Column(name="year_dow_hour")
+    private String yearDowHour;
 
-    @Column
+    @Column(name="hour")
     private int hour;
 
-    @Column
+    @Column(name="dow")
     private int dow;
 
-    @Column
+    @Column(name="year")
     private int year;
 
-    @Column
+    @Column(name="month")
     private int month;
 
-    @Column
+    @Column(name="watts")
     private int watts;
 
-    @Column
+    @Column(name="day")
     private int day;
 
-    @Column
-    private String year_month_day;
+    @Column(name="year_month_day")
+    private String yearMonthDay;
 
-    @Column
-    private String year_week;
+    @Column(name="year_week")
+    private String yearWeek;
 
-    @Column
+    @Column(name="week")
     private int week;
 
     public UsageByMinuteEntity() {
@@ -80,11 +80,11 @@ public class UsageByMinuteEntity implements Serializable {
         year = dtm.getYear();
         month = dtm.getMonthValue();
         week = dtm.get(ChronoField.ALIGNED_WEEK_OF_YEAR);
-        year_dow = String.format("%04d:%d", year, dow);
-        year_month = String.format("%04d:%02d", year, month);
-        year_dow_hour = String.format("%04d:%d:%02d", year, dow, hour);
-        year_month_day = String.format("%04d-%02d-%02d", year, month, day);
-        year_week = String.format("%04d:%02d", year, week);
+        yearDow = String.format("%04d:%d", year, dow);
+        yearMonth = String.format("%04d:%02d", year, month);
+        yearDowHour = String.format("%04d:%d:%02d", year, dow, hour);
+        yearMonthDay = String.format("%04d-%02d-%02d", year, month, day);
+        yearWeek = String.format("%04d:%02d", year, week);
     }
 
     public Long getId() {
@@ -103,28 +103,28 @@ public class UsageByMinuteEntity implements Serializable {
         this.date = date;
     }
 
-    public String getYear_dow() {
-        return year_dow;
+    public String getYearDow() {
+        return yearDow;
     }
 
-    public void setYear_dow(String year_dow) {
-        this.year_dow = year_dow;
+    public void setYearDow(String year_dow) {
+        this.yearDow = year_dow;
     }
 
-    public String getYear_month() {
-        return year_month;
+    public String getYearMonth() {
+        return yearMonth;
     }
 
-    public void setYear_month(String year_month) {
-        this.year_month = year_month;
+    public void setYearMonth(String year_month) {
+        this.yearMonth = year_month;
     }
 
-    public String getYear_dow_hour() {
-        return year_dow_hour;
+    public String getYearDowHour() {
+        return yearDowHour;
     }
 
-    public void setYear_dow_hour(String year_dow_hour) {
-        this.year_dow_hour = year_dow_hour;
+    public void setYearDowHour(String year_dow_hour) {
+        this.yearDowHour = year_dow_hour;
     }
 
     public int getHour() {
@@ -175,20 +175,20 @@ public class UsageByMinuteEntity implements Serializable {
         this.day = day;
     }
 
-    public String getYear_month_day() {
-        return year_month_day;
+    public String getYearMonthDay() {
+        return yearMonthDay;
     }
 
-    public void setYear_month_day(String year_month_day) {
-        this.year_month_day = year_month_day;
+    public void setYearMonthDay(String year_month_day) {
+        this.yearMonthDay = year_month_day;
     }
 
-    public String getYear_week() {
-        return year_week;
+    public String getYearWeek() {
+        return yearWeek;
     }
 
-    public void setYear_week(String year_week) {
-        this.year_week = year_week;
+    public void setYearWeek(String year_week) {
+        this.yearWeek = year_week;
     }
 
     public int getWeek() {

@@ -1,8 +1,8 @@
 package com.jvj28.homeworks.service;
 
 import com.jvj28.homeworks.command.HomeworksCommand;
-import com.jvj28.homeworks.util.PromiseCallback;
 import com.jvj28.homeworks.util.Promise;
+import com.jvj28.homeworks.util.PromiseCallback;
 import org.springframework.data.annotation.Immutable;
 import org.springframework.lang.NonNull;
 

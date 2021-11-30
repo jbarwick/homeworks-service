@@ -1,9 +1,8 @@
 package com.jvj28.homeworks.data.model;
 
+import com.jvj28.homeworks.command.RequestSystemDate;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import lombok.Data;
-
-import com.jvj28.homeworks.command.RequestSystemDate;
 
 import java.io.Serial;
 import java.util.concurrent.ExecutionException;

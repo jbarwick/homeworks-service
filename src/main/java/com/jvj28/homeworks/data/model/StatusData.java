@@ -1,6 +1,9 @@
 package com.jvj28.homeworks.data.model;
 
-import com.jvj28.homeworks.command.*;
+import com.jvj28.homeworks.command.OSRevision;
+import com.jvj28.homeworks.command.ProcessorAddress;
+import com.jvj28.homeworks.command.RequestAllProcessorStatusInformation;
+import com.jvj28.homeworks.command.RequestBootRevisions;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import lombok.Data;
 

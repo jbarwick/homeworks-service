@@ -6,7 +6,7 @@
 
     <groupId>com.jvj28.homeworks</groupId>
     <artifactId>homeworks-service</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.3</version>
     <name>homeworks-service</name>
     <url>https://github.com/jbarwick/homeworks-service</url>
     <inceptionYear>2019</inceptionYear>

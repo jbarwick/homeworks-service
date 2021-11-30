@@ -1,22 +1,25 @@
 package com.jvj28.homeworks.api;
 
+import com.jvj28.homeworks.data.Model;
 import com.jvj28.homeworks.data.db.UsageByDayRepository;
 import com.jvj28.homeworks.data.db.UsageByHourRepository;
 import com.jvj28.homeworks.data.db.UsageByMinuteRepository;
 import com.jvj28.homeworks.data.db.entity.*;
-import com.jvj28.homeworks.data.model.*;
-import com.jvj28.homeworks.data.Model;
+import com.jvj28.homeworks.data.model.LinkStatusData;
+import com.jvj28.homeworks.data.model.NetstatData;
+import com.jvj28.homeworks.data.model.StatusData;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.jvj28.homeworks.data.model.StatusData;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")

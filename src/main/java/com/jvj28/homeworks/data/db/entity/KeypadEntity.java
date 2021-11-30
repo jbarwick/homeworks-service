@@ -28,7 +28,7 @@ public class KeypadEntity implements Serializable {
     @CsvBindByName
     private String name;
 
-    @Column
+    @Column(name="address", nullable = false)
     @Indexed
     @CsvBindByName
     private String address;

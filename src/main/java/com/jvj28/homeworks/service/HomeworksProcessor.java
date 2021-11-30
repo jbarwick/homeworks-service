@@ -1,6 +1,7 @@
 package com.jvj28.homeworks.service;
 
-import com.jvj28.homeworks.command.*;
+import com.jvj28.homeworks.command.HomeworksCommand;
+import com.jvj28.homeworks.command.Login;
 import com.jvj28.homeworks.util.Promise;
 import org.apache.commons.net.telnet.TelnetClient;
 import org.slf4j.Logger;

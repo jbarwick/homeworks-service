@@ -2,7 +2,6 @@ package com.jvj28.homeworks.service;
 
 import com.jvj28.homeworks.command.DisableKeypadButtonMonitoring;
 import com.jvj28.homeworks.command.EnableKeypadButtonMonitoring;
-import com.jvj28.homeworks.data.Model;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

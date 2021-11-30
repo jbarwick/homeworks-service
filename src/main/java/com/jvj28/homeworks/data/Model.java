@@ -1,10 +1,11 @@
 package com.jvj28.homeworks.data;
 
 import com.jvj28.homeworks.command.*;
-import com.jvj28.homeworks.data.db.entity.*;
-import com.jvj28.homeworks.data.model.*;
-import com.jvj28.homeworks.service.HomeworksConfiguration;
 import com.jvj28.homeworks.data.db.*;
+import com.jvj28.homeworks.data.db.entity.*;
+import com.jvj28.homeworks.data.model.DataObject;
+import com.jvj28.homeworks.data.model.StatusData;
+import com.jvj28.homeworks.service.HomeworksConfiguration;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -17,7 +18,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import java.io.FileReader;
+import java.io.Reader;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -45,13 +47,15 @@ public class Model {
     ThreadLocal<UUID> currentUser = new ThreadLocal<>();
     private Date processorDate;
 
+    @SuppressWarnings("java:S107") // Dude, this is springboot, I'll probably have 50 parameters when all is said and done
     public Model(HomeworksConfiguration config,
                  HomeworksProcessor processor,
                  RedissonClient redis,
                  CircuitZoneRepository circuits,
                  CircuitRankRepository ranks,
                  KeypadsRepository keypads,
-                 UsageByMinuteRepository usageByMinute, UsersEntityRepository users) {
+                 UsageByMinuteRepository usageByMinute,
+                 UsersEntityRepository users) {
         this.config = config;
         this.redis = redis;
         this.processor = processor;

@@ -16,52 +16,53 @@ public class CircuitRankEntity implements Serializable {
     private static final long serialVersionUID = -2210877801950859110L;
 
     @Id
+    @Column(name="id", nullable = false)
     private Integer id;
 
-    @Column
+    @Column(name="uid", nullable = false)
     @org.hibernate.annotations.Type(type="org.hibernate.type.PostgresUUIDType")
     private UUID uid;
 
-    @Column
-    private int circuit_id;
+    @Column(name="circuit_id", nullable = false)
+    private int circuitId;
 
-    @Column
+    @Column(name="rank")
     private int rank;
 
-    @Column
+    @Column(name="address")
     private String address;
 
+    @Transient
     private String name;
 
+    @Transient
     private String room;
 
+    @Transient
     private Integer lights;
 
+    @Transient
     private Integer watts;
 
+    @Transient
     private String type;
 
-    @Column(name = "type")
     public String getType() {
         return type;
     }
 
-    @Column(name = "watts")
     public Integer getWatts() {
         return watts;
     }
 
-    @Column(name = "lights")
     public Integer getLights() {
         return lights;
     }
 
-    @Column(name = "room")
     public String getRoom() {
         return room;
     }
 
-    @Column(name = "name")
     public String getName() {
         return name;
     }
@@ -82,12 +83,12 @@ public class CircuitRankEntity implements Serializable {
         this.uid = uid;
     }
 
-    public int getCircuit_id() {
-        return circuit_id;
+    public int getCircuitId() {
+        return circuitId;
     }
 
-    public void setCircuit_id(int circuit_id) {
-        this.circuit_id = circuit_id;
+    public void setCircuitId(int circuit_id) {
+        this.circuitId = circuit_id;
     }
 
     public int getRank() {

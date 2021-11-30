@@ -1,6 +1,5 @@
 package com.jvj28.homeworks.command;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.stream.Stream;
 
 public enum Cmd {

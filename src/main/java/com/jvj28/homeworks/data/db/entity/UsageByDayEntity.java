@@ -21,12 +21,13 @@ public class UsageByDayEntity implements Serializable {
     private static final long serialVersionUID = 2553304008926973911L;
 
     @Id
+    @Column(name="date", nullable = false)
     private java.util.Date date;
 
-    @Column
+    @Column(name="day", nullable = false)
     private String day;
 
-    @Column
+    @Column(name="watts")
     private int watts;
 
     public Date getDate() {

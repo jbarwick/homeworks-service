@@ -16,9 +16,9 @@ public interface UsersEntityRepository extends JpaRepository<UsersEntity, UUID> 
     @Query("select c.uid from UsersEntity c")
     List<UUID> findAllIds();
 
-    @Query("select c.username from UsersEntity c")
+    @Query("select c.userName from UsersEntity c")
     List<String> findAllUsernames();
 
-    @Query("delete from UsersEntity c where c.username in (:names)")
+    @Query("delete from UsersEntity c where c.userName in (:names)")
     void deleteAllByUsernames(Collection<String> names);
 }
