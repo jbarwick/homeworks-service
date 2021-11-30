@@ -1,6 +1,7 @@
 package com.jvj28.homeworks.data;
 
 import com.jvj28.homeworks.command.*;
+import com.jvj28.homeworks.data.db.entity.*;
 import com.jvj28.homeworks.data.model.*;
 import com.jvj28.homeworks.service.HomeworksConfiguration;
 import com.jvj28.homeworks.data.db.*;
@@ -27,9 +28,10 @@ public class Model {
 
     private static final Logger log = LoggerFactory.getLogger(Model.class);
 
-    private static final String CIRCUITLIST = "CIRCUITS";
-    private static final String KEYPADLIST = "KEYPADS";
-    private static final String RANKLIST = "RANKS";
+    private static final String CIRCUITLIST = "CIRCUITSLIST";
+    private static final String KEYPADLIST = "KEYPADSLIST";
+    private static final String RANKLIST = "RANKSLIST";
+    private static final String USERSLIST = "USERSLIST";
 
     private final RedissonClient redis;
     private final HomeworksConfiguration config;
@@ -38,8 +40,10 @@ public class Model {
     private final KeypadsRepository keypads;
     private final CircuitRankRepository ranks;
     private final UsageByMinuteRepository usageByMinute;
+    private final UsersEntityRepository users;
 
     ThreadLocal<UUID> currentUser = new ThreadLocal<>();
+    private Date processorDate;
 
     public Model(HomeworksConfiguration config,
                  HomeworksProcessor processor,
@@ -47,7 +51,7 @@ public class Model {
                  CircuitZoneRepository circuits,
                  CircuitRankRepository ranks,
                  KeypadsRepository keypads,
-                 UsageByMinuteRepository usageByMinute) {
+                 UsageByMinuteRepository usageByMinute, UsersEntityRepository users) {
         this.config = config;
         this.redis = redis;
         this.processor = processor;
@@ -55,6 +59,7 @@ public class Model {
         this.keypads = keypads;
         this.ranks = ranks;
         this.usageByMinute = usageByMinute;
+        this.users = users;
     }
 
     @PostConstruct
@@ -65,11 +70,11 @@ public class Model {
         finalList.clear();
 
         log.info("Clearing KEYPADS cache");
-        RMap<String, KeypadData> finalKeypads = redis.getMap(KEYPADLIST);
+        RMap<String, KeypadEntity> finalKeypads = redis.getMap(KEYPADLIST);
         finalKeypads.clear();
 
         log.info("Clearing RANKS cache");
-        RMap<String, KeypadData> finalRanks = redis.getMap(RANKLIST);
+        RMap<String, KeypadEntity> finalRanks = redis.getMap(RANKLIST);
         finalRanks.clear();
 
         // Do note you see a "promise" here, the actual command is sent in QUEUE.
@@ -82,7 +87,7 @@ public class Model {
 
         log.debug("Performing login to processor");
         Login loginResult = null;
-        while (loginResult == null || !loginResult.isSucceeded()) {
+        do {
             try {
                 log.info("Waiting for login prompt");
                 if (!processor.waitForLoginPrompt()) {
@@ -91,23 +96,27 @@ public class Model {
                 }
                 loginResult = processor.sendCommand(
                         new Login(config.getUsername(), config.getConsolePassword())).onComplete(p -> {
-                            StatusData hw = get(StatusData.class, true);
-                            hw.setLoggedIn(p.isSucceeded());
-                            save(hw);
-                        }).get();
+                    StatusData hw = get(StatusData.class, true);
+                    hw.setLoggedIn(p.isSucceeded());
+                    save(hw);
+                }).get();
                 if (!loginResult.isSucceeded()) {
                     log.debug("Login failed.  Retrying...");
                 }
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException("Login Process Interrupted");
             }
+        } while (loginResult == null || !loginResult.isSucceeded());
+
+        try {
+            if (!processor.waitForReady()) {
+                log.warn("Timeout waiting for processor to become ready");
+                throw new RuntimeException("Processor did nto become ready in time");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted while waiting for command system to become ready");
         }
         log.info("Model beginning initialization");
-        try {
-            processor.waitForReady();
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Interrupted while waiting for command prompt");
-        }
         processor.sendCommand(PromptOn.class);
         processor.sendCommand(ReplyOn.class);
         processor.sendCommand(ProcessorAddress.class)
@@ -239,33 +248,33 @@ public class Model {
 
     /************* KEYPADS ************************/
 
-    public void saveKeypad(KeypadData keypad) {
+    public void saveKeypad(KeypadEntity keypad) {
         RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
         try {
-            RMap<String, KeypadData> map = getKeypadMap();
+            RMap<String, KeypadEntity> map = getKeypadMap();
             map.fastPut(keypad.getAddress(), keypad);
         } finally {
             rlock.unlock();
         }
     }
 
-    public void saveKeypads(List<KeypadData> keypads) {
+    public void saveKeypads(List<KeypadEntity> keypads) {
         RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
         try {
-            RMap<String, KeypadData> map = getKeypadMap();
+            RMap<String, KeypadEntity> map = getKeypadMap();
             keypads.forEach(keypad -> map.fastPut(keypad.getAddress(), keypad));
         } finally {
             rlock.unlock();
         }
     }
 
-    public List<KeypadData> geKeypads() {
+    public List<KeypadEntity> geKeypads() {
         RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
         try {
-            RMap<String, KeypadData> map = getKeypadMap();
+            RMap<String, KeypadEntity> map = getKeypadMap();
             if (map.isEmpty())
                 loadAllKeypads(map);
             return map.values().stream().toList();
@@ -274,11 +283,11 @@ public class Model {
         }
     }
 
-    public KeypadData findKeypadByAddress(String address) {
+    public KeypadEntity findKeypadByAddress(String address) {
         RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
         try {
-            RMap<String, KeypadData> map = getKeypadMap();
+            RMap<String, KeypadEntity> map = getKeypadMap();
             if (map.isEmpty())
                 loadAllKeypads(map);
             return map.get(address);
@@ -287,14 +296,14 @@ public class Model {
         }
     }
 
-    private RMap<String, KeypadData> getKeypadMap() {
-        return  redis.getMap(KEYPADLIST, MapOptions.<String, KeypadData>defaults()
+    private RMap<String, KeypadEntity> getKeypadMap() {
+        return  redis.getMap(KEYPADLIST, MapOptions.<String, KeypadEntity>defaults()
                 .writer(keypadMapWriter)
                 .loader(keypadMapLoader));
     }
 
-    private void loadAllKeypads(RMap<String, KeypadData> map) {
-        List<KeypadData> data = getKeypadsSeedData();
+    private void loadAllKeypads(RMap<String, KeypadEntity> map) {
+        List<KeypadEntity> data = getKeypadsSeedData();
         if (data == null || data.isEmpty())
             // do we need to convert to a list first to prevent DB record lock race condition?
             keypads.findAll().forEach(k -> map.fastPut(k.getAddress(), k));
@@ -302,7 +311,7 @@ public class Model {
             data.forEach(k -> map.fastPut(k.getAddress(), k));
     }
 
-    public List<KeypadData> getKeypadsSeedData() {
+    public List<KeypadEntity> getKeypadsSeedData() {
 
         String seedFile = config.getKeypadSeedFilename();
 
@@ -311,8 +320,8 @@ public class Model {
         } else {
             try (Reader reader = new FileReader(seedFile)) {
                 // create csv bean reader
-                CsvToBean<KeypadData> csvToBean = new CsvToBeanBuilder<KeypadData>(reader)
-                        .withType(KeypadData.class)
+                CsvToBean<KeypadEntity> csvToBean = new CsvToBeanBuilder<KeypadEntity>(reader)
+                        .withType(KeypadEntity.class)
                         .withIgnoreLeadingWhiteSpace(true)
                         .build();
                 // convert `CsvToBean` object to list of users
@@ -326,9 +335,9 @@ public class Model {
     }
 
     // Note that REDIS keys or not the DB keys.  The REDIS keys is the "Address" and the DB key is the "Id"
-    private final MapWriter<String, KeypadData> keypadMapWriter = new MapWriter<>() {
+    private final MapWriter<String, KeypadEntity> keypadMapWriter = new MapWriter<>() {
         @Override
-        public void write(Map<String, KeypadData> map) {
+        public void write(Map<String, KeypadEntity> map) {
             keypads.saveAll(map.values());
         }
 
@@ -339,9 +348,9 @@ public class Model {
     };
 
     // The keys in REDIS are the "Address" of the circuit.  This is not the DB key which is "ID"
-    private final MapLoader<String, KeypadData> keypadMapLoader = new MapLoader<>() {
+    private final MapLoader<String, KeypadEntity> keypadMapLoader = new MapLoader<>() {
         @Override
-        public KeypadData load(String key) {
+        public KeypadEntity load(String key) {
             return keypads.findByAddress(key).orElse(null);
         }
 
@@ -514,5 +523,97 @@ public class Model {
 
     public void saveUsage(UsageByMinuteEntity usage) {
         usageByMinute.save(usage);
+    }
+
+    /* ------------------------ USER INFORMATION ------------------------ */
+
+    public UsersEntity getUserById(UUID id) {
+        return users.findById(id).orElse(null);
+    }
+
+    public UsersEntity getUserByUsername(String username) {
+        RMap<String, UsersEntity> map = getUsersMap();
+        return map.get(username);
+    }
+
+    public List<UsersEntity> getUsersSeedData() {
+
+        String seedFile = config.getUsersSeedFilename();
+
+        if (seedFile == null) {
+            log.info("Seed file not specified.  Skipping DB initialization of users");
+        } else {
+            try (Reader reader = new FileReader(seedFile)) {
+                // create csv bean reader
+                CsvToBean<UsersEntity> csvToBean = new CsvToBeanBuilder<UsersEntity>(reader)
+                        .withType(UsersEntity.class)
+                        .withIgnoreLeadingWhiteSpace(true)
+                        .build();
+                // convert `CsvToBean` object to list of users
+                return csvToBean.parse();
+            } catch (Exception e) {
+                log.info("Error reading Users seed data.  Skipping.  Reason: {}", e.getMessage());
+            }
+        }
+        // silently return if there is not a file to read or there is a read error
+        return new ArrayList<>();
+    }
+
+    private RMap<String, UsersEntity> getUsersMap() {
+        RMap<String, UsersEntity> map = redis.getMap(USERSLIST,
+                MapOptions.<String, UsersEntity>defaults()
+                        .writer(usersMapWriter)
+                        .loader(usersMapLoader));
+        if (map.isEmpty()) loadAllUsers(map);
+        return map;
+    }
+
+    private final MapWriter<String, UsersEntity> usersMapWriter = new MapWriter<>() {
+        @Override
+        public void write(Map<String, UsersEntity> map) {
+            users.saveAll(map.values());
+        }
+
+        @Override
+        public void delete(Collection<String> names) {
+            users.deleteAllByUsernames(names);
+        }
+    };
+
+    private final MapLoader<String, UsersEntity> usersMapLoader = new MapLoader<>() {
+        @Override
+        public UsersEntity load(String key) {
+            return users.findByUsername(key).orElse(null);
+        }
+
+        @Override
+        public Iterable<String> loadAllKeys() {
+            return users.findAllUsernames();
+        }
+    };
+
+    private void loadAllUsers(RMap<String, UsersEntity> map) {
+        // ALWAYS seed from the CSV file.  Why? well, we want to give the users
+        // the ability to change the data in the database such as descriptions, etc.  This seed data will use the
+        // Primary Key ID not the Address to overwrite content.  So, you CAN change an address if needed.
+        List<UsersEntity> data = getUsersSeedData();
+        if (data == null || data.isEmpty())
+            // do we need to convert to a list first to prevent DB record lock race condition?
+            users.findAll().forEach(c -> map.put(c.getId().toString(), c));
+        else
+            // Put will save to redis AND the database.  We expect you have a MapWriter configured.
+            data.forEach(c -> map.fastPut(c.getId().toString(), c));
+    }
+
+    public void setProcessorDate(@NonNull Date date) {
+        log.debug("Storing date: {} timestamp: {}", date, date.getTime());
+        this.processorDate = date;
+    }
+
+    @NonNull
+    public Date getProcessorDate() {
+        if (this.processorDate == null)
+            return new Date();
+        return this.processorDate;
     }
 }

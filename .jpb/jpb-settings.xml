@@ -15,5 +15,6 @@
     <option name="generateJpaOnGetter" value="true" />
     <option name="generateSerialVersionUID" value="true" />
     <option name="scaffoldingLanguage" />
+    <option name="lastSelectedLanguage" value="Java" />
   </component>
 </project>

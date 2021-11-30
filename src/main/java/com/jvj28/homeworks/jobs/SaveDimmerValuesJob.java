@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.jobs;
 
-import com.jvj28.homeworks.data.model.UsageByMinuteEntity;
+import com.jvj28.homeworks.data.db.entity.UsageByMinuteEntity;
 import com.jvj28.homeworks.data.Model;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;

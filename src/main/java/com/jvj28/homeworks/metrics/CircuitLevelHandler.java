@@ -1,9 +1,11 @@
 package com.jvj28.homeworks.metrics;
 
 import com.jvj28.homeworks.data.Model;
-import com.jvj28.homeworks.data.model.CircuitEntity;
+import com.jvj28.homeworks.data.db.entity.CircuitEntity;
 
 import java.util.Set;
+
+import static com.jvj28.homeworks.metrics.Metrics.circuit_level;
 
 /**
  * Maps the CIRCUIT in Homeworks server to a Set of Metric objects.
@@ -21,7 +23,7 @@ public class CircuitLevelHandler implements MetricHandler {
         // the Metric with label.  This will ONLY retrieve from the model. So,
         // update of the model must be done by external service (such as processor listening)
         model.getCircuits().forEach(c -> metric_set.add(
-                new Metric(Metrics.circuit_level, getAttributes(c), c.getLevel())));
+                new Metric(circuit_level, getAttributes(c), c.getLevel())));
         return metric_set;
     }
 

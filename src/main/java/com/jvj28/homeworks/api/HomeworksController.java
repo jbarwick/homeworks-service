@@ -3,6 +3,7 @@ package com.jvj28.homeworks.api;
 import com.jvj28.homeworks.data.db.UsageByDayRepository;
 import com.jvj28.homeworks.data.db.UsageByHourRepository;
 import com.jvj28.homeworks.data.db.UsageByMinuteRepository;
+import com.jvj28.homeworks.data.db.entity.*;
 import com.jvj28.homeworks.data.model.*;
 import com.jvj28.homeworks.data.Model;
 import org.apache.logging.log4j.util.Strings;

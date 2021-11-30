@@ -1,7 +1,6 @@
-package com.jvj28.homeworks.data.model;
+package com.jvj28.homeworks.data.db.entity;
 
 import com.opencsv.bean.CsvBindByName;
-import lombok.*;
 import org.hibernate.Hibernate;
 import org.springframework.data.redis.core.index.Indexed;
 
@@ -13,19 +12,16 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
-@Entity
-@Getter
-@Setter
-@ToString
-@RequiredArgsConstructor
+@Entity(name = "KeypadEntity")
 @Table(name = "keypads")
-public class KeypadData implements Serializable {
+public class KeypadEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -5996194456256045358L;
 
     @Id
     @CsvBindByName
+    @Column(name="id", nullable = false)
     private Integer id;
 
     @Column
@@ -37,11 +33,35 @@ public class KeypadData implements Serializable {
     @CsvBindByName
     private String address;
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        KeypadData keypads = (KeypadData) o;
+        KeypadEntity keypads = (KeypadEntity) o;
         return id != null && Objects.equals(id, keypads.id);
     }
 
@@ -50,7 +70,7 @@ public class KeypadData implements Serializable {
         return getClass().hashCode();
     }
 
-    public void copy(KeypadData keypad) {
+    public void copy(KeypadEntity keypad) {
         this.id = keypad.id;
         this.name = keypad.name;
         this.address = keypad.address;

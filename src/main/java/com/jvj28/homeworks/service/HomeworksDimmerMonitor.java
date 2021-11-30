@@ -3,7 +3,7 @@ package com.jvj28.homeworks.service;
 import com.jvj28.homeworks.command.DisableDimmerLevelMonitoring;
 import com.jvj28.homeworks.command.EnableDimmerLevelMonitoring;
 import com.jvj28.homeworks.command.RequestZoneLevel;
-import com.jvj28.homeworks.data.model.CircuitEntity;
+import com.jvj28.homeworks.data.db.entity.CircuitEntity;
 import com.jvj28.homeworks.data.Model;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;

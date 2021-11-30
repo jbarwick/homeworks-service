@@ -21,7 +21,6 @@ public class StatusData implements DataObject<StatusData> {
     private String mode;
     private String processorInfo;
     private String bootRevision;
-    private String error;
 
     @Override
     public StatusData generate(HomeworksProcessor processor) throws InterruptedException, ExecutionException {

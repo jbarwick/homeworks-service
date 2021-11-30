@@ -1,7 +1,7 @@
 package com.jvj28.homeworks.jobs;
 
 import com.jvj28.homeworks.command.RequestZoneLevel;
-import com.jvj28.homeworks.data.model.CircuitEntity;
+import com.jvj28.homeworks.data.db.entity.CircuitEntity;
 import com.jvj28.homeworks.data.Model;
 import com.jvj28.homeworks.service.HomeworksDimmerMonitor;
 import com.jvj28.homeworks.service.HomeworksProcessor;

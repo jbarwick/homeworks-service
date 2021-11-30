@@ -24,19 +24,28 @@ public class HomeworksProcessor {
 
     private final Logger log = LoggerFactory.getLogger(HomeworksProcessor.class);
 
-    private final LinkedBlockingQueue<Promise<? extends HomeworksCommand>> queue = new LinkedBlockingQueue<>();
+    private Thread queueProcessorThread;
+    private Thread dataReceiverThread;
+
+    private final TelnetClient telnetClient = new TelnetClient();
+    private final HomeworksConfiguration config;
+
+    // Monitors.  In the future, will replace with a List of Listener objects and a register/deregister listener process
     private HomeworksDimmerMonitor dimmerMonitor;
     private HomeworksKeypadButtonMonitor keypadMonitor;
     private HomeworksKeypadLEDMonitor keypadLEDMonitor;
+
+    // Data receiver buffer
     private StringBuilder receiveBuffer = new StringBuilder();
-    private Thread queueProcessorThread;
-    private Thread dataReceiverThread;
+
+    // Command Queue and promise. Which is more like a Future.  Maybe can replace with a standard pattern
+    private final LinkedBlockingQueue<Promise<? extends HomeworksCommand>> queue = new LinkedBlockingQueue<>();
     private Promise<? extends HomeworksCommand> currentPromise;
+
+    // Ready Latches
     private CountDownLatch commandPromptLatch = new CountDownLatch(1);
-    private CountDownLatch loginCompleteLatch = new CountDownLatch(1);
+    private CountDownLatch readyLatch = new CountDownLatch(1);
     private CountDownLatch loginPromptLatch = new CountDownLatch(1);
-    private final TelnetClient telnetClient = new TelnetClient();
-    private final HomeworksConfiguration config;
 
     public HomeworksProcessor(HomeworksConfiguration config) {
         this.config = config;
@@ -48,21 +57,19 @@ public class HomeworksProcessor {
             log.debug("Connecting to server {} on port {}", config.getConsoleHost(), config.getPort());
             telnetClient.connect(config.getConsoleHost(), config.getPort());
             log.debug("Connected");
-            startPromiseQueueProcessor();
-            startDataReceiverProcessor();
         } catch (SocketException se) {
             log.error("Cannot create TPC connection");
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+        startPromiseQueueProcessor();
+        startDataReceiverProcessor();
     }
 
     @PreDestroy
     public void disconnect() {
         try {
-            loginPromptLatch = new CountDownLatch(1);
-            loginCompleteLatch = new CountDownLatch(1);
-            commandPromptLatch = new CountDownLatch(1);
+            resetLatches();
             log.debug("Disconnecting from server");
             queue.clear();
             telnetClient.disconnect();
@@ -72,12 +79,12 @@ public class HomeworksProcessor {
         }
     }
 
-    public boolean waitForReady() throws InterruptedException {
+    private boolean waitForCommandPrompt() throws InterruptedException {
         return commandPromptLatch.await(30, TimeUnit.SECONDS);
     }
 
-    public boolean waitForLoginSuccessful() throws InterruptedException {
-        return loginCompleteLatch.await(30, TimeUnit.SECONDS);
+    public boolean waitForReady() throws InterruptedException {
+        return readyLatch.await(30, TimeUnit.SECONDS);
     }
 
     public boolean waitForLoginPrompt() throws InterruptedException {
@@ -101,7 +108,7 @@ public class HomeworksProcessor {
             try {
                 while (telnetClient.isConnected()) {
                     // Wait for command prompt
-                    if (waitForReady()) {
+                    if (waitForCommandPrompt()) {
                         Promise<? extends HomeworksCommand> command = queue.take();
                         if (!sendCommandToProcessor(command))
                             queue.put(command);
@@ -173,6 +180,8 @@ public class HomeworksProcessor {
                     ch = -1;
                 }
             } while (ch >= 0 && telnetClient.isConnected());
+            if (!telnetClient.isConnected())
+                log.debug("Telnet Client disconnected");
             log.debug("Data reader stopped");
         });
         dataReceiverThread.setName("Data Receiver");
@@ -221,7 +230,7 @@ public class HomeworksProcessor {
         if (command.isSucceeded()) {
             log.debug("Login process succeeded.");
             loginPromptLatch = new CountDownLatch(1); // if we want to wait on another login prompt (such as after logout)
-            loginCompleteLatch.countDown(); // tell whoever is waiting that we succeeded with the login
+            readyLatch.countDown(); // tell whoever is waiting that we succeeded with the login
         }
     }
 
@@ -266,16 +275,14 @@ public class HomeworksProcessor {
     private void loginPromptReceived() {
         receiveBuffer = new StringBuilder();
         log.debug("LOGIN: prompt received");
-        // tell whoever is waiting that the login prompt has been received.
-        loginPromptLatch.countDown();
         if (currentPromise != null) {
             // Causes the onComplete to call the Callbacks.  Tell the promise that actually, the login has failed.
             // We got another login prompt.  Which is why we are in here.  So, we failed
             currentPromise.markComplete();
             currentPromise = null;
         }
-        // Tell the queue process above we are ready to begin running commands
-        // The LOGIN command is also a command, so we must allow commands so that the user can post a login command
+        // tell whoever is waiting that the login prompt has been received.
+        loginPromptLatch.countDown();
         commandPromptLatch.countDown();
     }
 
@@ -295,4 +302,13 @@ public class HomeworksProcessor {
         commandPromptLatch.countDown();
     }
 
+    public boolean isConnected() {
+        return telnetClient.isConnected();
+    }
+
+    void resetLatches() {
+        loginPromptLatch = new CountDownLatch(1);
+        readyLatch = new CountDownLatch(1);
+        commandPromptLatch = new CountDownLatch(1);
+    }
 }

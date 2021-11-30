@@ -15,7 +15,6 @@ public class LinkStatusData implements DataObject<LinkStatusData> {
 
     private String processorId;
     private String linkStatus;
-    private String error;
 
     @Override
     public LinkStatusData generate(HomeworksProcessor processor) throws InterruptedException, ExecutionException {

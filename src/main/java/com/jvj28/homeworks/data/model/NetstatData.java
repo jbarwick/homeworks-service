@@ -27,7 +27,6 @@ public class NetstatData implements DataObject<NetstatData> {
     private long errorTx;
     private long successfulRx;
     private long errorRx;
-    private String error;
 
     @Override
     public NetstatData generate(HomeworksProcessor processor) throws ExecutionException, InterruptedException {

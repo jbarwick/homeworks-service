@@ -1,7 +1,7 @@
 @echo off
 set /p VERSION=<version.txt
 call mvn versions:set -DnewVersion=%VERSION%
-call mvn clean package
+call mvn clean package install deploy
 set ORGANIZATION=jbarwick
 set NAME=homeworks-service
 docker build -t %ORGANIZATION%/%NAME%:%VERSION% -m 2GB --build-arg VERSION=%VERSION% .

@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.data.db;
 
-import com.jvj28.homeworks.data.model.UsageByMinuteEntity;
+import com.jvj28.homeworks.data.db.entity.UsageByMinuteEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

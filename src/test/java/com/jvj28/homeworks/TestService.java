@@ -1,8 +1,8 @@
 package com.jvj28.homeworks;
 
 import com.jvj28.homeworks.command.*;
-import com.jvj28.homeworks.data.model.CircuitEntity;
-import com.jvj28.homeworks.data.model.KeypadData;
+import com.jvj28.homeworks.data.db.entity.CircuitEntity;
+import com.jvj28.homeworks.data.db.entity.KeypadEntity;
 import com.jvj28.homeworks.data.model.StatusData;
 import com.jvj28.homeworks.data.Model;
 import com.jvj28.homeworks.service.HomeworksProcessor;
@@ -84,19 +84,19 @@ public class TestService {
             model.saveCircuit(zone);
             System.out.println(zone);
 
-            List<KeypadData> kpData = model.getKeypadsSeedData();
+            List<KeypadEntity> kpData = model.getKeypadsSeedData();
             assertNotNull(kpData);
             assertTrue(kpData.size() > 0);
             model.saveKeypads(kpData);
             System.out.println(kpData);
-            List<KeypadData> allkeys = model.geKeypads();
+            List<KeypadEntity> allkeys = model.geKeypads();
             allkeys.forEach(System.out::println);
 
-            KeypadData kp = kpData.stream().filter(k -> k.getId() == 2).findFirst().orElse(null);
+            KeypadEntity kp = kpData.stream().filter(k -> k.getId() == 2).findFirst().orElse(null);
             assertNotNull(kp);
             assertEquals("1:6:6", kp.getAddress());
 
-            KeypadData keypad = model.findKeypadByAddress("1:6:6");
+            KeypadEntity keypad = model.findKeypadByAddress("1:6:6");
             assertNotNull(keypad);
             model.saveKeypad(keypad);
             System.out.println(keypad);

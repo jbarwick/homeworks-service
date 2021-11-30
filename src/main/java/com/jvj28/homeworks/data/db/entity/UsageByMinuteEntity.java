@@ -1,6 +1,5 @@
-package com.jvj28.homeworks.data.model;
+package com.jvj28.homeworks.data.db.entity;
 
-import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.Column;
@@ -17,11 +16,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Objects;
 
-@Entity
-@Getter
-@Setter
-@ToString
-@RequiredArgsConstructor
+@Entity(name = "UsageByMinuteEntity")
 @Table(name = "usage_by_minute")
 public class UsageByMinuteEntity implements Serializable {
 
@@ -29,9 +24,10 @@ public class UsageByMinuteEntity implements Serializable {
     private static final long serialVersionUID = -2463817720193015011L;
 
     @Id
+    @Column(name="id", nullable = false)
     private Long id;
 
-    @Column
+    @Column(name="date", nullable = false)
     private Date date;
 
     @Column
@@ -70,6 +66,10 @@ public class UsageByMinuteEntity implements Serializable {
     @Column
     private int week;
 
+    public UsageByMinuteEntity() {
+        this(Instant.now());
+    }
+
     public UsageByMinuteEntity(Instant instant) {
         ZonedDateTime dtm = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()).truncatedTo(ChronoUnit.MINUTES);
         this.date = Date.from(dtm.toInstant());
@@ -85,6 +85,118 @@ public class UsageByMinuteEntity implements Serializable {
         year_dow_hour = String.format("%04d:%d:%02d", year, dow, hour);
         year_month_day = String.format("%04d-%02d-%02d", year, month, day);
         year_week = String.format("%04d:%02d", year, week);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public String getYear_dow() {
+        return year_dow;
+    }
+
+    public void setYear_dow(String year_dow) {
+        this.year_dow = year_dow;
+    }
+
+    public String getYear_month() {
+        return year_month;
+    }
+
+    public void setYear_month(String year_month) {
+        this.year_month = year_month;
+    }
+
+    public String getYear_dow_hour() {
+        return year_dow_hour;
+    }
+
+    public void setYear_dow_hour(String year_dow_hour) {
+        this.year_dow_hour = year_dow_hour;
+    }
+
+    public int getHour() {
+        return hour;
+    }
+
+    public void setHour(int hour) {
+        this.hour = hour;
+    }
+
+    public int getDow() {
+        return dow;
+    }
+
+    public void setDow(int dow) {
+        this.dow = dow;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getWatts() {
+        return watts;
+    }
+
+    public void setWatts(int watts) {
+        this.watts = watts;
+    }
+
+    public int getDay() {
+        return day;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
+    }
+
+    public String getYear_month_day() {
+        return year_month_day;
+    }
+
+    public void setYear_month_day(String year_month_day) {
+        this.year_month_day = year_month_day;
+    }
+
+    public String getYear_week() {
+        return year_week;
+    }
+
+    public void setYear_week(String year_week) {
+        this.year_week = year_week;
+    }
+
+    public int getWeek() {
+        return week;
+    }
+
+    public void setWeek(int week) {
+        this.week = week;
     }
 
     @Override

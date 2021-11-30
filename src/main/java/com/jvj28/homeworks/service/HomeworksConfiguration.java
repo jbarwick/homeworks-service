@@ -44,6 +44,9 @@ public class HomeworksConfiguration {
     @Value("${hw.keypads.seed:keypads.csv}")
     private String seed_keypads;
 
+    @Value("${hw.users.seed:users.csv}")
+    private String seed_users;
+
     public String getUsername() {
         return username;
     }
@@ -64,5 +67,9 @@ public class HomeworksConfiguration {
 
     public String getKeypadSeedFilename() {
         return seed_keypads;
+    }
+
+    public String getUsersSeedFilename() {
+        return seed_users;
     }
 }

@@ -8,7 +8,8 @@ public enum Metrics {
     circuit_level(CircuitLevelHandler.class),
     circuit_watts(CircuitWattsHandler.class),
     total_watts(TotalWattsHandler.class),
-    network_status(NetstatHandler.class);
+    network_status(NetstatHandler.class),
+    processor_date(SystemDateHandler.class);
 
     private final Class<? extends MetricHandler> handler;
 
