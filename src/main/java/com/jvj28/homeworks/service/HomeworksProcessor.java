@@ -47,13 +47,14 @@ public class HomeworksProcessor {
     private CountDownLatch commandPromptLatch = new CountDownLatch(1);
     private CountDownLatch readyLatch = new CountDownLatch(1);
     private CountDownLatch loginPromptLatch = new CountDownLatch(1);
+    private boolean stoppedOnPurpose = false;
 
     public HomeworksProcessor(HomeworksConfiguration config) {
         this.config = config;
     }
 
     @PostConstruct
-    public void connectToHomeworksProcessor() {
+    public void connect() {
         try {
             log.debug("Connecting to server {} on port {}", config.getConsoleHost(), config.getPort());
             telnetClient.connect(config.getConsoleHost(), config.getPort());
@@ -85,11 +86,11 @@ public class HomeworksProcessor {
     }
 
     public boolean waitForReady() throws InterruptedException {
-        return readyLatch.await(30, TimeUnit.SECONDS);
+        return readyLatch.await(60, TimeUnit.SECONDS);
     }
 
     public boolean waitForLoginPrompt() throws InterruptedException {
-        return loginPromptLatch.await(30, TimeUnit.SECONDS);
+        return loginPromptLatch.await(60, TimeUnit.SECONDS);
     }
     /**
      * This method does the following things:
@@ -311,5 +312,23 @@ public class HomeworksProcessor {
         loginPromptLatch = new CountDownLatch(1);
         readyLatch = new CountDownLatch(1);
         commandPromptLatch = new CountDownLatch(1);
+    }
+
+    public void start() {
+        if (!isConnected()) {
+            stoppedOnPurpose = false;
+            connect();
+        }
+    }
+
+    public void stop() {
+        if (isConnected()) {
+            stoppedOnPurpose = true;
+            disconnect();
+        }
+    }
+
+    public boolean isNotStoppedByOnPurpose() {
+        return !stoppedOnPurpose;
     }
 }

@@ -89,68 +89,7 @@ public class Model {
         // NOTE: these setup and configuration commands are here and not in 'processor' because
         // the Model relies on the processor, the processor does not know the model
 
-        log.debug("Performing login to processor");
-        Login loginResult = null;
-        do {
-            try {
-                log.info("Waiting for login prompt");
-                if (!processor.waitForLoginPrompt()) {
-                    log.warn("Did not receive login prompt for 30 seconds");
-                    continue;
-                }
-                loginResult = processor.sendCommand(
-                        new Login(config.getUsername(), config.getConsolePassword())).onComplete(p -> {
-                    StatusData hw = get(StatusData.class, true);
-                    hw.setLoggedIn(p.isSucceeded());
-                    save(hw);
-                }).get();
-                if (!loginResult.isSucceeded()) {
-                    log.debug("Login failed.  Retrying...");
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException("Login Process Interrupted");
-            }
-        } while (loginResult == null || !loginResult.isSucceeded());
 
-        try {
-            if (!processor.waitForReady()) {
-                log.warn("Timeout waiting for processor to become ready");
-                throw new RuntimeException("Processor did nto become ready in time");
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Interrupted while waiting for command system to become ready");
-        }
-        log.info("Model beginning initialization");
-        processor.sendCommand(PromptOn.class);
-        processor.sendCommand(ReplyOn.class);
-        processor.sendCommand(ProcessorAddress.class)
-                .onComplete(p -> {
-                    StatusData hw = get(StatusData.class, true);
-                    hw.setProcessorAddress(p.getAddress());
-                    hw.setMode(p.getMode());
-                    save(hw);
-                });
-        processor.sendCommand(OSRevision.class)
-                .onComplete(p -> {
-                    StatusData hw = get(StatusData.class, true);
-                    hw.setOsRevision(p.getRevision());
-                    hw.setProcessorId(p.getProcessorId());
-                    hw.setModel((p.getModel()));
-                    save(hw);
-                });
-        processor.sendCommand(RequestBootRevisions.class)
-                .onComplete(p -> {
-                    StatusData hw = get(StatusData.class, true);
-                    hw.setProcessorId(p.getProcessorId());
-                    hw.setBootRevision(p.getBootRevision());
-                    save(hw);
-                });
-        processor.sendCommand(RequestAllProcessorStatusInformation.class)
-                .onComplete(p -> {
-                    StatusData hw = get(StatusData.class,true);
-                    hw.setProcessorInfo(p.getProcessorInfo());
-                    save(hw);
-                });
     }
 
     /**
@@ -587,7 +526,7 @@ public class Model {
     private final MapLoader<String, UsersEntity> usersMapLoader = new MapLoader<>() {
         @Override
         public UsersEntity load(String key) {
-            return users.findByUsername(key).orElse(null);
+            return users.findByUserName(key).orElse(null);
         }
 
         @Override

@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface UsersEntityRepository extends JpaRepository<UsersEntity, UUID> {
 
-    Optional<UsersEntity> findByUsername(String username);
+    Optional<UsersEntity> findByUserName(String username);
 
     @Query("select c.uid from UsersEntity c")
     List<UUID> findAllIds();
