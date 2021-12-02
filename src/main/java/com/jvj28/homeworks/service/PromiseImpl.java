@@ -16,12 +16,16 @@ class PromiseImpl<T extends HomeworksCommand> implements Promise<T> {
 
     // Only allow a promise to run for 30 seconds.  Else, nothing will happen.  The callback will not execute.
     private static final int TIMEOUT = 30;
+    // This is the command that is sent to the processor.  It is passed to the callback function so that you
+    // can do something with it.  The HomeworksProcessor will call the parseLine and then update the processorLatch
     private final T command;
     // Used to tell other threads that all callback functions have completed
     private CountDownLatch callbackLatch = new CountDownLatch(0);
     // Used to tell this thread the process has finished the command
     private final CountDownLatch processorLatch = new CountDownLatch(1);
+
     private Thread promiseThread;
+
     private boolean cancelled;
 
     public PromiseImpl(T command) {
@@ -47,7 +51,7 @@ class PromiseImpl<T extends HomeworksCommand> implements Promise<T> {
                 }
             }
             catch (InterruptedException ignore) {
-                // Ignored
+                Thread.currentThread().interrupt();
             }
             finally {
                 promiseThread = null;

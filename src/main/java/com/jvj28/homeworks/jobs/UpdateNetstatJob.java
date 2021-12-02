@@ -32,8 +32,10 @@ public class UpdateNetstatJob extends QuartzJobBean {
         try {
             log.debug("Generating new Netstat Data");
             ns.generate(processor);
-        } catch (ExecutionException | InterruptedException e) {
-            log.warn("Could not generate data object: {}", e.getMessage());
+        } catch (ExecutionException ee) {
+            log.warn("Could not generate data object: {}", ee.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } finally {
             log.debug("Saving Network status to DB");
             model.save(ns); // Save and release the lock

@@ -21,13 +21,16 @@ public class NetstatHandler implements MetricHandler {
         log.debug("Reading Netstat Metrics");
         NetstatData netstat = model.get(NetstatData.class);
         if (netstat == null)
-            return null;
+            return Set.of(
+                new Metric("receive_error", 0),
+                new Metric("receive_success", 0),
+                new Metric("transmit_error", 0),
+                new Metric("transmit_success", 0));
         log.debug("Returning 4 metrics for Netstat: {}", netstat);
         return Set.of(
             new Metric("receive_error", netstat.getErrorRx()),
             new Metric("receive_success", netstat.getSuccessfulRx()),
             new Metric("transmit_error", netstat.getErrorTx()),
-            new Metric("transmit_success", netstat.getSuccessfulTx())
-        );
+            new Metric("transmit_success", netstat.getSuccessfulTx()));
     }
 }

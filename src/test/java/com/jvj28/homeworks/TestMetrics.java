@@ -9,6 +9,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,10 +31,9 @@ class TestMetrics {
             assertNotNull(mockMvc);
 
             System.out.println("Sleeping...");
-            Thread.sleep(10000); // Pause for startup to begin
+            TimeUnit.SECONDS.sleep(10);
             while (processor.queueIsNotEmpty())
-                //noinspection BusyWait
-                Thread.sleep(1000);
+                TimeUnit.SECONDS.sleep(1);
             System.out.println("Ready.");
 
             ResultActions result = this.mockMvc

@@ -15,6 +15,8 @@ public class Netstat extends NetstatProperties implements HomeworksCommand {
     }
 
     @Override
+    @SuppressWarnings("java:S2692") // dude, this is MY logic.  I KNOW that '0' is a valid index.
+                                    // Don't assume you know what I'm doing!
     public void parseLine(String line) {
         if (line == null || line.length() == 0)
             return;

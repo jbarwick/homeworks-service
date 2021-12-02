@@ -13,13 +13,13 @@ public class DateData implements DataObject<DateData> {
     @Serial
     private static final long serialVersionUID = -784261855573465956L;
 
-    private String dateData;
+    private String processorDate;
     private String dayOfWeek;
 
     @Override
     public DateData generate(HomeworksProcessor processor) throws InterruptedException, ExecutionException {
         processor.sendCommand(RequestSystemDate.class).onComplete(p -> {
-            setDateData(p.getDate());
+            setProcessorDate(p.getDate());
             setDayOfWeek(p.getDayOfWeek());
         }).get();
         return this;

@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.util.annotation.NonNull;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -53,23 +52,27 @@ public class HomeworksProcessor {
         this.config = config;
     }
 
-    @PostConstruct
-    public void connect() {
-        try {
-            log.debug("Connecting to server {} on port {}", config.getConsoleHost(), config.getPort());
-            telnetClient.connect(config.getConsoleHost(), config.getPort());
-            log.debug("Connected");
-        } catch (SocketException se) {
-            log.error("Cannot create TPC connection");
-        } catch (Exception e) {
-            log.error(e.getMessage());
+    private boolean connect() {
+        if (!isConnected()) {
+            try {
+                log.debug("Connecting to server {} on port {}", config.getConsoleHost(), config.getPort());
+                telnetClient.connect(config.getConsoleHost(), config.getPort());
+                log.debug("Connected");
+                startPromiseQueueProcessor();
+                startDataReceiverProcessor();
+
+            } catch (SocketException se) {
+                log.error("Cannot create TPC connection");
+                return false;
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                return false;
+            }
         }
-        startPromiseQueueProcessor();
-        startDataReceiverProcessor();
+        return true;
     }
 
-    @PreDestroy
-    public void disconnect() {
+    void disconnect() {
         try {
             resetLatches();
             log.debug("Disconnecting from server");
@@ -92,6 +95,7 @@ public class HomeworksProcessor {
     public boolean waitForLoginPrompt() throws InterruptedException {
         return loginPromptLatch.await(60, TimeUnit.SECONDS);
     }
+
     /**
      * This method does the following things:
      * 1) Uses a #CountDownLatch to wait for a command prompt before it sends the command.
@@ -101,30 +105,23 @@ public class HomeworksProcessor {
      */
     private void startPromiseQueueProcessor() throws IllegalStateException {
 
-        if (queueProcessorThread != null) {
-            throw new IllegalStateException("Queue processor already started");
-        }
+        if (queueProcessorThread != null)
+            return;
 
         queueProcessorThread = new Thread(() -> {
             log.debug("Started Queue Processor");
-            try {
-                while (telnetClient.isConnected()) {
+            while (isNotStoppedByOnPurpose()) {
+                try {
                     // Wait for command prompt
-                    if (waitForCommandPrompt()) {
+                    if (waitForCommandPrompt()) { // This may timeout.  But if it does, just keep waiting
                         Promise<? extends HomeworksCommand> command = queue.take();
                         if (!sendCommandToProcessor(command))
                             queue.put(command);
                     }
+                } catch (InterruptedException e) {
+                    log.warn("Queue processor interrupted. Stopping.");
+                    Thread.currentThread().interrupt();
                 }
-            } catch (InterruptedException e) {
-                log.warn("Queue processor interrupted. Stopping.");
-            } finally {
-                try {
-                    telnetClient.disconnect(); // make sure.  No error if already disconnected
-                } catch (IOException e) {
-                    log.warn("Error disconnecting from processor: {}", e.getMessage());
-                }
-                queueProcessorThread = null;
             }
             log.debug("Queue Processor stopped");
         });
@@ -133,7 +130,7 @@ public class HomeworksProcessor {
         queueProcessorThread.start();
     }
 
-    private boolean sendCommandToProcessor(@NonNull Promise<? extends HomeworksCommand> promise) throws InterruptedException {
+    private boolean sendCommandToProcessor(@NonNull Promise<? extends HomeworksCommand> promise) {
 
         try {
             // Reset the latch because we cannot send another command until a command prompt has been received
@@ -160,16 +157,15 @@ public class HomeworksProcessor {
             output.flush();
             return true;
         } catch (IOException e) {
-           log.warn(e.getMessage());
+            log.warn(e.getMessage());
             return false;
         }
     }
 
     private void startDataReceiverProcessor() throws IllegalStateException {
 
-        if (dataReceiverThread != null) {
-            throw new IllegalStateException("Data receiver already started");
-        }
+        if (dataReceiverThread != null)
+            return;
 
         dataReceiverThread = new Thread(() -> {
             log.debug("Data reader started");
@@ -179,11 +175,13 @@ public class HomeworksProcessor {
                     ch = telnetClient.getInputStream().read();
                     appendToReceiveBuffer((char) ch);
                 } catch (IOException e) {
-                    ch = -1;
+                    try {
+                        TimeUnit.SECONDS.sleep(3);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
-            } while (ch >= 0 && telnetClient.isConnected());
-            if (!telnetClient.isConnected())
-                log.debug("Telnet Client disconnected");
+            } while (isNotStoppedByOnPurpose());
             log.debug("Data reader stopped");
         });
         dataReceiverThread.setName("Data Receiver");
@@ -236,15 +234,13 @@ public class HomeworksProcessor {
         }
     }
 
-    @SuppressWarnings("java:S2142") // InterruptedException problem.
     public <S extends HomeworksCommand> Promise<S> sendCommand(Class<S> clazz) {
         try {
             return sendCommand(clazz.getConstructor().newInstance());
         } catch (InstantiationException | IllegalAccessException |
                 InvocationTargetException | NoSuchMethodException ignored) {
-            // Ignored
+            return null;
         }
-        return null;
     }
 
     public <S extends HomeworksCommand> Promise<S> sendCommand(S command) {
@@ -308,7 +304,7 @@ public class HomeworksProcessor {
         return telnetClient.isConnected();
     }
 
-    void resetLatches() {
+    private void resetLatches() {
         loginPromptLatch = new CountDownLatch(1);
         readyLatch = new CountDownLatch(1);
         commandPromptLatch = new CountDownLatch(1);
@@ -321,6 +317,7 @@ public class HomeworksProcessor {
         }
     }
 
+    @PreDestroy
     public void stop() {
         if (isConnected()) {
             stoppedOnPurpose = true;

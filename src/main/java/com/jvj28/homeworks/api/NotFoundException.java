@@ -1,19 +1,25 @@
 package com.jvj28.homeworks.api;
 
-public class NotFoundException extends RuntimeException {
+import java.io.Serial;
+import java.io.Serializable;
 
-    private final Object obj;
+public class NotFoundException extends RuntimeException implements Serializable {
 
-    public NotFoundException(Object obj, String message) {
+    @Serial
+    private static final long serialVersionUID = -7914273648161723765L;
+
+    private final Serializable obj;
+
+    public NotFoundException(Serializable obj, String message) {
         super(message);
         this.obj = obj;
     }
 
-    public NotFoundException(Object obj) {
+    public NotFoundException(Serializable obj) {
         this.obj = obj;
     }
 
-    public Object getObject() {
+    public Serializable getObject() {
         return obj;
     }
 }

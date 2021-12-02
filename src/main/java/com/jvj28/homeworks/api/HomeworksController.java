@@ -94,7 +94,7 @@ public class HomeworksController {
         } else {
             CircuitEntity zone = model.findCircuitByAddress(address);
             if (zone == null)
-                throw new NotFoundException(List.of(new CircuitEntity()), String.format("Circuit [%s] not found", address));
+                throw new NotFoundException(new CircuitEntity(), String.format("Circuit [%s] not found", address));
             return List.of(zone);
         }
     }

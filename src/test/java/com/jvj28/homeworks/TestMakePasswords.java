@@ -2,16 +2,12 @@ package com.jvj28.homeworks;
 
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-import org.jasypt.encryption.pbe.config.PBEConfig;
-import org.jasypt.encryption.pbe.config.SimplePBEConfig;
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
-import org.jasypt.util.text.BasicTextEncryptor;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class MakePasswords {
+class TestMakePasswords {
 
     @Test
     void testMakePasswords() {

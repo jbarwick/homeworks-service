@@ -1,8 +1,8 @@
 package com.jvj28.homeworks;
 
 import com.google.gson.Gson;
-import com.jvj28.homeworks.command.OSRevision;
 import com.jvj28.homeworks.command.Login;
+import com.jvj28.homeworks.command.OSRevision;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

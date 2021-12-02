@@ -1,10 +1,13 @@
 package com.jvj28.homeworks;
 
-import com.jvj28.homeworks.command.*;
+import com.jvj28.homeworks.command.Netstat;
+import com.jvj28.homeworks.command.RequestSystemDate;
+import com.jvj28.homeworks.command.RequestSystemTime;
+import com.jvj28.homeworks.command.RequestZoneLevel;
+import com.jvj28.homeworks.data.Model;
 import com.jvj28.homeworks.data.db.entity.CircuitEntity;
 import com.jvj28.homeworks.data.db.entity.KeypadEntity;
 import com.jvj28.homeworks.data.model.StatusData;
-import com.jvj28.homeworks.data.Model;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import com.jvj28.homeworks.util.Promise;
 import org.junit.jupiter.api.Test;
@@ -13,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,7 +41,7 @@ class TestService {
 
             while (processor.queueIsNotEmpty())
                 //noinspection BusyWait
-                Thread.sleep(1000);
+                TimeUnit.SECONDS.sleep(1);
             assertNotNull(rd.getCommand().getDate());
             System.out.println("Processor date = " + rd.getCommand().getDate());
 
@@ -56,7 +60,7 @@ class TestService {
 
         try {
             System.out.println("Letting the system warm up");
-            Thread.sleep(10000); // Let the system warm up
+            TimeUnit.SECONDS.sleep(10); // Let the system warm up
 
             System.out.println("Getting Zone Details for Test");
             CircuitEntity zone = model.findCircuitByAddress("01:05:05:01");
@@ -71,7 +75,7 @@ class TestService {
             System.out.println("Waiting for all commands to complete");
             while (processor.queueIsNotEmpty())
                 //noinspection BusyWait
-                Thread.sleep(1000);
+                TimeUnit.SECONDS.sleep(1);
             System.out.println("Done Waiting!");
 
             List<CircuitEntity> alldata = model.getCircuits();

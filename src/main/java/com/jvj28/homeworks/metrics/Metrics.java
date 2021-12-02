@@ -3,6 +3,7 @@ package com.jvj28.homeworks.metrics;
 import java.lang.reflect.InvocationTargetException;
 import java.util.stream.Stream;
 
+@SuppressWarnings("java:S115")
 public enum Metrics {
 
     circuit_level(CircuitLevelHandler.class),

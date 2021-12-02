@@ -1,5 +1,7 @@
 package com.jvj28.homeworks.service;
 
+import com.jvj28.homeworks.data.db.UsersEntityRepository;
+import com.jvj28.homeworks.data.db.entity.UsersEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,22 +11,29 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
 public class ApiUserDetailsService implements UserDetailsService {
 
+    private final UsersEntityRepository users;
+
+    public ApiUserDetailsService(UsersEntityRepository users) {
+        this.users = users;
+    }
+
     public boolean authenticate(String username, String password) {
-        return true;
+        return users.findByUserName(username).map(usersEntity -> usersEntity.getUserPass().equals(password)).orElse(false);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if ("service".equals(username)) {
-            Collection<? extends GrantedAuthority> authorities = new ArrayList<>();
-            return new User("service", "$2a$10$slYQmyNdGzTn7ZLBXBChFOC9f6kFjAqPhccnP6DxlWXx2lPk1C3G6",
-                    authorities);
+        Collection<? extends GrantedAuthority> authorities = new ArrayList<>();
+        Optional<UsersEntity> u = users.findByUserName(username);
+        if (u.isPresent()) {
+            return new User(username, u.get().getUserPass(), authorities);
         } else {
-            throw new UsernameNotFoundException("User not found with username: " + username);
+            throw new UsernameNotFoundException(String.format("User [%s] not found", username));
         }
     }
 }

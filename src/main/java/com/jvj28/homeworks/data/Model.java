@@ -1,10 +1,8 @@
 package com.jvj28.homeworks.data;
 
-import com.jvj28.homeworks.command.*;
 import com.jvj28.homeworks.data.db.*;
 import com.jvj28.homeworks.data.db.entity.*;
 import com.jvj28.homeworks.data.model.DataObject;
-import com.jvj28.homeworks.data.model.StatusData;
 import com.jvj28.homeworks.service.HomeworksConfiguration;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import com.opencsv.bean.CsvToBean;
@@ -20,9 +18,11 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.FileReader;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -160,7 +160,7 @@ public class Model {
                 rlock.lockInterruptibly(30, TimeUnit.SECONDS);
                 log.debug("Lock acquired: {}", rlock.getName());
             } catch (InterruptedException e) {
-                throw new RecordLockException(e);
+                Thread.currentThread().interrupt();
             }
         }
         RBucket<S> bucket = redis.getBucket(rkey);
@@ -178,9 +178,14 @@ public class Model {
         try {
             S result = clazz.getConstructor().newInstance();
             return result.generate(processor);
-        } catch (Exception ignored) {
-            return null;
+        } catch (ExecutionException | InvocationTargetException |
+                InstantiationException | IllegalAccessException |
+                NoSuchMethodException | TimeoutException e) {
+            log.error("Could not create data object {}", e.getMessage());
+        } catch (InterruptedException ignore) {
+            Thread.currentThread().interrupt();
         }
+        return null;
     }
 
     public int getCurrentUsage() {

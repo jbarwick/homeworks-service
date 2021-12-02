@@ -55,8 +55,11 @@ public class AutomationService {
                 JobDetail netstatUpdater = getJobDetail(UpdateNetstatJob.class);
                 scheduler.scheduleJob(netstatUpdater, buildJobTrigger(netstatUpdater, 1, 21));
 
-            } catch (SchedulerException | InterruptedException e) {
+            } catch (SchedulerException se) {
+                log.error("Something happened to the scheduler: {}", se.getMessage());
+            } catch (InterruptedException e) {
                 log.error(e.getMessage());
+                Thread.currentThread().interrupt();
             }
         });
     }
@@ -71,15 +74,15 @@ public class AutomationService {
                 .build();
     }
 
-    private Trigger buildJobTrigger(JobDetail jobDetail, int repeat_every_minutes, int delay_seconds) {
-        Instant instant = ZonedDateTime.now().plusSeconds(delay_seconds).toInstant();
+    private Trigger buildJobTrigger(JobDetail jobDetail, int repeatEveryMinutes, int delaySeconds) {
+        Instant instant = ZonedDateTime.now().plusSeconds(delaySeconds).toInstant();
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
                 .withIdentity(jobDetail.getKey().getName(), "hw-triggers")
                 .withDescription(jobDetail.getDescription())
                 .startAt(Date.from(instant))
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInMinutes(repeat_every_minutes)
+                        .withIntervalInMinutes(repeatEveryMinutes)
                         .repeatForever())
                 .build();
     }
