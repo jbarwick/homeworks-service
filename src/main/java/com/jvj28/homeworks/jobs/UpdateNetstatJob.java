@@ -27,18 +27,18 @@ public class UpdateNetstatJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(@NonNull JobExecutionContext context) {
+        Thread.currentThread().setName("Refresh Netstat");
         log.debug("Scheduler Update Network Status (with forUpdate)");
         NetstatData ns = model.get(NetstatData.class, true);
         try {
+            processor.waitForReady();
             log.debug("Generating new Netstat Data");
             ns.generate(processor);
+            model.save(ns); // Save and release the lock
         } catch (ExecutionException ee) {
             log.warn("Could not generate data object: {}", ee.getMessage());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        } finally {
-            log.debug("Saving Network status to DB");
-            model.save(ns); // Save and release the lock
         }
     }
 }

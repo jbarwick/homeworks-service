@@ -230,7 +230,6 @@ public class HomeworksProcessor {
         if (command.isSucceeded()) {
             log.debug("Login process succeeded.");
             loginPromptLatch = new CountDownLatch(1); // if we want to wait on another login prompt (such as after logout)
-            readyLatch.countDown(); // tell whoever is waiting that we succeeded with the login
         }
     }
 
@@ -297,6 +296,7 @@ public class HomeworksProcessor {
             currentPromise = null;
         }
         // Can continue processing the Promise Queue.  So clear the latch.
+        readyLatch.countDown(); // tell whoever is waiting that we succeeded with the login
         commandPromptLatch.countDown();
     }
 

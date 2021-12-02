@@ -25,6 +25,7 @@ public class MetricsController {
     @ResponseBody
     @GetMapping(value = "/metrics", produces = {MediaType.TEXT_PLAIN_VALUE} )
     public String getMetrics() {
+        Thread.currentThread().setName("/metrics");
         log.debug("/metrics: Collecting metrics and sending");
         return service.collect().toString();
     }

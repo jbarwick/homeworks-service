@@ -2,7 +2,12 @@ package com.jvj28.homeworks.command;
 
 import com.jvj28.homeworks.util.NetstatProperties;
 
+import java.io.Serial;
+
 public class Netstat extends NetstatProperties implements HomeworksCommand {
+
+    @Serial
+    private static final long serialVersionUID = -1797885115219317364L;
 
     @Override
     public String getName() {

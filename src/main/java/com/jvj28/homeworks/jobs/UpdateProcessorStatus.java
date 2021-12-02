@@ -22,6 +22,7 @@ public class UpdateProcessorStatus extends QuartzJobBean {
 
     @Override
     protected void executeInternal(@NonNull JobExecutionContext context) {
+        Thread.currentThread().setName("Refresh Status");
 
         this.processor.sendCommand(RequestAllProcessorStatusInformation.class).onComplete(status ->
                 log.debug("Processor info: {}",status.getProcessorInfo())

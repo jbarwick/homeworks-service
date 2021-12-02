@@ -31,21 +31,25 @@ public class RefreshDimmerValuesJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(@NonNull JobExecutionContext jobExecutionContext) {
-
-        log.debug("Dimmer refresh job execute");
-
-        dimmerMonitor.setEnabled(false);
-        model.getCircuits().forEach(circuit -> processor.sendCommand(
-                new RequestZoneLevel(circuit.getAddress())).onComplete(request -> {
-                    CircuitEntity c = model.findCircuitByAddress(request.getAddress());
-                    if (c != null) {
-                        c.setLevel(request.getLevel());
-                        model.saveCircuit(c);
-                        log.debug("Circuit [{}] at {}%", request.getAddress(), request.getLevel());
+        Thread.currentThread().setName("Refresh Dimmers");
+        try {
+            processor.waitForReady();
+            log.debug("Dimmer refresh job execute");
+            dimmerMonitor.setEnabled(false);
+            model.getCircuits().forEach(circuit -> processor.sendCommand(
+                    new RequestZoneLevel(circuit.getAddress())).onComplete(request -> {
+                        CircuitEntity c = model.findCircuitByAddress(request.getAddress());
+                        if (c != null) {
+                            c.setLevel(request.getLevel());
+                            model.saveCircuit(c);
+                            log.debug("Circuit [{}] at {}%", request.getAddress(), request.getLevel());
+                        }
                     }
-                }
-        ));
-        // This is not synchronous.  It simply adds the command to the command queue
-        dimmerMonitor.setEnabled(true);
+            ));
+            // This is not synchronous.  It simply adds the command to the command queue
+            dimmerMonitor.setEnabled(true);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

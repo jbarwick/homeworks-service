@@ -24,6 +24,7 @@ public class SaveDimmerValuesJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(@NonNull JobExecutionContext jobExecutionContext) {
+        Thread.currentThread().setName("Save Usage");
         log.debug("Save Watts to Db Job Started");
         int watts = model.getCurrentUsage();
         UsageByMinuteEntity usage = new UsageByMinuteEntity(Instant.now());

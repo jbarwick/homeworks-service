@@ -50,6 +50,7 @@ public class HomeworksConnectionMonitor {
                 } catch (InterruptedException e) {
                     log.error(e.getMessage()); // we are probably terminating
                     Thread.currentThread().interrupt();
+                    return;
                 }
                 // We do this loop infinitely.
             } while (processor.isNotStoppedByOnPurpose());

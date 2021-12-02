@@ -118,7 +118,7 @@ public class Model {
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Saving entity with id: {}", rkey);
-                log.debug(entity.toString());
+                log.debug("Saving {}", entity);
             }
             RBucket<DataObject<E>> bucket = redis.getBucket(rkey);
             bucket.set(entity);
@@ -126,7 +126,7 @@ public class Model {
             // This should have been locked in the "find forUpdate" function.
             if (rlock.isLocked()) {
                 rlock.unlock();
-                log.debug("Lock released: {}", rlock.getName());
+                log.debug("WriteLock released: {}", rlock.getName());
             }
         }
     }
@@ -148,30 +148,32 @@ public class Model {
     @SuppressWarnings({"java:S2629","java:S2222"})  // Why?  Because we have a LONG wait for this lock and will be unlocked in "save"
     public <S extends DataObject<S>> S get(Class<S> clazz, boolean forUpdate) {
 
+        S object = null;
+
         String rkey = clazz.getName();
-        if (log.isDebugEnabled()) {
-            log.debug("Getting data with id: {}{}", rkey, forUpdate ? " (for update)" : "");
-        }
-        RLock rlock = redis.getLock(rkey + "Lock");
-        // Lock the record if we are going to be doing updates.  This prevents another thread from updating or
-        // reading it while we are trying to update.
-        if (forUpdate) {
-            try {
-                rlock.lockInterruptibly(30, TimeUnit.SECONDS);
-                log.debug("Lock acquired: {}", rlock.getName());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+        try {
+            RLock rlock = redis.getLock(rkey + "Lock");
+            rlock.lockInterruptibly(30, TimeUnit.SECONDS);
+            log.debug("Lock acquired for 30 seconds: {}", rlock.getName());
+            log.debug("Getting data with id: {}", rkey);
+            RBucket<S> bucket = redis.getBucket(rkey);
+            object = bucket.get();
+            log.debug("Read Object: {}", object);
+            if (!forUpdate) {
+                rlock.unlock(); // release the lock if we ar not updating.  Else do that in the "save" command
+                log.debug("ReadLock released: {}", rlock.getName());
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
-        RBucket<S> bucket = redis.getBucket(rkey);
-        log.debug("Bucket {} remain TTL: {}", rkey, bucket.remainTimeToLive());
-        S object = bucket.get();
+
         if (object == null) {
             log.debug("Object [{}] not found in REDIS.  Regenerating...", rkey);
             return generate(clazz);
         }
-        else
+        else {
             return object;
+        }
     }
 
     private <S extends DataObject<S>> S generate(Class<S> clazz) {
