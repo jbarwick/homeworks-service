@@ -1,14 +1,15 @@
 package com.jvj28.homeworks.service;
 
 import com.jvj28.homeworks.command.*;
-import com.jvj28.homeworks.data.Model;
-import com.jvj28.homeworks.data.model.StatusData;
+import com.jvj28.homeworks.model.Model;
+import com.jvj28.homeworks.model.data.StatusData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,26 +43,43 @@ public class HomeworksConnectionMonitor {
         log.debug("Starting connection monitor");
         asyncExecutor.execute(() -> {
             Thread.currentThread().setName(CONNECTION_MONITOR_THREAD);
-            do {
-                try {
-                    attemptConnection();
-                    attemptLogin();
-                    attemptKeepAlive();
-                } catch (InterruptedException e) {
-                    log.error(e.getMessage()); // we are probably terminating
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-                // We do this loop infinitely.
-            } while (processor.isNotStoppedByOnPurpose());
+            try {
+                runConnectionMonitorSteps();
+            } catch (InterruptedException e) {
+                log.warn("Monitor Thread Interrupted");
+                Thread.currentThread().interrupt();
+            }
         });
+    }
+
+    private void runConnectionMonitorSteps() throws InterruptedException {
+        while (processor.isNotStoppedByOnPurpose()) {
+            try {
+                attemptConnection();
+                attemptLogin();
+                attemptKeepAlive();
+            } catch (IOException e) {
+                log.error("Monitor Exception: {}", e.getMessage());
+            }
+            attemptDisconnect();
+            TimeUnit.SECONDS.sleep(5);
+        }
+    }
+
+    private void attemptDisconnect() {
+        try {
+            log.error("Closing Connection and retrying");
+            processor.disconnect();
+        } catch (IOException e) {
+            log.warn("Error during disconnect: {}", e.getMessage());
+        }
     }
 
     /**
      * Run a loop checking to see if the processor Telnet service is still connected.
      * If not, then let's reset the system, exit, and the loop above will attempt to reconnect
      */
-    private void attemptKeepAlive() throws InterruptedException {
+    private void attemptKeepAlive() throws InterruptedException, IOException {
         while (processor.isConnected()) {
             try {
                 TimeUnit.SECONDS.sleep(DELAY);
@@ -82,13 +100,17 @@ public class HomeworksConnectionMonitor {
                 processor.disconnect(); // remove this?
             }
         }
+        if (!processor.isNotStoppedByOnPurpose())
+            throw new IOException("Login process exiting due to disconnect");
     }
 
-    private void attemptLogin() throws InterruptedException {
+    private void attemptLogin() throws InterruptedException, IOException {
 
         // Tell the processor object to connect
         Login loginResult = null;
         do {
+            if (!processor.isConnected())
+                throw new IOException("Login process exiting due to disconnect");
             try {
                 log.info("Waiting for login prompt");
                 if (!processor.waitForLoginPrompt()) {
@@ -108,7 +130,7 @@ public class HomeworksConnectionMonitor {
             } catch (ExecutionException e) {
                 log.debug("Retrying login {}", e.getMessage());
             }
-        } while ((loginResult == null) || !loginResult.isSucceeded());
+        } while (processor.isConnected() && ((loginResult == null) || !loginResult.isSucceeded()));
 
         log.info("Model beginning initialization");
         processor.sendCommand(PromptOn.class);
@@ -144,7 +166,8 @@ public class HomeworksConnectionMonitor {
 
     }
 
-    private void attemptConnection()  {
+    private void attemptConnection() throws IOException {
+        log.debug("Connecting to and Starting processor");
         processor.start();
     }
 }

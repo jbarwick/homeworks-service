@@ -1,7 +1,7 @@
 package com.jvj28.homeworks.service;
 
-import com.jvj28.homeworks.data.db.UsersEntityRepository;
-import com.jvj28.homeworks.data.db.entity.UsersEntity;
+import com.jvj28.homeworks.model.db.UsersEntityRepository;
+import com.jvj28.homeworks.model.db.entity.UsersEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

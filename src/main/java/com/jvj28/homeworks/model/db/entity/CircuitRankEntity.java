@@ -1,4 +1,4 @@
-package com.jvj28.homeworks.data.db.entity;
+package com.jvj28.homeworks.model.db.entity;
 
 import org.hibernate.Hibernate;
 

@@ -1,4 +1,4 @@
-package com.jvj28.homeworks.data.db.entity;
+package com.jvj28.homeworks.model.db.entity;
 
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Immutable;
@@ -13,25 +13,29 @@ import java.util.Date;
 import java.util.Objects;
 
 @Immutable
-@Entity(name = "UsageByHourEntity")
-@Table(name = "watts_by_hour")
-public class UsageByHourEntity implements Serializable {
+@Entity(name = "UsageByDayEntity")
+@Table(name = "watts_by_day")
+public class UsageByDayEntity implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = -6747807612111577660L;
+    private static final long serialVersionUID = 2553304008926973911L;
 
     @Id
+    @Column(name="date", nullable = false)
     private java.util.Date date;
 
-    @Column
+    @Column(name="day", nullable = false)
+    private String day;
+
+    @Column(name="watts")
     private int watts;
 
     public Date getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public String getDay() {
+        return day;
     }
 
     public int getWatts() {
@@ -42,7 +46,7 @@ public class UsageByHourEntity implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        UsageByHourEntity that = (UsageByHourEntity) o;
+        UsageByDayEntity that = (UsageByDayEntity) o;
         return date != null && Objects.equals(date, that.date);
     }
 

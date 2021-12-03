@@ -1,4 +1,4 @@
-package com.jvj28.homeworks.data.model;
+package com.jvj28.homeworks.model.data;
 
 import com.jvj28.homeworks.command.RequestLinkShortStatus;
 import com.jvj28.homeworks.service.HomeworksProcessor;

@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.metrics;
 
-import com.jvj28.homeworks.data.Model;
+import com.jvj28.homeworks.model.Model;
 
 import java.util.Set;
 

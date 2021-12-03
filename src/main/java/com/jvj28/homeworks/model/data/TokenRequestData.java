@@ -1,4 +1,4 @@
-package com.jvj28.homeworks.data.model;
+package com.jvj28.homeworks.model.data;
 
 import lombok.Data;
 

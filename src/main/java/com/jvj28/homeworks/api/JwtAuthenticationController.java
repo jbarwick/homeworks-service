@@ -1,8 +1,8 @@
 package com.jvj28.homeworks.api;
 
 import com.jvj28.homeworks.components.JwtTokenUtil;
-import com.jvj28.homeworks.data.model.TokenData;
-import com.jvj28.homeworks.data.model.TokenRequestData;
+import com.jvj28.homeworks.model.data.TokenData;
+import com.jvj28.homeworks.model.data.TokenRequestData;
 import com.jvj28.homeworks.service.ApiUserDetailsService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -34,6 +34,7 @@ public class JwtAuthenticationController {
 
     @PostMapping(value = "/authenticate")
     public TokenData createAuthenticationToken(@RequestBody TokenRequestData authenticationRequest) {
+        Thread.currentThread().setName("/authenticate");
 
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 

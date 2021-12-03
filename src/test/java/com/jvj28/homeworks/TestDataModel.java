@@ -2,8 +2,8 @@ package com.jvj28.homeworks;
 
 import com.jvj28.homeworks.command.Netstat;
 import com.jvj28.homeworks.command.RequestZoneLevel;
-import com.jvj28.homeworks.data.Model;
-import com.jvj28.homeworks.data.db.entity.CircuitEntity;
+import com.jvj28.homeworks.model.Model;
+import com.jvj28.homeworks.model.db.entity.CircuitEntity;
 import com.jvj28.homeworks.service.HomeworksConfiguration;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import org.junit.jupiter.api.Test;

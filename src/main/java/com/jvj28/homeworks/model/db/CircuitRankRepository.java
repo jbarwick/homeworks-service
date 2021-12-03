@@ -1,6 +1,6 @@
-package com.jvj28.homeworks.data.db;
+package com.jvj28.homeworks.model.db;
 
-import com.jvj28.homeworks.data.db.entity.CircuitRankEntity;
+import com.jvj28.homeworks.model.db.entity.CircuitRankEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

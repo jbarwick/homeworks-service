@@ -1,7 +1,7 @@
 package com.jvj28.homeworks.metrics;
 
-import com.jvj28.homeworks.data.Model;
-import com.jvj28.homeworks.data.model.NetstatData;
+import com.jvj28.homeworks.model.Model;
+import com.jvj28.homeworks.model.data.NetstatData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

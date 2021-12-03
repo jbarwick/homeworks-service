@@ -1,13 +1,13 @@
 package com.jvj28.homeworks.api;
 
-import com.jvj28.homeworks.data.Model;
-import com.jvj28.homeworks.data.db.UsageByDayRepository;
-import com.jvj28.homeworks.data.db.UsageByHourRepository;
-import com.jvj28.homeworks.data.db.UsageByMinuteRepository;
-import com.jvj28.homeworks.data.db.entity.*;
-import com.jvj28.homeworks.data.model.LinkStatusData;
-import com.jvj28.homeworks.data.model.NetstatData;
-import com.jvj28.homeworks.data.model.StatusData;
+import com.jvj28.homeworks.model.Model;
+import com.jvj28.homeworks.model.data.LinkStatusData;
+import com.jvj28.homeworks.model.data.NetstatData;
+import com.jvj28.homeworks.model.data.StatusData;
+import com.jvj28.homeworks.model.db.UsageByDayRepository;
+import com.jvj28.homeworks.model.db.UsageByHourRepository;
+import com.jvj28.homeworks.model.db.UsageByMinuteRepository;
+import com.jvj28.homeworks.model.db.entity.*;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,11 +41,13 @@ public class HomeworksController {
 
     @GetMapping("/help")
     public HelpResponse getHelp() {
+        Thread.currentThread().setName("/help");
         return new HelpResponse();
     }
 
     @GetMapping("/status")
     public StatusData getStatus() {
+        Thread.currentThread().setName("/status");
         StatusData result = model.get(StatusData.class);
         if (result == null)
             throw new NotFoundException(new StatusData());
@@ -54,6 +56,7 @@ public class HomeworksController {
 
     @GetMapping("/netstat")
     public NetstatData getNetstat() {
+        Thread.currentThread().setName("/netstat");
         NetstatData result = model.get(NetstatData.class);
         if (result == null)
             throw new NotFoundException(new NetstatData());
@@ -62,6 +65,7 @@ public class HomeworksController {
 
     @GetMapping("/linkstatus")
     public LinkStatusData getLinkStatus() {
+        Thread.currentThread().setName("/linkstatus");
         LinkStatusData result = model.get(LinkStatusData.class);
         if (result == null)
             throw new NotFoundException(new LinkStatusData());
@@ -72,6 +76,7 @@ public class HomeworksController {
     public List<UsageByDayEntity> getUsageByDay(
             @RequestParam(name = "start", required = false, defaultValue = "-7d") String start,
             @RequestParam(name = "end", required = false, defaultValue = "0d") String end) {
+        Thread.currentThread().setName("/usagebyday");
         Date startDate = convertToDate(start);
         Date endDate = convertToDate(end);
         return usageByDay.findUsageBetweenDate(startDate, endDate);
@@ -79,6 +84,7 @@ public class HomeworksController {
     
     @GetMapping("/circuits")
     public List<CircuitEntity> getCircuits(@RequestParam(name = "address", required = false) String address) {
+        Thread.currentThread().setName("/circuits");
         if (Strings.isBlank(address)) {
             List<CircuitEntity> data = model.getCircuits();
             if (data == null)
@@ -103,6 +109,7 @@ public class HomeworksController {
     public List<UsageByHourEntity> getUsageByHour(
             @RequestParam(name = "start", required = false, defaultValue = "-24h") String start,
             @RequestParam(name = "end", required = false, defaultValue = "0h") String end) {
+        Thread.currentThread().setName("/usagebyhour");
         Date startDate = convertToDate(start);
         Date endDate = convertToDate(end);
         return usageByHour.findUsageBetweenDate(startDate, endDate);
@@ -112,6 +119,7 @@ public class HomeworksController {
     public List<UsageByMinuteEntity> getUsageByMinute(
             @RequestParam(name = "start", required = false, defaultValue = "-1h") String start,
             @RequestParam(name = "end", required = false, defaultValue = "0h") String end) {
+        Thread.currentThread().setName("/usagebyminute");
         Date startDate = convertToDate(start);
         Date endDate = convertToDate(end);
         return usageByMinute.findUsageBetweenDate(startDate, endDate);
@@ -119,6 +127,7 @@ public class HomeworksController {
 
     @GetMapping("/usage")
     public TotalUsage getUsage() {
+        Thread.currentThread().setName("/usage");
         TotalUsage usage = new TotalUsage();
         usage.setWatts(model.getCurrentUsage());
         return usage;

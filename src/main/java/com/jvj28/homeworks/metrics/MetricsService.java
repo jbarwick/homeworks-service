@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.metrics;
 
-import com.jvj28.homeworks.data.Model;
+import com.jvj28.homeworks.model.Model;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

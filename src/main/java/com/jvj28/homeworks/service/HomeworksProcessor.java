@@ -9,11 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.util.annotation.NonNull;
 
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -52,35 +50,23 @@ public class HomeworksProcessor {
         this.config = config;
     }
 
-    private boolean connect() {
+    private void connect() throws IOException {
         if (!isConnected()) {
-            try {
-                log.debug("Connecting to server {} on port {}", config.getConsoleHost(), config.getPort());
-                telnetClient.connect(config.getConsoleHost(), config.getPort());
-                log.debug("Connected");
-                startPromiseQueueProcessor();
-                startDataReceiverProcessor();
-
-            } catch (SocketException se) {
-                log.error("Cannot create TPC connection");
-                return false;
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                return false;
-            }
+            log.debug("Connecting to server {} on port {}", config.getConsoleHost(), config.getPort());
+            telnetClient.connect(config.getConsoleHost(), config.getPort());
+            log.debug("Connected");
+            startPromiseQueueProcessor();
+            startDataReceiverProcessor();
         }
-        return true;
     }
 
-    void disconnect() {
-        try {
+    void disconnect() throws IOException {
+        if (isConnected()) {
             resetLatches();
             log.debug("Disconnecting from server");
             queue.clear();
             telnetClient.disconnect();
             log.debug("Disconnected");
-        } catch (IOException e) {
-            log.error("Disconnect Error: {}", e.getMessage());
         }
     }
 
@@ -305,24 +291,20 @@ public class HomeworksProcessor {
     }
 
     private void resetLatches() {
+
         loginPromptLatch = new CountDownLatch(1);
         readyLatch = new CountDownLatch(1);
         commandPromptLatch = new CountDownLatch(1);
     }
 
-    public void start() {
-        if (!isConnected()) {
-            stoppedOnPurpose = false;
-            connect();
-        }
+    public void start() throws IOException {
+        stoppedOnPurpose = false;
+        connect();
     }
 
-    @PreDestroy
-    public void stop() {
-        if (isConnected()) {
-            stoppedOnPurpose = true;
-            disconnect();
-        }
+    public void stop() throws IOException {
+        stoppedOnPurpose = true;
+        disconnect();
     }
 
     public boolean isNotStoppedByOnPurpose() {

@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.api;
 
-import com.jvj28.homeworks.data.RecordLockException;
+import com.jvj28.homeworks.model.LockException;
 import lombok.NonNull;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
@@ -48,9 +48,9 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(RecordLockException.class)
+    @ExceptionHandler(LockException.class)
     public ResponseEntity<Object> handleCityNotFoundException(
-            RecordLockException ex, WebRequest request) {
+            LockException ex, WebRequest request) {
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put(TIMESTAMP, LocalDateTime.now());

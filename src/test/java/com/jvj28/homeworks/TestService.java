@@ -4,10 +4,10 @@ import com.jvj28.homeworks.command.Netstat;
 import com.jvj28.homeworks.command.RequestSystemDate;
 import com.jvj28.homeworks.command.RequestSystemTime;
 import com.jvj28.homeworks.command.RequestZoneLevel;
-import com.jvj28.homeworks.data.Model;
-import com.jvj28.homeworks.data.db.entity.CircuitEntity;
-import com.jvj28.homeworks.data.db.entity.KeypadEntity;
-import com.jvj28.homeworks.data.model.StatusData;
+import com.jvj28.homeworks.model.Model;
+import com.jvj28.homeworks.model.db.entity.CircuitEntity;
+import com.jvj28.homeworks.model.db.entity.KeypadEntity;
+import com.jvj28.homeworks.model.data.StatusData;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import com.jvj28.homeworks.util.Promise;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,6 @@ class TestService {
             Promise<RequestSystemDate> rd = processor.sendCommand(new RequestSystemDate()).onComplete(System.out::println);
 
             while (processor.queueIsNotEmpty())
-                //noinspection BusyWait
                 TimeUnit.SECONDS.sleep(1);
             assertNotNull(rd.getCommand().getDate());
             System.out.println("Processor date = " + rd.getCommand().getDate());
@@ -74,7 +73,6 @@ class TestService {
             ).get();
             System.out.println("Waiting for all commands to complete");
             while (processor.queueIsNotEmpty())
-                //noinspection BusyWait
                 TimeUnit.SECONDS.sleep(1);
             System.out.println("Done Waiting!");
 

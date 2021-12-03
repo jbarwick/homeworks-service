@@ -1,8 +1,8 @@
-package com.jvj28.homeworks.data;
+package com.jvj28.homeworks.model;
 
-import com.jvj28.homeworks.data.db.*;
-import com.jvj28.homeworks.data.db.entity.*;
-import com.jvj28.homeworks.data.model.DataObject;
+import com.jvj28.homeworks.model.data.DataObject;
+import com.jvj28.homeworks.model.db.*;
+import com.jvj28.homeworks.model.db.entity.*;
 import com.jvj28.homeworks.service.HomeworksConfiguration;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import com.opencsv.bean.CsvToBean;
@@ -80,16 +80,6 @@ public class Model {
         log.info("Clearing RANKS cache");
         RMap<String, KeypadEntity> finalRanks = redis.getMap(RANKLIST);
         finalRanks.clear();
-
-        // Do note you see a "promise" here, the actual command is sent in QUEUE.
-        // The promise command system guarantees only one command
-        // will be running at a time.  So, the below 6 commands will execute immediately
-        // and this method will instantly return.  The commands will complete at their leisure.
-
-        // NOTE: these setup and configuration commands are here and not in 'processor' because
-        // the Model relies on the processor, the processor does not know the model
-
-
     }
 
     /**

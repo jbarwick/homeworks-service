@@ -1,6 +1,6 @@
-package com.jvj28.homeworks.data.db;
+package com.jvj28.homeworks.model.db;
 
-import com.jvj28.homeworks.data.db.entity.UsersEntity;
+import com.jvj28.homeworks.model.db.entity.UsersEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

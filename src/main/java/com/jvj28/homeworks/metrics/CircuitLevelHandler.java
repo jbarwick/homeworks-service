@@ -1,7 +1,7 @@
 package com.jvj28.homeworks.metrics;
 
-import com.jvj28.homeworks.data.Model;
-import com.jvj28.homeworks.data.db.entity.CircuitEntity;
+import com.jvj28.homeworks.model.Model;
+import com.jvj28.homeworks.model.db.entity.CircuitEntity;
 
 import java.util.Set;
 

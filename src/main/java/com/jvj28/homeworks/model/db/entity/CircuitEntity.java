@@ -1,4 +1,4 @@
-package com.jvj28.homeworks.data.db.entity;
+package com.jvj28.homeworks.model.db.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.opencsv.bean.CsvBindByName;
