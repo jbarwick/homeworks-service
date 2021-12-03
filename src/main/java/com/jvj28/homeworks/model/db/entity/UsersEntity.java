@@ -4,7 +4,6 @@ import com.opencsv.bean.CsvBindByName;
 import org.springframework.data.redis.core.index.Indexed;
 
 import javax.persistence.*;
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -14,7 +13,6 @@ import java.util.UUID;
 @Entity(name = "UsersEntity")
 public class UsersEntity implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = -8014989191927735315L;
 
     @Id

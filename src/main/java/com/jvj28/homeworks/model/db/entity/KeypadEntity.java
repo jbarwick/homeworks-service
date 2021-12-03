@@ -8,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -16,7 +15,6 @@ import java.util.Objects;
 @Table(name = "keypads")
 public class KeypadEntity implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = -5996194456256045358L;
 
     @Id

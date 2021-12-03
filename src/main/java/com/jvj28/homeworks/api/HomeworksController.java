@@ -81,7 +81,7 @@ public class HomeworksController {
         Date endDate = convertToDate(end);
         return usageByDay.findUsageBetweenDate(startDate, endDate);
     }
-    
+
     @GetMapping("/circuits")
     public List<CircuitEntity> getCircuits(@RequestParam(name = "address", required = false) String address) {
         Thread.currentThread().setName("/circuits");
@@ -96,7 +96,7 @@ public class HomeworksController {
                         k.setRank(rank.getRank());
                         zones.add(k);
                     }));
-            return zones.stream().toList();
+            return zones;
         } else {
             CircuitEntity zone = model.findCircuitByAddress(address);
             if (zone == null)
@@ -134,14 +134,22 @@ public class HomeworksController {
     }
 
     public static Date convertToDate(String relative) {
-        char unit = relative.charAt(relative.length()-1);
-        int amount = Integer.parseInt(relative.substring(0, relative.length()-1));
-        LocalDateTime d = switch (unit) {
-            case 'y' -> LocalDateTime.now().plusYears(amount);
-            case 'm' -> LocalDateTime.now().plusMonths(amount);
-            case 'h' -> LocalDateTime.now().plusHours(amount);
-            default -> LocalDateTime.now().plusDays(amount);
-        };
+        char unit = relative.charAt(relative.length() - 1);
+        int amount = Integer.parseInt(relative.substring(0, relative.length() - 1));
+        LocalDateTime d;
+        switch (unit) {
+            case 'y':
+                d = LocalDateTime.now().plusYears(amount);
+                break;
+            case 'm':
+                d = LocalDateTime.now().plusMonths(amount);
+                break;
+            case 'h':
+                d = LocalDateTime.now().plusHours(amount);
+                break;
+            default:
+                d = LocalDateTime.now().plusDays(amount);
+        }
         return Date.from(d.atZone(ZoneId.systemDefault()).toInstant());
     }
 

@@ -4,13 +4,11 @@ import com.jvj28.homeworks.command.RequestSystemDate;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import lombok.Data;
 
-import java.io.Serial;
 import java.util.concurrent.ExecutionException;
 
 @Data
 public class DateData implements DataObject<DateData> {
 
-    @Serial
     private static final long serialVersionUID = -784261855573465956L;
 
     private String processorDate;

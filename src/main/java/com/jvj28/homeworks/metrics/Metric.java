@@ -11,13 +11,13 @@ import java.util.Objects;
  * <p>WARNING:  value is NOT in the hash/equals.  DO NOT use a.equals(b) to compare
  * this object if you are trying to check if the values are equal</p>
  *
- * <p></p>if you want to compare this object including its value, you need to write your own
+ * <p>if you want to compare this object including its value, you need to write your own
  * function.</p>
  * <pre>
  *     if (metric1.equals(metric2) {
  *         ... the metrics are the same Metric.  The value may be different.
  *     }
- *     if (metric1.equals(metric2) && metric1.getValue().equals(metric2.getValue) {
+ *     if (metric1.equals(metric2) &amp;&amp; metric1.getValue().equals(metric2.getValue) {
  *         ... the metrics and their values are the same.
  *     }
  * </pre>

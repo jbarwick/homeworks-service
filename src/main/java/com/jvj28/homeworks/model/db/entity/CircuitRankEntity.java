@@ -3,7 +3,6 @@ package com.jvj28.homeworks.model.db.entity;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
@@ -12,7 +11,6 @@ import java.util.UUID;
 @Table(name = "circuit_rank")
 public class CircuitRankEntity implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = -2210877801950859110L;
 
     @Id

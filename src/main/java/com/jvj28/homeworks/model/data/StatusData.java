@@ -7,13 +7,11 @@ import com.jvj28.homeworks.command.RequestBootRevisions;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import lombok.Data;
 
-import java.io.Serial;
 import java.util.concurrent.ExecutionException;
 
 @Data
 public class StatusData implements DataObject<StatusData> {
 
-    @Serial
     private static final long serialVersionUID = -9166231701068973133L;
 
     private boolean loggedIn;

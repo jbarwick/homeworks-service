@@ -4,12 +4,10 @@ import com.jvj28.homeworks.command.Netstat;
 import com.jvj28.homeworks.service.HomeworksProcessor;
 import com.jvj28.homeworks.util.NetstatProperties;
 
-import java.io.Serial;
 import java.util.concurrent.ExecutionException;
 
 public class NetstatData extends NetstatProperties implements DataObject<NetstatData> {
 
-    @Serial
     private static final long serialVersionUID = 6866420726145457381L;
 
     @Override

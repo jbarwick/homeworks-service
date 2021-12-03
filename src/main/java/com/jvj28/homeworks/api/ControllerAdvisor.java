@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.api;
 
-import com.jvj28.homeworks.model.LockException;
+import com.jvj28.homeworks.model.RecordLockException;
 import lombok.NonNull;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
@@ -14,9 +14,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @ControllerAdvice
 public class ControllerAdvisor extends ResponseEntityExceptionHandler {
@@ -48,9 +50,9 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(LockException.class)
+    @ExceptionHandler(RecordLockException.class)
     public ResponseEntity<Object> handleCityNotFoundException(
-            LockException ex, WebRequest request) {
+            RecordLockException ex, WebRequest request) {
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put(TIMESTAMP, LocalDateTime.now());
@@ -101,11 +103,12 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         body.put(TIMESTAMP, LocalDate.now());
         body.put(STATUS, status.value());
 
-        List<String> errors = ex.getBindingResult()
+        List<String> errors = new ArrayList<>();
+
+        ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .toList();
+                .map(DefaultMessageSourceResolvable::getDefaultMessage).forEach(errors::add);
 
         body.put(ERRORS, errors);
 

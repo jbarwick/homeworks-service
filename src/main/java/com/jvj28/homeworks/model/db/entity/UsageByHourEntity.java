@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
@@ -17,7 +16,6 @@ import java.util.Objects;
 @Table(name = "watts_by_hour")
 public class UsageByHourEntity implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = -6747807612111577660L;
 
     @Id

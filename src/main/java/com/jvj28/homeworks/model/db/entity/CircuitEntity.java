@@ -5,7 +5,6 @@ import com.opencsv.bean.CsvBindByName;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -13,7 +12,6 @@ import java.util.Objects;
 @Entity(name = "CircuitEntity")
 public class CircuitEntity implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = -4838814670155025772L;
 
     @CsvBindByName

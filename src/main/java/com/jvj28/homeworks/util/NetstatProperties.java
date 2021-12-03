@@ -2,13 +2,11 @@ package com.jvj28.homeworks.util;
 
 import lombok.Data;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 @Data
 public class NetstatProperties implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = 8145361970543775115L;
 
     private String macAddress;

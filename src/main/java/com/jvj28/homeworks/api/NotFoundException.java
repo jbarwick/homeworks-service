@@ -1,11 +1,9 @@
 package com.jvj28.homeworks.api;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 public class NotFoundException extends RuntimeException implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = -7914273648161723765L;
 
     private final Serializable obj;

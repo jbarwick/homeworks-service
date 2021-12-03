@@ -6,7 +6,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -20,7 +19,6 @@ import java.util.Objects;
 @Table(name = "usage_by_minute")
 public class UsageByMinuteEntity implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = -2463817720193015011L;
 
     @Id

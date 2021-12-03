@@ -217,7 +217,7 @@ public class Model {
             RMap<String, KeypadEntity> map = getKeypadMap();
             if (map.isEmpty())
                 loadAllKeypads(map);
-            return map.values().stream().toList();
+            return List.copyOf(map.values());
         } finally {
             rlock.unlock();
         }
@@ -312,7 +312,7 @@ public class Model {
         rlock.lock();
         try {
             RMap<String, CircuitEntity> map = getCircuitMap();
-            return map.values().stream().toList();
+            return List.copyOf(map.values());
         } finally {
             rlock.unlock();
         }
@@ -430,7 +430,7 @@ public class Model {
                 // We do this different from circuits or keypads because we don't have seed data.
                 rankMap.loadAll(false, 1);
             //the map should already be sorted correctly
-            return rankMap.values().stream().toList();
+            return List.copyOf(rankMap.values());
         } finally {
             rlock.unlock();
         }

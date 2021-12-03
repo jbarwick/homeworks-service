@@ -1,12 +1,12 @@
 package com.jvj28.homeworks.model;
 
-public class LockException extends RuntimeException {
+public class RecordLockException extends RuntimeException {
 
-    public LockException() {
+    public RecordLockException() {
         super();
     }
 
-    public LockException(InterruptedException e) {
+    public RecordLockException(InterruptedException e) {
         super(e);
     }
 }
