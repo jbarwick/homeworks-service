@@ -225,15 +225,16 @@
                         <id>sign-artifacts</id>
                         <phase>verify</phase>
                         <goals>
-                            <goal>sign</goal>
+                            <goal>sign-and-deploy-file</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <skip>true</skip>
                     <keyname>homeworks-service</keyname>
                     <passphraseServerId>${gpg.keyname}</passphraseServerId>
                     <executable>D:\Program Files (x86)\GnuPG\bin\gpg.exe</executable>
+                    <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                    <repositoryId>sonatype-oss</repositoryId>
                 </configuration>
             </plugin>
         </plugins>
