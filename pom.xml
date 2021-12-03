@@ -8,9 +8,10 @@
     <artifactId>homeworks-service</artifactId>
     <version>1.0.5</version>
     <name>homeworks-service</name>
+    <packaging>jar</packaging>
     <url>https://github.com/jbarwick/homeworks-service</url>
     <inceptionYear>2019</inceptionYear>
-    <description>Provides a REST API for integration with Homeworks Console</description>
+    <description>Provides an API for integration with Homeworks Console</description>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -25,6 +26,7 @@
         <license>
             <name>GNU General Public License Version 3</name>
             <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+            <distribution>repo</distribution>
         </license>
     </licenses>
 
@@ -214,8 +216,56 @@
                 <artifactId>jasypt-maven-plugin</artifactId>
                 <version>3.0.4</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <keyname>homeworks-service</keyname>
+                    <passphraseServerId>${gpg.keyname}</passphraseServerId>
+                    <executable>D:\Program Files (x86)\GnuPG\bin\gpg.exe</executable>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <distributionManagement>
         <repository>
