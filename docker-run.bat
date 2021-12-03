@@ -1,6 +1,9 @@
 @echo off
 set /p VERSION=<version.txt
 call mvn versions:set -DnewVersion=%VERSION%
+git add --all
+git commit -m"Version Update"
+git push
 call mvn clean package install deploy
 set ORGANIZATION=jbarwick
 set NAME=homeworks-service
