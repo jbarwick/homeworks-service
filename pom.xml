@@ -230,6 +230,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <skip>true</skip>
                     <keyname>homeworks-service</keyname>
                     <passphraseServerId>${gpg.keyname}</passphraseServerId>
                     <executable>D:\Program Files (x86)\GnuPG\bin\gpg.exe</executable>
@@ -237,23 +238,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>release-sign-artifacts</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <distributionManagement>
         <repository>
