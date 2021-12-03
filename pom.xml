@@ -6,7 +6,7 @@
 
     <groupId>com.jvj28.homeworks</groupId>
     <artifactId>homeworks-service</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6-SNAPSHOT</version>
     <name>homeworks-service</name>
     <packaging>jar</packaging>
     <url>https://github.com/jbarwick/homeworks-service</url>
@@ -225,7 +225,7 @@
                         <id>sign-artifacts</id>
                         <phase>verify</phase>
                         <goals>
-                            <goal>sign-and-deploy-file</goal>
+                            <goal>sign</goal>
                         </goals>
                     </execution>
                 </executions>
