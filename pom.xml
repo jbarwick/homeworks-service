@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.jvj28.homeworks</groupId>
     <artifactId>homeworks-service</artifactId>
-    <version>1.0.8-SNAPSHOT</version>
+    <version>1.0.8</version>
     <name>homeworks-service</name>
     <packaging>jar</packaging>
     <url>https://github.com/jbarwick/homeworks-service</url>
