@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.jvj28.homeworks</groupId>
     <artifactId>homeworks-service</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8-SNAPSHOT</version>
     <name>homeworks-service</name>
     <packaging>jar</packaging>
     <url>https://github.com/jbarwick/homeworks-service</url>
@@ -203,9 +203,18 @@
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.8</version>
                 <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <serverId>${nexus.id}</serverId>
                     <nexusUrl>${nexus.url}</nexusUrl>
+                    <skipStaging>${skip.staging}</skipStaging>
                     <autoReleaseAfterClose>${auto.release}</autoReleaseAfterClose>
                 </configuration>
             </plugin>
