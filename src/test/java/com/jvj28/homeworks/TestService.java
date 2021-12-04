@@ -86,15 +86,10 @@ class TestService {
             model.saveCircuit(zone);
             System.out.println(zone);
 
-            List<KeypadEntity> kpData = model.getKeypadsSeedData();
-            assertNotNull(kpData);
-            assertTrue(kpData.size() > 0);
-            model.saveKeypads(kpData);
-            System.out.println(kpData);
-            List<KeypadEntity> allkeys = model.geKeypads();
-            allkeys.forEach(System.out::println);
+            List<KeypadEntity> keypads = model.getKeypads();
+            keypads.forEach(System.out::println);
 
-            KeypadEntity kp = kpData.stream().filter(k -> k.getId() == 2).findFirst().orElse(null);
+            KeypadEntity kp = keypads.stream().filter(k -> k.getId() == 2).findFirst().orElse(null);
             assertNotNull(kp);
             assertEquals("1:6:6", kp.getAddress());
 

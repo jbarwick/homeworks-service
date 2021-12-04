@@ -1,5 +1,6 @@
 package com.jvj28.homeworks.model;
 
+import com.jvj28.homeworks.metrics.Metric;
 import com.jvj28.homeworks.model.data.DataObject;
 import com.jvj28.homeworks.model.db.*;
 import com.jvj28.homeworks.model.db.entity.*;
@@ -25,6 +26,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * The <b>Central Brain</b> managing all data into and out of REDIS and the JPA repositories.
+ * This is the <b>Data Model</b> manager.  There are some potential questions around the design
+ * pattern here, however, doing it this way made other design patterns possible.  I needed a
+ * <i>central governance</i> service for all data management.
+ */
 @Service
 public class Model {
 
@@ -186,8 +193,14 @@ public class Model {
         return watts.get();
     }
 
-    /************* KEYPADS ************************/
+    /* ------------------------- KEYPADS ----------------------------- */
 
+    /**
+     * <p>Save a KeypadEntity object to REDIS. There is a callback to JPA to store
+     * the record in the database.  Note that ALL keypads are stored in a single REDIS list.</p>
+     *
+     * @param keypad the KeypadEntity to store
+     */
     public void saveKeypad(KeypadEntity keypad) {
         RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
@@ -199,18 +212,42 @@ public class Model {
         }
     }
 
-    public void saveKeypads(List<KeypadEntity> keypads) {
+    /**
+     * <p>Save a List of KeypadEntity objects to REDIS.  This will ADD to the list that
+     * is currently in REDIS.  It does NOT replace the list.  The list is saved to JPA database</p>
+     * @param keypads is the List of KeyPadEntity objects to save
+     */
+    public void saveKeypads(@NonNull List<KeypadEntity> keypads) {
+        saveKeypads(keypads, false);
+    }
+
+    /**
+     * <p>Save aList of KeypadEntity objects to REDIS.  This will optionally replace the
+     * list that is currently in REDIS.  The list is saved to the JPA database</p>
+     * @param keypads a {@link List} of {@link KeypadEntity} objects
+     * @param replace true if the list should be replaced
+     */
+    public void saveKeypads(@NonNull List<KeypadEntity> keypads, boolean replace) {
         RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
         try {
             RMap<String, KeypadEntity> map = getKeypadMap();
+            if (replace) map.clear();
             keypads.forEach(keypad -> map.fastPut(keypad.getAddress(), keypad));
         } finally {
             rlock.unlock();
         }
     }
 
-    public List<KeypadEntity> geKeypads() {
+    /**
+     * <p>Retrieve a list of all keypads from REDIS. If REDIS is empty, the list
+     * is retrieved from the keypads.csv file.  If the file is not present, the
+     * list will finally be loaded from the JPA repository.
+     * </p>
+     * @return a {@link List} of {@link KeypadEntity} objects
+     */
+    @NonNull
+    public List<KeypadEntity> getKeypads() {
         RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
         try {
@@ -223,6 +260,12 @@ public class Model {
         }
     }
 
+    /**
+     * <p>Returns a {@link KeypadEntity} object from REDIS.  Note that ALL keypads
+     * are cached in REDIS.  This function will read ALL keypads if necessary. see {@link #getKeypads()}</p>
+     * @param address the address of the keypad to retrieve
+     * @return the {@link KeypadEntity} identified by the address or null if not found
+     */
     public KeypadEntity findKeypadByAddress(String address) {
         RLock rlock = redis.getLock(KEYPADLIST + "Lock");
         rlock.lock();
@@ -251,7 +294,7 @@ public class Model {
             data.forEach(k -> map.fastPut(k.getAddress(), k));
     }
 
-    public List<KeypadEntity> getKeypadsSeedData() {
+    private List<KeypadEntity> getKeypadsSeedData() {
 
         String seedFile = config.getKeypadSeedFilename();
 
@@ -303,10 +346,15 @@ public class Model {
     // ************* CIRCUITS ************************
 
     /**
-     * Load all the circuits from redis or if they are not there, get them from the dB.
+     * <p>Load all the {@link CircuitEntity} objects from REDIS. If not loaded yet, this
+     * function will attempt to load the data from circuits.csv file.  If that file is empty,
+     * it will finally attempt to load the circuits from the JPA repository.  All data is saved back
+     * to JPA repository if needed.
+     *</p>
      *
-     * @return a List of Circuit records
+     * @return a {@link List} of {@link CircuitEntity} records
      */
+    @NonNull
     public List<CircuitEntity> getCircuits() {
         RLock rlock = redis.getLock(CIRCUITLIST + "Lock");
         rlock.lock();
@@ -318,6 +366,13 @@ public class Model {
         }
     }
 
+    /**
+     * <p>Retrieve a {@link CircuitEntity} object from REDIS.  If not found, the
+     * list is loaded from circuits.csv.  Else the list will be loaded from JPA
+     * repository. see {@link #getCircuits()}</p>
+     * @param address the address of the circuit to retrieve
+     * @return returns a {@link CircuitEntity} record or null if not found
+     */
     public CircuitEntity findCircuitByAddress(String address) {
         RLock rlock = redis.getLock(CIRCUITLIST + "Lock");
         rlock.lock();
@@ -329,6 +384,12 @@ public class Model {
         }
     }
 
+    /**
+     * Save a {@link List} of {@link CircuitEntity} objects to REDIS.  If the circuit list is
+     * not yet loaded, it will be. See {@link #getCircuits()}.  The supplied value and the
+     * redis list will be saved back to the JPA repository.
+     * @param circuit the {@link CircuitEntity} to save
+     */
     public void saveCircuit(@NonNull CircuitEntity circuit) {
         RLock rlock = redis.getLock(CIRCUITLIST + "Lock");
         rlock.lock();
@@ -354,7 +415,7 @@ public class Model {
             data.forEach(c -> map.fastPut(c.getAddress(), c));
     }
 
-    public List<CircuitEntity> getCircuitSeedData() {
+    private List<CircuitEntity> getCircuitSeedData() {
 
         String seedFile = config.getCircuitsSeedFilename();
 
@@ -414,7 +475,13 @@ public class Model {
 
     // ***************** RANKS ***********************
 
-    // err...user is a global variable.  One-at-a-time please.
+    /**
+     * <p>Retrieves a list of circuit Rank for the specified user.  The "rank" is a custom
+     * sort order that can be saved so the user can keep his preferences saved</p>
+     * @param user is the {@link UUID} of the user
+     * @return a {@link List} of {@link CircuitRankEntity} objects
+     */
+    @NonNull
     public List<CircuitRankEntity> findRanksByUserId(UUID user) {
 
         // Set the ThreadLocal for the current user as we need it in the MapOptions
@@ -461,22 +528,28 @@ public class Model {
         }
     };
 
-    public void saveUsage(UsageByMinuteEntity usage) {
-        usageByMinute.save(usage);
-    }
-
     /* ------------------------ USER INFORMATION ------------------------ */
 
+    /**
+     * <p>Retrieves the {@link UsersEntity} for the user specified by their {@link UUID}</p>
+     * @param id the {@link UUID} of the user to retrieve
+     * @return a {@link UsersEntity} object or null if not found
+     */
     public UsersEntity getUserById(UUID id) {
         return users.findById(id).orElse(null);
     }
 
+    /**
+     * <p>Retrieves the {@link UsersEntity} for the user specified by their <b>username</b></p>
+     * @param username the <i>username</i> of the user to retrieve
+     * @return a {@link UsersEntity} object or null if not found
+     */
     public UsersEntity getUserByUsername(String username) {
         RMap<String, UsersEntity> map = getUsersMap();
         return map.get(username);
     }
 
-    public List<UsersEntity> getUsersSeedData() {
+    private List<UsersEntity> getUsersSeedData() {
 
         String seedFile = config.getUsersSeedFilename();
 
@@ -545,11 +618,34 @@ public class Model {
             data.forEach(c -> map.fastPut(c.getId().toString(), c));
     }
 
+    /**
+     * <p>Saves the {@link UsageByMinuteEntity} object to the JPA repository. The job scheduler
+     * does this every 60 seconds.  You can use this data as history of use and calculate some
+     * nice graphs.
+     * </p>
+     * @param usage the {@link UsageByMinuteEntity} object to save
+     */
+    public void saveUsage(UsageByMinuteEntity usage) {
+        usageByMinute.save(usage);
+    }
+
+    /**
+     * <p>Records the homeworks processor Date and Time in a {@link Date} object within
+     * the model for future use.  It's mostly used by the <b>keep alive</b> logic and
+     * passed as a {@link Metric} to Prometheus
+     * </p>
+     * @param date the {@link Date} of the Lutron HW processor to cache
+     */
     public void setProcessorDate(@NonNull Date date) {
         log.debug("Storing date: {} timestamp: {}", date, date.getTime());
         this.processorDate = date;
     }
 
+    /**
+     * <p>Retrieve the processor date previously cached.  This is typically read in the /metrics
+     * API for Prometheus and other API</p>
+     * @return the {@link Date} of the lutron HW processor.
+     */
     @NonNull
     public Date getProcessorDate() {
         if (this.processorDate == null)

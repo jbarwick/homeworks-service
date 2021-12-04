@@ -178,6 +178,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <skip>${skip.javadoc}</skip>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -203,14 +206,6 @@
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.8</version>
                 <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <serverId>${nexus.id}</serverId>
                     <nexusUrl>${nexus.url}</nexusUrl>
@@ -222,7 +217,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
-                    <skip>false</skip>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
             <plugin>
@@ -246,6 +241,7 @@
                 <configuration>
                     <keyname>${gpg.keyname}</keyname>
                     <passphraseServerId>${gpg.keyname}</passphraseServerId>
+                    <skip>${skip.gpg}</skip>
                 </configuration>
             </plugin>
             <plugin>

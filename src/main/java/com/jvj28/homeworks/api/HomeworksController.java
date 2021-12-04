@@ -9,6 +9,8 @@ import com.jvj28.homeworks.model.db.UsageByHourRepository;
 import com.jvj28.homeworks.model.db.UsageByMinuteRepository;
 import com.jvj28.homeworks.model.db.entity.*;
 import org.apache.logging.log4j.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +26,8 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api")
 public class HomeworksController {
+
+    private static final Logger log = LoggerFactory.getLogger(HomeworksController.class);
 
     private final Model model;
     private final UsageByDayRepository usageByDay;
@@ -42,12 +46,14 @@ public class HomeworksController {
     @GetMapping("/help")
     public HelpResponse getHelp() {
         Thread.currentThread().setName("/help");
+        log.debug("Request Help");
         return new HelpResponse();
     }
 
     @GetMapping("/status")
     public StatusData getStatus() {
         Thread.currentThread().setName("/status");
+        log.debug("Request System Status");
         StatusData result = model.get(StatusData.class);
         if (result == null)
             throw new NotFoundException(new StatusData());
@@ -57,6 +63,7 @@ public class HomeworksController {
     @GetMapping("/netstat")
     public NetstatData getNetstat() {
         Thread.currentThread().setName("/netstat");
+        log.debug("Request Network Status");
         NetstatData result = model.get(NetstatData.class);
         if (result == null)
             throw new NotFoundException(new NetstatData());
@@ -66,6 +73,7 @@ public class HomeworksController {
     @GetMapping("/linkstatus")
     public LinkStatusData getLinkStatus() {
         Thread.currentThread().setName("/linkstatus");
+        log.debug("Request Link Status");
         LinkStatusData result = model.get(LinkStatusData.class);
         if (result == null)
             throw new NotFoundException(new LinkStatusData());
@@ -85,9 +93,10 @@ public class HomeworksController {
     @GetMapping("/circuits")
     public List<CircuitEntity> getCircuits(@RequestParam(name = "address", required = false) String address) {
         Thread.currentThread().setName("/circuits");
+        log.debug("Request Circuits List");
         if (Strings.isBlank(address)) {
             List<CircuitEntity> data = model.getCircuits();
-            if (data == null)
+            if (data.isEmpty())
                 throw new NotFoundException(new ArrayList<CircuitEntity>());
             List<CircuitRankEntity> ranks = model.findRanksByUserId(UUID.fromString("aad7b0bf-b210-4fbb-8a1b-b01622df52df"));
             ArrayList<CircuitEntity> zones = new ArrayList<>();
@@ -110,6 +119,7 @@ public class HomeworksController {
             @RequestParam(name = "start", required = false, defaultValue = "-24h") String start,
             @RequestParam(name = "end", required = false, defaultValue = "0h") String end) {
         Thread.currentThread().setName("/usagebyhour");
+        log.debug("Request Usage by Hour");
         Date startDate = convertToDate(start);
         Date endDate = convertToDate(end);
         return usageByHour.findUsageBetweenDate(startDate, endDate);
