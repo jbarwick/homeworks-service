@@ -8,13 +8,9 @@ import com.jvj28.homeworks.model.db.UsageByDayRepository;
 import com.jvj28.homeworks.model.db.UsageByHourRepository;
 import com.jvj28.homeworks.model.db.UsageByMinuteRepository;
 import com.jvj28.homeworks.model.db.entity.*;
-import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -90,28 +86,37 @@ public class HomeworksController {
         return usageByDay.findUsageBetweenDate(startDate, endDate);
     }
 
+    @PutMapping("/circuits/{address}/{level}")
+    public CircuitEntity putCircuitLevelByAddress(@PathVariable String address, @PathVariable int level) {
+        CircuitEntity entity = model.findCircuitByAddress(address);
+        if (entity != null) {
+            entity.setLevel(level);
+        }
+        return entity;
+    }
+
+    @GetMapping("/circuits/{address}")
+    public CircuitEntity getCircuitByAddress(@PathVariable String address) {
+        Thread.currentThread().setName("/circuits");
+        log.debug("Request Circuit: {}", address);
+        return model.findCircuitByAddress(address);
+    }
+
     @GetMapping("/circuits")
-    public List<CircuitEntity> getCircuits(@RequestParam(name = "address", required = false) String address) {
+    public List<CircuitEntity> getCircuits() {
         Thread.currentThread().setName("/circuits");
         log.debug("Request Circuits List");
-        if (Strings.isBlank(address)) {
-            List<CircuitEntity> data = model.getCircuits();
-            if (data.isEmpty())
-                throw new NotFoundException(new ArrayList<CircuitEntity>());
-            List<CircuitRankEntity> ranks = model.findRanksByUserId(UUID.fromString("aad7b0bf-b210-4fbb-8a1b-b01622df52df"));
-            ArrayList<CircuitEntity> zones = new ArrayList<>();
-            ranks.forEach(rank -> data.stream().filter(c -> c.getAddress().equals(rank.getAddress())).findFirst()
-                    .ifPresent(k -> {
-                        k.setRank(rank.getRank());
-                        zones.add(k);
-                    }));
-            return zones;
-        } else {
-            CircuitEntity zone = model.findCircuitByAddress(address);
-            if (zone == null)
-                throw new NotFoundException(new CircuitEntity(), String.format("Circuit [%s] not found", address));
-            return List.of(zone);
-        }
+        List<CircuitEntity> data = model.getCircuits();
+        if (data.isEmpty())
+            throw new NotFoundException(new ArrayList<CircuitEntity>());
+        List<CircuitRankEntity> ranks = model.findRanksByUserId(UUID.fromString("aad7b0bf-b210-4fbb-8a1b-b01622df52df"));
+        ArrayList<CircuitEntity> zones = new ArrayList<>();
+        ranks.forEach(rank -> data.stream().filter(c -> c.getAddress().equals(rank.getAddress())).findFirst()
+                .ifPresent(k -> {
+                    k.setRank(rank.getRank());
+                    zones.add(k);
+                }));
+        return zones;
     }
 
     @GetMapping("/usagebyhour")
@@ -130,6 +135,7 @@ public class HomeworksController {
             @RequestParam(name = "start", required = false, defaultValue = "-1h") String start,
             @RequestParam(name = "end", required = false, defaultValue = "0h") String end) {
         Thread.currentThread().setName("/usagebyminute");
+        log.debug("Request Usage by Minute");
         Date startDate = convertToDate(start);
         Date endDate = convertToDate(end);
         return usageByMinute.findUsageBetweenDate(startDate, endDate);
@@ -138,6 +144,7 @@ public class HomeworksController {
     @GetMapping("/usage")
     public TotalUsage getUsage() {
         Thread.currentThread().setName("/usage");
+        log.debug("Request total usage");
         TotalUsage usage = new TotalUsage();
         usage.setWatts(model.getCurrentUsage());
         return usage;

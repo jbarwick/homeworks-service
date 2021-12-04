@@ -40,7 +40,7 @@ public class AutomationService {
                 processor.waitForReady();
 
                 log.debug("Enabling Processor Status Refresh Job (Refresh every hour)");
-                JobDetail statusUpdate = getJobDetail(UpdateProcessorStatus.class);
+                JobDetail statusUpdate = getJobDetail(UpdateStatusJob.class);
                 scheduler.scheduleJob(statusUpdate, buildJobTrigger(statusUpdate, 60, 10));
 
                 log.debug("Enabling Dimmer Values Refresh Job (Refresh every hour to ensure synced to Level Monitor)");

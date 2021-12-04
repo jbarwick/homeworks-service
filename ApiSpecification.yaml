@@ -1,0 +1,419 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v3.0
+servers:
+  - url: http://localhost:9992
+    description: Generated server url
+paths:
+  /api/circuits/{address}/{level}:
+    put:
+      tags:
+        - homeworks-controller
+      operationId: putCircuitLevelByAddress
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: level
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CircuitEntity'
+  /authenticate:
+    post:
+      tags:
+        - jwt-authentication-controller
+      operationId: createAuthenticationToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequestData'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/TokenData'
+  /metrics:
+    get:
+      tags:
+        - metrics-controller
+      operationId: getMetrics
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/usagebyminute:
+    get:
+      tags:
+        - homeworks-controller
+      operationId: getUsageByMinute
+      parameters:
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: string
+            default: -1h
+        - name: end
+          in: query
+          required: false
+          schema:
+            type: string
+            default: 0h
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsageByMinuteEntity'
+  /api/usagebyhour:
+    get:
+      tags:
+        - homeworks-controller
+      operationId: getUsageByHour
+      parameters:
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: string
+            default: -24h
+        - name: end
+          in: query
+          required: false
+          schema:
+            type: string
+            default: 0h
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsageByHourEntity'
+  /api/usagebyday:
+    get:
+      tags:
+        - homeworks-controller
+      operationId: getUsageByDay
+      parameters:
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: string
+            default: -7d
+        - name: end
+          in: query
+          required: false
+          schema:
+            type: string
+            default: 0d
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsageByDayEntity'
+  /api/usage:
+    get:
+      tags:
+        - homeworks-controller
+      operationId: getUsage
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/TotalUsage'
+  /api/status:
+    get:
+      tags:
+        - homeworks-controller
+      operationId: getStatus
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/StatusData'
+  /api/netstat:
+    get:
+      tags:
+        - homeworks-controller
+      operationId: getNetstat
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/NetstatData'
+  /api/linkstatus:
+    get:
+      tags:
+        - homeworks-controller
+      operationId: getLinkStatus
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LinkStatusData'
+  /api/help:
+    get:
+      tags:
+        - homeworks-controller
+      operationId: getHelp
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/HelpResponse'
+  /api/circuits:
+    get:
+      tags:
+        - homeworks-controller
+      operationId: getCircuits
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CircuitEntity'
+  /api/circuits/{address}:
+    get:
+      tags:
+        - homeworks-controller
+      operationId: getCircuitByAddress
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CircuitEntity'
+components:
+  schemas:
+    CircuitEntity:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        address:
+          type: string
+        room:
+          type: string
+        lights:
+          type: integer
+          format: int32
+        watts:
+          type: integer
+          format: int32
+        type:
+          type: string
+        level:
+          type: integer
+          format: int32
+        rank:
+          type: integer
+          format: int32
+    TokenRequestData:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    TokenData:
+      type: object
+      properties:
+        token:
+          type: string
+    UsageByMinuteEntity:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+        yearDow:
+          type: string
+        yearMonth:
+          type: string
+        yearDowHour:
+          type: string
+        hour:
+          type: integer
+          format: int32
+        dow:
+          type: integer
+          format: int32
+        year:
+          type: integer
+          format: int32
+        month:
+          type: integer
+          format: int32
+        watts:
+          type: integer
+          format: int32
+        day:
+          type: integer
+          format: int32
+        yearMonthDay:
+          type: string
+        yearWeek:
+          type: string
+        week:
+          type: integer
+          format: int32
+    UsageByHourEntity:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+        watts:
+          type: integer
+          format: int32
+    UsageByDayEntity:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+        day:
+          type: string
+        watts:
+          type: integer
+          format: int32
+    TotalUsage:
+      type: object
+      properties:
+        watts:
+          type: integer
+          format: int32
+    StatusData:
+      type: object
+      properties:
+        loggedIn:
+          type: boolean
+        processorId:
+          type: string
+        osRevision:
+          type: string
+        model:
+          type: string
+        processorAddress:
+          type: string
+        mode:
+          type: string
+        processorInfo:
+          type: string
+        bootRevision:
+          type: string
+    NetstatData:
+      type: object
+      properties:
+        macAddress:
+          type: string
+        ipAddress:
+          type: string
+        subnetMask:
+          type: string
+        gateway:
+          type: string
+        telnetPort:
+          type: integer
+          format: int32
+        ftpPort:
+          type: integer
+          format: int32
+        httpPort:
+          type: integer
+          format: int32
+        pingResponse:
+          type: boolean
+        bufferHWM:
+          type: string
+        socketHWM:
+          type: string
+        successfulTx:
+          type: integer
+          format: int64
+        errorTx:
+          type: integer
+          format: int64
+        successfulRx:
+          type: integer
+          format: int64
+        errorRx:
+          type: integer
+          format: int64
+    LinkStatusData:
+      type: object
+      properties:
+        processorId:
+          type: string
+        linkStatus:
+          type: string
+    HelpCommandListEntry:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    HelpResponse:
+      type: object
+      properties:
+        commands:
+          type: array
+          items:
+            $ref: '#/components/schemas/HelpCommandListEntry'

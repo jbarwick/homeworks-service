@@ -30,11 +30,12 @@ rem I can't afford a subscription
 rem docker scan %ORGANIZATION%/%NAME%:%VERSION%
 rem do NOT put a space after DOCKER_PASSWORD and before the pipe |.  Else login will fail!
 if $PUSH% NEQ 1 ( GOTO RUN )
+echo "Pushing to docker.io
 rem ECHO %DOCKER_PASSWORD%| docker login -u %ORGANIZATION% --password-stdin
 rem docker push %ORGANIZATION%/%NAME%:%VERSION%
 :RUN
-echo Running Container on port 8080
-docker run -d -p 8080:9992 %ORGANIZATION%/%NAME%:%VERSION%
+echo Running Container on port 9992
+docker run -d -p 9992:9992 %ORGANIZATION%/%NAME%:%VERSION%
 GOTO DONE
 :ERROR
 ECHO There was a problem.  Error level: %ERRORLEVEL%

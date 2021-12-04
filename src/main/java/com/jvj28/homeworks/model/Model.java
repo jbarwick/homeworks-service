@@ -54,7 +54,8 @@ public class Model {
     ThreadLocal<UUID> currentUser = new ThreadLocal<>();
     private Date processorDate;
 
-    @SuppressWarnings("java:S107") // Dude, this is springboot, I'll probably have 50 parameters when all is said and done
+    @SuppressWarnings("java:S107")
+    // Dude, this is springboot, I'll probably have 50 parameters when all is said and done
     public Model(HomeworksConfiguration config,
                  HomeworksProcessor processor,
                  RedissonClient redis,
@@ -101,6 +102,7 @@ public class Model {
 
     /**
      * Retrieve the user that was saved for this Thread
+     *
      * @return the UUID of the user logged-in to this Thread.
      */
     public UUID getCurrentUser() {
@@ -142,7 +144,8 @@ public class Model {
      * @param <S>       the class to work with
      * @return the object for S or null.
      */
-    @SuppressWarnings({"java:S2629","java:S2222"})  // Why?  Because we have a LONG wait for this lock and will be unlocked in "save"
+    @SuppressWarnings({"java:S2629", "java:S2222"})
+    // Why?  Because we have a LONG wait for this lock and will be unlocked in "save"
     public <S extends DataObject<S>> S get(Class<S> clazz, boolean forUpdate) {
 
         S object = null;
@@ -167,8 +170,7 @@ public class Model {
         if (object == null) {
             log.debug("Object [{}] not found in REDIS.  Regenerating...", rkey);
             return generate(clazz);
-        }
-        else {
+        } else {
             return object;
         }
     }
@@ -215,6 +217,7 @@ public class Model {
     /**
      * <p>Save a List of KeypadEntity objects to REDIS.  This will ADD to the list that
      * is currently in REDIS.  It does NOT replace the list.  The list is saved to JPA database</p>
+     *
      * @param keypads is the List of KeyPadEntity objects to save
      */
     public void saveKeypads(@NonNull List<KeypadEntity> keypads) {
@@ -224,6 +227,7 @@ public class Model {
     /**
      * <p>Save aList of KeypadEntity objects to REDIS.  This will optionally replace the
      * list that is currently in REDIS.  The list is saved to the JPA database</p>
+     *
      * @param keypads a {@link List} of {@link KeypadEntity} objects
      * @param replace true if the list should be replaced
      */
@@ -244,6 +248,7 @@ public class Model {
      * is retrieved from the keypads.csv file.  If the file is not present, the
      * list will finally be loaded from the JPA repository.
      * </p>
+     *
      * @return a {@link List} of {@link KeypadEntity} objects
      */
     @NonNull
@@ -263,6 +268,7 @@ public class Model {
     /**
      * <p>Returns a {@link KeypadEntity} object from REDIS.  Note that ALL keypads
      * are cached in REDIS.  This function will read ALL keypads if necessary. see {@link #getKeypads()}</p>
+     *
      * @param address the address of the keypad to retrieve
      * @return the {@link KeypadEntity} identified by the address or null if not found
      */
@@ -280,7 +286,7 @@ public class Model {
     }
 
     private RMap<String, KeypadEntity> getKeypadMap() {
-        return  redis.getMap(KEYPADLIST, MapOptions.<String, KeypadEntity>defaults()
+        return redis.getMap(KEYPADLIST, MapOptions.<String, KeypadEntity>defaults()
                 .writer(keypadMapWriter)
                 .loader(keypadMapLoader));
     }
@@ -350,7 +356,7 @@ public class Model {
      * function will attempt to load the data from circuits.csv file.  If that file is empty,
      * it will finally attempt to load the circuits from the JPA repository.  All data is saved back
      * to JPA repository if needed.
-     *</p>
+     * </p>
      *
      * @return a {@link List} of {@link CircuitEntity} records
      */
@@ -370,6 +376,7 @@ public class Model {
      * <p>Retrieve a {@link CircuitEntity} object from REDIS.  If not found, the
      * list is loaded from circuits.csv.  Else the list will be loaded from JPA
      * repository. see {@link #getCircuits()}</p>
+     *
      * @param address the address of the circuit to retrieve
      * @return returns a {@link CircuitEntity} record or null if not found
      */
@@ -388,6 +395,7 @@ public class Model {
      * Save a {@link List} of {@link CircuitEntity} objects to REDIS.  If the circuit list is
      * not yet loaded, it will be. See {@link #getCircuits()}.  The supplied value and the
      * redis list will be saved back to the JPA repository.
+     *
      * @param circuit the {@link CircuitEntity} to save
      */
     public void saveCircuit(@NonNull CircuitEntity circuit) {
@@ -478,6 +486,7 @@ public class Model {
     /**
      * <p>Retrieves a list of circuit Rank for the specified user.  The "rank" is a custom
      * sort order that can be saved so the user can keep his preferences saved</p>
+     *
      * @param user is the {@link UUID} of the user
      * @return a {@link List} of {@link CircuitRankEntity} objects
      */
@@ -532,6 +541,7 @@ public class Model {
 
     /**
      * <p>Retrieves the {@link UsersEntity} for the user specified by their {@link UUID}</p>
+     *
      * @param id the {@link UUID} of the user to retrieve
      * @return a {@link UsersEntity} object or null if not found
      */
@@ -541,6 +551,7 @@ public class Model {
 
     /**
      * <p>Retrieves the {@link UsersEntity} for the user specified by their <b>username</b></p>
+     *
      * @param username the <i>username</i> of the user to retrieve
      * @return a {@link UsersEntity} object or null if not found
      */
@@ -623,6 +634,7 @@ public class Model {
      * does this every 60 seconds.  You can use this data as history of use and calculate some
      * nice graphs.
      * </p>
+     *
      * @param usage the {@link UsageByMinuteEntity} object to save
      */
     public void saveUsage(UsageByMinuteEntity usage) {
@@ -634,6 +646,7 @@ public class Model {
      * the model for future use.  It's mostly used by the <b>keep alive</b> logic and
      * passed as a {@link Metric} to Prometheus
      * </p>
+     *
      * @param date the {@link Date} of the Lutron HW processor to cache
      */
     public void setProcessorDate(@NonNull Date date) {
@@ -644,6 +657,7 @@ public class Model {
     /**
      * <p>Retrieve the processor date previously cached.  This is typically read in the /metrics
      * API for Prometheus and other API</p>
+     *
      * @return the {@link Date} of the lutron HW processor.
      */
     @NonNull
@@ -652,4 +666,5 @@ public class Model {
             return new Date();
         return this.processorDate;
     }
+
 }

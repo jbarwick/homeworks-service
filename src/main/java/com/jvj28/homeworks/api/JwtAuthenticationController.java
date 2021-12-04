@@ -1,9 +1,9 @@
 package com.jvj28.homeworks.api;
 
-import com.jvj28.homeworks.components.JwtTokenUtil;
+import com.jvj28.homeworks.auth.JwtTokenUtil;
 import com.jvj28.homeworks.model.data.TokenData;
 import com.jvj28.homeworks.model.data.TokenRequestData;
-import com.jvj28.homeworks.service.ApiUserDetailsService;
+import com.jvj28.homeworks.auth.ApiUserDetailsService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;

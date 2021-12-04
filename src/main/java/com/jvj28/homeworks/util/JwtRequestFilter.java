@@ -1,7 +1,7 @@
 package com.jvj28.homeworks.util;
 
-import com.jvj28.homeworks.components.JwtTokenUtil;
-import com.jvj28.homeworks.service.ApiUserDetailsService;
+import com.jvj28.homeworks.auth.JwtTokenUtil;
+import com.jvj28.homeworks.auth.ApiUserDetailsService;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;

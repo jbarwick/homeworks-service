@@ -10,13 +10,13 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UpdateProcessorStatus extends QuartzJobBean {
+public class UpdateStatusJob extends QuartzJobBean {
 
-    private final Logger log = LoggerFactory.getLogger(UpdateProcessorStatus.class);
+    private final Logger log = LoggerFactory.getLogger(UpdateStatusJob.class);
 
     private final HomeworksProcessor processor;
 
-    public UpdateProcessorStatus(HomeworksProcessor processor) {
+    public UpdateStatusJob(HomeworksProcessor processor) {
         this.processor = processor;
     }
 

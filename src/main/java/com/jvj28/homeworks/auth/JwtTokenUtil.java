@@ -1,4 +1,4 @@
-package com.jvj28.homeworks.components;
+package com.jvj28.homeworks.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

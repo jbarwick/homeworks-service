@@ -1,4 +1,4 @@
-package com.jvj28.homeworks.service;
+package com.jvj28.homeworks.auth;
 
 import com.jvj28.homeworks.model.db.UsersEntityRepository;
 import com.jvj28.homeworks.model.db.entity.UsersEntity;

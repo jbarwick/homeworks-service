@@ -71,6 +71,17 @@ scrape_configs:
 
 And, I've a React web application that I'm writing to consume the /api in this program.  Not included in this docker image
 
+### OpenAPI (Swagger)
+
+Specifications and Documenation
+
+    http://localhost:9992/api-docs    
+    http://localhost:9992/api-docs.yaml
+
+Working with Swagger
+
+    http://localhost:9992/swagger-ui.html
+
 ### Comments
 
 Please enjoy and make recommendations...
@@ -78,8 +89,8 @@ Please enjoy and make recommendations...
 This application
 
 * polls the Homeworks system every 60 seconds for network status
-* uses an internal REDIS database for storage of dimmer values
-* uses a postgres database to store circuits, keypads, sort ranking for User Interfaces or web apps (in dev...there are no users yet), and
+* uses an REDIS database for storage of dimmer values
+* uses a PostgreSQL database to store circuits, keypads, sort ranking for User Interfaces or web apps (in dev...there are no users yet), and
 * calculates system total wattage and saves that information to PostgreSQL every 60 seconds (yes, your DB will grow...there is no 'purge' logic)
 * provides a json API for a Web App to consume
 * provides a /metrics endpoint for Prometheus.  On Prometheous project, I said I'll put the metrics-exporter on 9992, but, I haven't created a listener here.   Just use port 8080.. web port can't be changed at the moment.  Or, this is just SpringBoot, you can modify application.properties.

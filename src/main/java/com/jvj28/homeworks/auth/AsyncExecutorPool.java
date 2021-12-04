@@ -1,4 +1,4 @@
-package com.jvj28.homeworks.components;
+package com.jvj28.homeworks.auth;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
