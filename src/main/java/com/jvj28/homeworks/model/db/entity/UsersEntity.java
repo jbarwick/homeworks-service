@@ -39,7 +39,6 @@ public class UsersEntity implements Serializable {
     private String lastName;
 
     @CsvBindByName
-    @Lob
     @Column(name = "info")
     private String info;
 

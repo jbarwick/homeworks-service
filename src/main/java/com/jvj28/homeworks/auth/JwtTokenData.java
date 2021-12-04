@@ -1,4 +1,4 @@
-package com.jvj28.homeworks.model.data;
+package com.jvj28.homeworks.auth;
 
 import lombok.Data;
 import lombok.NonNull;
@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Data
 @RequiredArgsConstructor
-public class TokenData implements Serializable {
+public class JwtTokenData implements Serializable {
 
     private static final long serialVersionUID = 8733015036749179327L;
 

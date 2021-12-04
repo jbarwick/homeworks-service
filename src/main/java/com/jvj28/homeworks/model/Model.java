@@ -40,7 +40,6 @@ public class Model {
     private static final String CIRCUITLIST = "CIRCUITSLIST";
     private static final String KEYPADLIST = "KEYPADSLIST";
     private static final String RANKLIST = "RANKSLIST";
-    private static final String USERSLIST = "USERSLIST";
 
     private final RedissonClient redis;
     private final HomeworksConfiguration config;
@@ -556,10 +555,20 @@ public class Model {
      * @return a {@link UsersEntity} object or null if not found
      */
     public UsersEntity getUserByUsername(String username) {
-        RMap<String, UsersEntity> map = getUsersMap();
-        return map.get(username);
+        // first check if this user is in REDIS.
+        RBucket<UsersEntity> userData = redis.getBucket(username);
+        UsersEntity user;
+        if (userData.isExists()) {
+            user = userData.get();
+        } else {
+            user = users.findByUserName(username).orElse(null);
+            if (user != null)
+                userData.set(user);
+        }
+        return user;
     }
 
+    @NonNull
     private List<UsersEntity> getUsersSeedData() {
 
         String seedFile = config.getUsersSeedFilename();
@@ -583,50 +592,13 @@ public class Model {
         return new ArrayList<>();
     }
 
-    private RMap<String, UsersEntity> getUsersMap() {
-        RMap<String, UsersEntity> map = redis.getMap(USERSLIST,
-                MapOptions.<String, UsersEntity>defaults()
-                        .writer(usersMapWriter)
-                        .loader(usersMapLoader));
-        if (map.isEmpty()) loadAllUsers(map);
-        return map;
-    }
-
-    private final MapWriter<String, UsersEntity> usersMapWriter = new MapWriter<>() {
-        @Override
-        public void write(Map<String, UsersEntity> map) {
-            users.saveAll(map.values());
-        }
-
-        @Override
-        public void delete(Collection<String> names) {
-            users.deleteAllByUsernames(names);
-        }
-    };
-
-    private final MapLoader<String, UsersEntity> usersMapLoader = new MapLoader<>() {
-        @Override
-        public UsersEntity load(String key) {
-            return users.findByUserName(key).orElse(null);
-        }
-
-        @Override
-        public Iterable<String> loadAllKeys() {
-            return users.findAllUsernames();
-        }
-    };
-
-    private void loadAllUsers(RMap<String, UsersEntity> map) {
-        // ALWAYS seed from the CSV file.  Why? well, we want to give the users
-        // the ability to change the data in the database such as descriptions, etc.  This seed data will use the
-        // Primary Key ID not the Address to overwrite content.  So, you CAN change an address if needed.
+    @PostConstruct
+    private void refreshUserData() {
         List<UsersEntity> data = getUsersSeedData();
-        if (data == null || data.isEmpty())
-            // do we need to convert to a list first to prevent DB record lock race condition?
-            users.findAll().forEach(c -> map.put(c.getId().toString(), c));
-        else
-            // Put will save to redis AND the database.  We expect you have a MapWriter configured.
-            data.forEach(c -> map.fastPut(c.getId().toString(), c));
+        if (!data.isEmpty()) {
+            users.deleteAll();
+            users.saveAll(data);
+        }
     }
 
     /**

@@ -1,9 +1,9 @@
-package com.jvj28.homeworks.api;
+package com.jvj28.homeworks.auth;
 
-import com.jvj28.homeworks.auth.JwtTokenUtil;
-import com.jvj28.homeworks.model.data.TokenData;
-import com.jvj28.homeworks.model.data.TokenRequestData;
-import com.jvj28.homeworks.auth.ApiUserDetailsService;
+import com.jvj28.homeworks.api.BadRequestException;
+import com.jvj28.homeworks.api.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -16,32 +16,38 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin
-public class JwtAuthenticationController {
+public class ApiAuthenticationController {
+
+    private final Logger log = LoggerFactory.getLogger(ApiAuthenticationController.class);
 
     private final AuthenticationManager authenticationManager;
-
     private final JwtTokenUtil jwtTokenUtil;
+    private final ApiAuthUserDetailsService apiUserDetailsService;
 
-    private final ApiUserDetailsService apiUserDetailsService;
-
-    public JwtAuthenticationController(AuthenticationManager authenticationManager,
+    public ApiAuthenticationController(AuthenticationManager authenticationManager,
                                        JwtTokenUtil jwtTokenUtil,
-                                       ApiUserDetailsService apiUserDetailsService) {
+                                       ApiAuthUserDetailsService apiUserDetailsService) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.apiUserDetailsService = apiUserDetailsService;
     }
 
     @PostMapping(value = "/authenticate")
-    public TokenData createAuthenticationToken(@RequestBody TokenRequestData authenticationRequest) {
+    public String createAuthenticationToken(@RequestBody ApiAuthRequestData request) {
         Thread.currentThread().setName("/authenticate");
 
-        authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+        String username = request.getUsername();
+        String password = request.getPassword();
+
+        log.info("Attempting login for user [{}]", username);
+        log.debug("With password [{}]", password);
+
+        authenticate(username, password);
 
         final UserDetails userDetails = apiUserDetailsService
-                .loadUserByUsername(authenticationRequest.getUsername());
+                .loadUserByUsername(request.getUsername());
 
-        return new TokenData(jwtTokenUtil.generateToken(userDetails));
+        return jwtTokenUtil.generateToken(userDetails);
     }
 
     private void authenticate(String username, String password) {

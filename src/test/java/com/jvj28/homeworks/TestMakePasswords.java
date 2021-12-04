@@ -4,6 +4,7 @@ import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,6 +35,9 @@ class TestMakePasswords {
         original = encryptor.decrypt(result);
         assertEquals("xxxx", original);
 
+        BCryptPasswordEncoder benc = new BCryptPasswordEncoder();
+        result = benc.encode("master");
+        System.out.printf("Password: %s%n", result);
     }
 
     StringEncryptor stringEncryptor() {

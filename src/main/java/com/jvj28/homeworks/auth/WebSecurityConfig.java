@@ -1,8 +1,5 @@
-package com.jvj28.homeworks.config;
+package com.jvj28.homeworks.auth;
 
-import com.jvj28.homeworks.auth.JwtAuthenticationEntryPoint;
-import com.jvj28.homeworks.auth.ApiUserDetailsService;
-import com.jvj28.homeworks.util.JwtRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,13 +22,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final ApiAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final ApiAuthUserDetailsService jwtApiUserDetailsService;
+    private final ApiRequestAuthorizationFilter jwtRequestFilter;
 
-    private final ApiUserDetailsService jwtApiUserDetailsService;
-
-    private final JwtRequestFilter jwtRequestFilter;
-
-    public WebSecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, ApiUserDetailsService jwtApiUserDetailsService, JwtRequestFilter jwtRequestFilter) {
+    public WebSecurityConfig(ApiAuthenticationEntryPoint jwtAuthenticationEntryPoint, ApiAuthUserDetailsService jwtApiUserDetailsService, ApiRequestAuthorizationFilter jwtRequestFilter) {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtApiUserDetailsService = jwtApiUserDetailsService;
         this.jwtRequestFilter = jwtRequestFilter;
