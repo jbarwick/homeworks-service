@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.index.Indexed;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.UUID;
 
 @Table(name = "users", indexes = {
@@ -15,6 +16,7 @@ public class UsersEntity implements Serializable {
 
     private static final long serialVersionUID = -8014989191927735315L;
 
+    @SuppressWarnings("deprecation")
     @Id
     @Column(name = "uid", nullable = false)
     @org.hibernate.annotations.Type(type="org.hibernate.type.PostgresUUIDType")
@@ -41,6 +43,24 @@ public class UsersEntity implements Serializable {
     @CsvBindByName
     @Column(name = "info")
     private String info;
+
+    public UsersEntity() {
+        // new entity doesn't need to initialize values
+    }
+
+    public UUID getId() {
+        return uid;
+    }
+
+    public void setId(UUID uid) {
+        this.uid = uid;
+    }
+
+
+    public UsersEntity(String userName, String userPass) {
+        this.userName = userName;
+        this.userPass = userPass;
+    }
 
     public String getInfo() {
         return info;
@@ -82,11 +102,28 @@ public class UsersEntity implements Serializable {
         this.userName = username;
     }
 
-    public UUID getId() {
-        return uid;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UsersEntity that = (UsersEntity) o;
+        return uid.equals(that.uid) && userName.equals(that.userName) && Objects.equals(userPass, that.userPass) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(info, that.info);
     }
 
-    public void setId(UUID uid) {
-        this.uid = uid;
+    @Override
+    public int hashCode() {
+        return Objects.hash(uid, userName, userPass, firstName, lastName, info);
+    }
+
+    @Override
+    public String toString() {
+        return "UsersEntity{" +
+                "uid=" + uid +
+                ", userName='" + userName + '\'' +
+                ", userPass='" + userPass + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", info='" + info + '\'' +
+                '}';
     }
 }

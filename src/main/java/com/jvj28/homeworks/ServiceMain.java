@@ -9,10 +9,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.jvj28.homeworks"})
 @EnableEncryptableProperties
 @EnableRedisRepositories
+@CrossOrigin
 public class ServiceMain {
 
     @Bean(name = "encryptorBean")

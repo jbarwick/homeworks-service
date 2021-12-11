@@ -1,13 +1,14 @@
 package com.jvj28.homeworks.model.data;
 
 import com.jvj28.homeworks.command.RequestSystemDate;
-import com.jvj28.homeworks.service.HomeworksProcessor;
+import com.jvj28.homeworks.processor.HomeworksProcessor;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.concurrent.ExecutionException;
 
 @Data
-public class DateData implements DataObject<DateData> {
+public class DateData implements DataObject<DateData>, Serializable {
 
     private static final long serialVersionUID = -784261855573465956L;
 

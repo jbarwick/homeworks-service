@@ -52,4 +52,13 @@ public class UsageByDayEntity implements Serializable {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "UsageByDayEntity{" +
+                "date=" + date +
+                ", day='" + day + '\'' +
+                ", watts=" + watts +
+                '}';
+    }
 }

@@ -4,8 +4,8 @@ import com.jvj28.homeworks.metrics.Metric;
 import com.jvj28.homeworks.model.data.DataObject;
 import com.jvj28.homeworks.model.db.*;
 import com.jvj28.homeworks.model.db.entity.*;
-import com.jvj28.homeworks.service.HomeworksConfiguration;
-import com.jvj28.homeworks.service.HomeworksProcessor;
+import com.jvj28.homeworks.processor.HomeworksConfiguration;
+import com.jvj28.homeworks.processor.HomeworksProcessor;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import org.redisson.api.*;
@@ -49,6 +49,8 @@ public class Model {
     private final CircuitRankRepository ranks;
     private final UsageByMinuteRepository usageByMinute;
     private final UsersEntityRepository users;
+    private final UsageByDayRepository usageByDay;
+    private final UsageByHourRepository usageByHour;
 
     ThreadLocal<UUID> currentUser = new ThreadLocal<>();
     private Date processorDate;
@@ -62,7 +64,7 @@ public class Model {
                  CircuitRankRepository ranks,
                  KeypadsRepository keypads,
                  UsageByMinuteRepository usageByMinute,
-                 UsersEntityRepository users) {
+                 UsersEntityRepository users, UsageByDayRepository usageByDay, UsageByHourRepository usageByHour) {
         this.config = config;
         this.redis = redis;
         this.processor = processor;
@@ -71,6 +73,8 @@ public class Model {
         this.ranks = ranks;
         this.usageByMinute = usageByMinute;
         this.users = users;
+        this.usageByDay = usageByDay;
+        this.usageByHour = usageByHour;
     }
 
     @PostConstruct
@@ -639,4 +643,18 @@ public class Model {
         return this.processorDate;
     }
 
+    public List<UsageByMinuteEntity> getUsageByMinuteBetweenDate(Date startDate, Date endDate) {
+        // Will cache these values in the future.  Don't always pull from DB
+        return usageByMinute.findUsageBetweenDate(startDate, endDate);
+    }
+
+    public List<UsageByHourEntity> getUsageByHourBetweenDate(Date startDate, Date endDate) {
+        // Will cache these values in the future.  Don't always pull from DB
+        return usageByHour.findUsageBetweenDate(startDate, endDate);
+    }
+
+    public List<UsageByDayEntity> getUsageByDayBetweenDate(Date startDate, Date endDate) {
+        // Will cache these values in the future.  Don't always pull from DB
+        return usageByDay.findUsageBetweenDate(startDate, endDate);
+    }
 }

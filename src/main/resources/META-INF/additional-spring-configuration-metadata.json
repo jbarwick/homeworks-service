@@ -1,22 +1,27 @@
 {
   "properties": [
     {
-      "name": "hw.host",
+      "name": "homeworks.processor.host",
       "type": "java.lang.String",
       "description": "Hostname of the Lutron processor."
     },
     {
-      "name": "hw.username",
+      "name": "homeworks.processor.port",
+      "type": "java.lang.Integer",
+      "description": "Port for connecting to the Lutron processor."
+    },
+    {
+      "name": "homeworks.processor.username",
       "type": "java.lang.String",
       "description": "Username for the Lutron processor: Lutron."
     },
     {
-      "name": "hw.password",
+      "name": "homeworks.processor.password",
       "type": "java.lang.String",
       "description": "Password for the Lutron processor."
     },
     {
-      "name": "jwt.secret",
+      "name": "homeworks.api.encryption.secret",
       "type": "java.lang.String",
       "description": "Do not put secret keys in your configuration file.  You know better than that!."
     }

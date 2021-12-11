@@ -8,8 +8,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-
 @Service
 public class ApiAuthUserDetailsService implements UserDetailsService {
 
@@ -23,7 +21,15 @@ public class ApiAuthUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UsersEntity user = model.getUserByUsername(username);
         if (user != null) {
-            return new User(username, user.getUserPass(), new ArrayList<>());
+            return User.builder()
+                    .username(user.getUserName())
+                    .password(user.getUserPass())
+                    .accountExpired(false)
+                    .accountLocked(false)
+                    .roles("BASIC")
+                    .disabled(false)
+                    .authorities("USER")
+                    .build();
         } else {
             throw new UsernameNotFoundException(String.format("User [%s] not found", username));
         }

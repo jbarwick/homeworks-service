@@ -4,12 +4,10 @@ import com.jvj28.homeworks.model.db.entity.UsageByDayEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
 
-@Repository
 public interface UsageByDayRepository extends CrudRepository<UsageByDayEntity, String> {
 
     @Query("select c from UsageByDayEntity c where c.date >= :start_date and c.date < :end_date order by c.date")

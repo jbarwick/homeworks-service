@@ -146,13 +146,16 @@ public class CircuitEntity implements Serializable {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "(" +
-                "id = " + id + ", " +
-                "name = " + name + ", " +
-                "address = " + address + ", " +
-                "room = " + room + ", " +
-                "lights = " + lights + ", " +
-                "watts = " + watts + ", " +
-                "type = " + type + ")";
+        return "CircuitEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", room='" + room + '\'' +
+                ", lights=" + lights +
+                ", watts=" + watts +
+                ", type='" + type + '\'' +
+                ", level=" + level +
+                ", rank=" + rank +
+                '}';
     }
 }

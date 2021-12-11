@@ -3,6 +3,7 @@ package com.jvj28.homeworks.metrics;
 import lombok.Data;
 import lombok.NonNull;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -24,15 +25,17 @@ import java.util.Objects;
  *
  */
 @Data
-public class Metric {
+public class Metric implements Serializable {
+
+    private static final long serialVersionUID = -5942871492147619052L;
 
     @NonNull
-    String name;
+    private String name;
 
-    LabelList label;
+    private LabelList label;
 
     @NonNull
-    String value;
+    private String value;
 
     public Metric(@NonNull String name, LabelList label, @NonNull String value) {
         this.name = name;
@@ -67,6 +70,7 @@ public class Metric {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Metric metric = (Metric) o;
+
         return name.equals(metric.name) && Objects.equals(label, metric.label);
     }
 
@@ -78,8 +82,8 @@ public class Metric {
     @Override
     public String toString() {
         if (label == null)
-            return String.format("%s %s", name, value);
+            return String.format("hw_%s %s", name, value);
         else
-            return String.format("%s{%s} %s", name, label, value);
+            return String.format("hw_%s{%s} %s", name, label, value);
     }
 }

@@ -4,13 +4,14 @@ import com.jvj28.homeworks.command.OSRevision;
 import com.jvj28.homeworks.command.ProcessorAddress;
 import com.jvj28.homeworks.command.RequestAllProcessorStatusInformation;
 import com.jvj28.homeworks.command.RequestBootRevisions;
-import com.jvj28.homeworks.service.HomeworksProcessor;
+import com.jvj28.homeworks.processor.HomeworksProcessor;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.concurrent.ExecutionException;
 
 @Data
-public class StatusData implements DataObject<StatusData> {
+public class StatusData implements DataObject<StatusData>, Serializable {
 
     private static final long serialVersionUID = -9166231701068973133L;
 

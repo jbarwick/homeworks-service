@@ -48,4 +48,12 @@ public class UsageByHourEntity implements Serializable {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "UsageByHourEntity{" +
+                "date=" + date +
+                ", watts=" + watts +
+                '}';
+    }
 }

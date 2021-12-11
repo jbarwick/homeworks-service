@@ -1,13 +1,14 @@
 package com.jvj28.homeworks.model.data;
 
 import com.jvj28.homeworks.command.RequestLinkShortStatus;
-import com.jvj28.homeworks.service.HomeworksProcessor;
+import com.jvj28.homeworks.processor.HomeworksProcessor;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.concurrent.ExecutionException;
 
 @Data
-public class LinkStatusData implements DataObject<LinkStatusData> {
+public class LinkStatusData implements DataObject<LinkStatusData>, Serializable {
 
     private static final long serialVersionUID = -657472216331498686L;
 

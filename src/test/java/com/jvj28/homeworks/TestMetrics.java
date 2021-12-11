@@ -1,6 +1,6 @@
 package com.jvj28.homeworks;
 
-import com.jvj28.homeworks.service.HomeworksProcessor;
+import com.jvj28.homeworks.processor.HomeworksProcessor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

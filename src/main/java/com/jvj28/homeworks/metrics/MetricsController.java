@@ -27,6 +27,10 @@ public class MetricsController {
     public String getMetrics() {
         Thread.currentThread().setName("/metrics");
         log.debug("/metrics: Collecting metrics and sending");
-        return service.collect().toString();
+        try {
+            return service.collect().toString();
+        } catch (Exception e) {
+            throw new MetricsException(e.getMessage());
+        }
     }
 }

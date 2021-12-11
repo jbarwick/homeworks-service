@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -14,13 +15,14 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@ConfigurationProperties(prefix = "homeworks.api")
 public class JwtTokenUtil implements Serializable {
 
     private static final long serialVersionUID = -2550185165626007488L;
 
     public static final long JWT_TOKEN_VALIDITY = 5L * 60L * 60L;
 
-    @Value("${jwt.secret}")
+    @Value("${homeworks.api.encryption.secret}")
     private String secret;
 
     //retrieve username from jwt token

@@ -209,4 +209,24 @@ public class UsageByMinuteEntity implements Serializable {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "UsageByMinuteEntity{" +
+                "id=" + id +
+                ", date=" + date +
+                ", yearDow='" + yearDow + '\'' +
+                ", yearMonth='" + yearMonth + '\'' +
+                ", yearDowHour='" + yearDowHour + '\'' +
+                ", hour=" + hour +
+                ", dow=" + dow +
+                ", year=" + year +
+                ", month=" + month +
+                ", watts=" + watts +
+                ", day=" + day +
+                ", yearMonthDay='" + yearMonthDay + '\'' +
+                ", yearWeek='" + yearWeek + '\'' +
+                ", week=" + week +
+                '}';
+    }
 }

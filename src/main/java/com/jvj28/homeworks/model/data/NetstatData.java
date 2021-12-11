@@ -1,12 +1,12 @@
 package com.jvj28.homeworks.model.data;
 
 import com.jvj28.homeworks.command.Netstat;
-import com.jvj28.homeworks.service.HomeworksProcessor;
-import com.jvj28.homeworks.util.NetstatProperties;
+import com.jvj28.homeworks.processor.HomeworksProcessor;
 
+import java.io.Serializable;
 import java.util.concurrent.ExecutionException;
 
-public class NetstatData extends NetstatProperties implements DataObject<NetstatData> {
+public class NetstatData extends NetstatProperties implements DataObject<NetstatData>, Serializable {
 
     private static final long serialVersionUID = 6866420726145457381L;
 

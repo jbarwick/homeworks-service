@@ -17,6 +17,7 @@ public class CircuitRankEntity implements Serializable {
     @Column(name="id", nullable = false)
     private Integer id;
 
+    @SuppressWarnings("deprecation")
     @Column(name="uid", nullable = false)
     @org.hibernate.annotations.Type(type="org.hibernate.type.PostgresUUIDType")
     private UUID uid;
@@ -136,5 +137,21 @@ public class CircuitRankEntity implements Serializable {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "CircuitRankEntity{" +
+                "id=" + id +
+                ", uid=" + uid +
+                ", circuitId=" + circuitId +
+                ", rank=" + rank +
+                ", address='" + address + '\'' +
+                ", name='" + name + '\'' +
+                ", room='" + room + '\'' +
+                ", lights=" + lights +
+                ", watts=" + watts +
+                ", type='" + type + '\'' +
+                '}';
     }
 }

@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.jobs;
 
-import com.jvj28.homeworks.service.HomeworksProcessor;
+import com.jvj28.homeworks.processor.HomeworksProcessor;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

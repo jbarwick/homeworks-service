@@ -73,4 +73,13 @@ public class KeypadEntity implements Serializable {
         this.name = keypad.name;
         this.address = keypad.address;
     }
+
+    @Override
+    public String toString() {
+        return "KeypadEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                '}';
+    }
 }

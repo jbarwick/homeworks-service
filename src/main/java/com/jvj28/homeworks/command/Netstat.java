@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.command;
 
-import com.jvj28.homeworks.util.NetstatProperties;
+import com.jvj28.homeworks.model.data.NetstatProperties;
 
 public class Netstat extends NetstatProperties implements HomeworksCommand {
 
