@@ -7,9 +7,8 @@ set PROFILE=monster-jj
 set /p VERSION=<version.txt
 set /p PVERSION=<version-prev.txt
 set PORT=9992
-set PUSH=1
+set PUSH=0
 set SCAN=0
-set LOGIN=0
 set RUN=1
 set BUILD=1
 IF "%VERSION%" == "%PVERSION%" GOTO SKIPVERSION
@@ -21,7 +20,9 @@ git add version.txt pom.xml
 IF %ERRORLEVEL% NEQ 0 ( GOTO ERROR )
 git commit -m"Version Update to: %VERSION%"
 IF %ERRORLEVEL% NEQ 0 ( GOTO ERROR )
-git push
+git tag %VERSION%
+IF %ERRORLEVEL% NEQ 0 ( GOTO ERROR )
+git push --tags
 IF %ERRORLEVEL% NEQ 0 ( GOTO ERROR )
 GOTO BUILD
 :SKIPVERSION
@@ -36,7 +37,7 @@ docker build -t %ORGANIZATION%/%NAME%:%VERSION% -m 2GB ^
     .
 IF %ERRORLEVEL% NEQ 0 ( GOTO ERROR )
 :DOCKERLOGIN
-if %LOGIN% NEQ 1 ( GOTO RUN )
+if %PUSH% NEQ 1 ( GOTO RUN )
 rem do NOT put a space after DOCKER_PASSWORD and before the pipe |.  Else login will fail!
 rem ECHO %DOCKER_PASSWORD%| docker login -u %ORGANIZATION% --password-stdin
 IF %ERRORLEVEL% NEQ 0 ( GOTO ERROR )

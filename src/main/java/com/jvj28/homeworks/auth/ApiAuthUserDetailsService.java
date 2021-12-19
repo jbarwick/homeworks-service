@@ -2,6 +2,8 @@ package com.jvj28.homeworks.auth;
 
 import com.jvj28.homeworks.model.Model;
 import com.jvj28.homeworks.model.db.entity.UsersEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,9 +28,10 @@ public class ApiAuthUserDetailsService implements UserDetailsService {
                     .password(user.getUserPass())
                     .accountExpired(false)
                     .accountLocked(false)
-                    .roles("BASIC")
+                    .roles("USER")
                     .disabled(false)
-                    .authorities("USER")
+                    .authorities(new SimpleGrantedAuthority("USER"),
+                            new UUIDGrantedAuthority(user.getId()))
                     .build();
         } else {
             throw new UsernameNotFoundException(String.format("User [%s] not found", username));

@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.api;
 
-import com.jvj28.homeworks.api.contract.HelpResponse;
+import com.jvj28.homeworks.api.contract.*;
 import com.jvj28.homeworks.model.data.LinkStatusData;
 import com.jvj28.homeworks.model.data.NetstatData;
 import com.jvj28.homeworks.model.data.StatusData;
@@ -47,6 +47,15 @@ public class HwApiController {
         return result;
     }
 
+    @GetMapping("/ranks")
+    public RanksResponse getRanks() {
+        Thread.currentThread().setName("/ranks");
+        log.debug("Request Ranks for current user");
+        RanksResponse response = service.getRanksForUser();
+        log.debug("Ranks returned for user [{}]", response.getUserId());
+        return response;
+    }
+
     @GetMapping("/netstat")
     public NetstatData getNetstat() {
         Thread.currentThread().setName("/netstat");
@@ -68,7 +77,7 @@ public class HwApiController {
     }
 
     @GetMapping("/usagebyday")
-    public List<UsageByDayEntity> getUsageByDay(
+    public UsageByDayResponse getUsageByDay(
             @RequestParam(name = "start", required = false, defaultValue = "-7d") String start,
             @RequestParam(name = "end", required = false, defaultValue = "0d") String end) {
         Thread.currentThread().setName("/usagebyday");
@@ -94,24 +103,14 @@ public class HwApiController {
     }
 
     @GetMapping("/circuits")
-    public List<CircuitEntity> getCircuits() {
+    public CircuitsResponse getCircuits() {
         Thread.currentThread().setName("/circuits");
         log.debug("Request Circuits List");
-        List<CircuitEntity> data = service.getCircuits();
-        if (data.isEmpty())
-            throw new NotFoundException(new ArrayList<CircuitEntity>());
-        List<CircuitRankEntity> ranks = service.getRanksByUserId(UUID.fromString("aad7b0bf-b210-4fbb-8a1b-b01622df52df"));
-        ArrayList<CircuitEntity> zones = new ArrayList<>();
-        ranks.forEach(rank -> data.stream().filter(c -> c.getAddress().equals(rank.getAddress())).findFirst()
-                .ifPresent(k -> {
-                    k.setRank(rank.getRank());
-                    zones.add(k);
-                }));
-        return zones;
+        return service.getCircuits();
     }
 
     @GetMapping("/usagebyhour")
-    public List<UsageByHourEntity> getUsageByHour(
+    public UsageByHourResponse getUsageByHour(
             @RequestParam(name = "start", required = false, defaultValue = "-24h") String start,
             @RequestParam(name = "end", required = false, defaultValue = "0h") String end) {
         Thread.currentThread().setName("/usagebyhour");
@@ -122,7 +121,7 @@ public class HwApiController {
     }
 
     @GetMapping("/usagebyminute")
-    public List<UsageByMinuteEntity> getUsageByMinute(
+    public UsageByMinuteResponse getUsageByMinute(
             @RequestParam(name = "start", required = false, defaultValue = "-1h") String start,
             @RequestParam(name = "end", required = false, defaultValue = "0h") String end) {
         Thread.currentThread().setName("/usagebyminute");
