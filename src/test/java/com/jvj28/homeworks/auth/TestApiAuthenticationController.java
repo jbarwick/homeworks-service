@@ -39,10 +39,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = {
-        ApiAuthenticationController.class,
+        ApiAuthController.class,
         ApiAuthControllerAdvice.class,
         JwtTokenUtil.class,
-        ApiAuthUserDetailsService.class,
+        ApiAuthService.class,
         ApiRequestAuthorizationFilter.class})
 @WebMvcTest
 class TestApiAuthenticationController {
@@ -50,9 +50,9 @@ class TestApiAuthenticationController {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    ApiAuthUserDetailsService apiAuthService;
+    ApiAuthService apiAuthService;
     @Autowired
-    ApiAuthenticationController controller;
+    ApiAuthController controller;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
     @Autowired
@@ -122,7 +122,7 @@ class TestApiAuthenticationController {
     }
 
     @Test
-    void testAthenticatoinExceptions() {
+    void testAthenticationExceptions() {
         try {
             String username = "bubbauser";
             String password = "bubbapass";

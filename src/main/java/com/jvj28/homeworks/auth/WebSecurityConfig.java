@@ -20,10 +20,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 //@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final ApiAuthUserDetailsService userDetailsService;
+    private final ApiAuthService userDetailsService;
     private final ApiRequestAuthorizationFilter authorizationFilter;
 
-    public WebSecurityConfig(ApiAuthUserDetailsService userDetailsService, ApiRequestAuthorizationFilter authorizationFilter) {
+    public WebSecurityConfig(ApiAuthService userDetailsService, ApiRequestAuthorizationFilter authorizationFilter) {
         this.userDetailsService = userDetailsService;
         this.authorizationFilter = authorizationFilter;
     }
@@ -73,7 +73,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
-        return new ApiAuthenticationEntryPoint();
+        return new ApiAuthJwtEntryPoint();
     }
 
     @Override

@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class ApiAuthenticationController {
+public class ApiAuthController {
 
-    private final Logger log = LoggerFactory.getLogger(ApiAuthenticationController.class);
+    private final Logger log = LoggerFactory.getLogger(ApiAuthController.class);
 
     private final JwtTokenUtil jwtTokenUtil;
-    private final ApiAuthUserDetailsService apiUserDetailsService;
+    private final ApiAuthService apiUserDetailsService;
     private final AuthenticationManager authenticationManager;
 
-    public ApiAuthenticationController(JwtTokenUtil jwtTokenUtil,
-                                       ApiAuthUserDetailsService apiUserDetailsService, AuthenticationManager authenticationManager) {
+    public ApiAuthController(JwtTokenUtil jwtTokenUtil,
+                             ApiAuthService apiUserDetailsService, AuthenticationManager authenticationManager) {
         this.jwtTokenUtil = jwtTokenUtil;
         this.apiUserDetailsService = apiUserDetailsService;
         this.authenticationManager = authenticationManager;

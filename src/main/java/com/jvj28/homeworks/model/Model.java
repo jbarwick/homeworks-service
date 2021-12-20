@@ -91,6 +91,10 @@ public class Model {
         log.info("Clearing RANKS cache");
         RMap<String, KeypadEntity> finalRanks = redis.getMap(RANKLIST);
         finalRanks.clear();
+
+        log.info("Clearing USES cache");
+        RKeys keys = redis.getKeys();
+        keys.flushall();
     }
 
     /**
@@ -565,10 +569,12 @@ public class Model {
         if (userData.isExists()) {
             user = userData.get();
         } else {
-            user = users.findByUserName(username).orElse(null);
+            user = users.findByUsername(username);
             if (user != null)
-                userData.set(user);
+                userData.set(user, 5, TimeUnit.MINUTES);
         }
+        if (user != null)
+            user.setEnabled(true); // force this until we begin to really use it.
         return user;
     }
 
@@ -656,5 +662,13 @@ public class Model {
     public List<UsageByDayEntity> getUsageByDayBetweenDate(Date startDate, Date endDate) {
         // Will cache these values in the future.  Don't always pull from DB
         return usageByDay.findUsageBetweenDate(startDate, endDate);
+    }
+
+    public void saveRanks(List<CircuitRankEntity> ranksList) {
+        ranks.saveAll(ranksList);
+    }
+
+    public void saveRank(CircuitRankEntity rank) {
+        ranks.save(rank);
     }
 }

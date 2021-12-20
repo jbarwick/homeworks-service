@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -54,6 +51,11 @@ public class HwApiController {
         RanksResponse response = service.getRanksForUser();
         log.debug("Ranks returned for user [{}]", response.getUserId());
         return response;
+    }
+
+    @PostMapping("/ranks")
+    public void setRanks(@RequestBody RankItemRequest[] ranksList) {
+        service.setRanksForUser(ranksList);
     }
 
     @GetMapping("/netstat")

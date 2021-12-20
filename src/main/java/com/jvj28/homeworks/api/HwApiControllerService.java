@@ -1,14 +1,12 @@
 package com.jvj28.homeworks.api;
 
 import com.jvj28.homeworks.api.contract.*;
-import com.jvj28.homeworks.auth.UUIDGrantedAuthority;
 import com.jvj28.homeworks.model.Model;
 import com.jvj28.homeworks.model.data.LinkStatusData;
 import com.jvj28.homeworks.model.data.NetstatData;
 import com.jvj28.homeworks.model.data.StatusData;
 import com.jvj28.homeworks.model.db.entity.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -61,12 +59,10 @@ public class HwApiControllerService {
     }
 
     private UUID getUUIDFromSecurityContext() {
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        Collection<? extends GrantedAuthority> authorities = securityContext.getAuthentication().getAuthorities();
-        for (GrantedAuthority ga: authorities) {
-            if (ga instanceof UUIDGrantedAuthority) {
-                return ((UUIDGrantedAuthority) ga).getUserId();
-            }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UsersEntity) {
+            return ((UsersEntity) principal).getId();
         }
         return UUID.fromString("aad7b0bf-b210-4fbb-8a1b-b01622df52df");
     }
@@ -103,6 +99,47 @@ public class HwApiControllerService {
         UsageByMinuteResponse response = new UsageByMinuteResponse(startDate, endDate);
         response.setUsageByMinuteList(model.getUsageByMinuteBetweenDate(startDate, endDate));
         return response;
+    }
+
+    public void setRanksForUser(RankItemRequest[] ranksList) {
+
+        UUID uuid = getUUIDFromSecurityContext();
+
+        // Get the existing ranks for this user and we'll update them
+        final List<CircuitRankEntity> ranks = model.findRanksByUserId(uuid);
+        for (RankItemRequest r : ranksList) {
+            final String address = r.getAddress();
+            CircuitRankEntity rankEntity = ranks.stream().filter(i -> i.getAddress().equals(address)).findFirst().orElse(null);
+            if (rankEntity == null) {
+                rankEntity = getNewRankFromCircuit(address);
+                ranks.add(rankEntity);
+            }
+            rankEntity.setUid(uuid);
+            rankEntity.setRank(r.getRank());
+        }
+        model.saveRanks(ranks);
+    }
+
+    private CircuitRankEntity getNewRankFromCircuit(String address) {
+
+        CircuitRankEntity newRank = new CircuitRankEntity();
+
+        // Find the circuit in the list From REDIS to get information for the new rank
+        CircuitEntity circuit = model.getCircuits().stream().filter(r ->
+                r.getAddress().equals(address)).findFirst().orElse(null);
+        if (circuit != null) {
+            newRank.setCircuitId(circuit.getId());
+            newRank.setAddress(circuit.getAddress());
+            newRank.setLights(circuit.getLights());
+            newRank.setName(circuit.getName());
+            newRank.setRoom(circuit.getRoom());
+            newRank.setType(circuit.getType());
+            newRank.setWatts(circuit.getWatts());
+        } else {
+            newRank.setAddress(address);
+        }
+
+        return newRank;
     }
 
 }
