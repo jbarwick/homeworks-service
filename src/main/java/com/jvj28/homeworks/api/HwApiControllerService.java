@@ -5,12 +5,17 @@ import com.jvj28.homeworks.model.Model;
 import com.jvj28.homeworks.model.data.LinkStatusData;
 import com.jvj28.homeworks.model.data.NetstatData;
 import com.jvj28.homeworks.model.data.StatusData;
-import com.jvj28.homeworks.model.db.entity.*;
+import com.jvj28.homeworks.model.db.entity.CircuitEntity;
+import com.jvj28.homeworks.model.db.entity.CircuitRankEntity;
+import com.jvj28.homeworks.model.db.entity.UsersEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Translate the data in the model to the CONTRACT between the API and the client.

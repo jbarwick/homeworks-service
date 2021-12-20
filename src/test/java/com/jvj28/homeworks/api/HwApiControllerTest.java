@@ -3,7 +3,6 @@ package com.jvj28.homeworks.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jvj28.homeworks.api.contract.HelpResponse;
 import com.jvj28.homeworks.api.contract.UsageByDayResponse;
-import com.jvj28.homeworks.auth.contract.ApiAuthRequest;
 import com.jvj28.homeworks.model.Model;
 import com.jvj28.homeworks.model.data.LinkStatusData;
 import com.jvj28.homeworks.model.data.NetstatData;
@@ -18,7 +17,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 

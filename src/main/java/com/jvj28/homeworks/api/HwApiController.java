@@ -5,7 +5,7 @@ import com.jvj28.homeworks.model.data.LinkStatusData;
 import com.jvj28.homeworks.model.data.NetstatData;
 import com.jvj28.homeworks.model.data.StatusData;
 import com.jvj28.homeworks.model.data.TotalUsageData;
-import com.jvj28.homeworks.model.db.entity.*;
+import com.jvj28.homeworks.model.db.entity.CircuitEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;

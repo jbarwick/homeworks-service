@@ -1,7 +1,6 @@
 package com.jvj28.homeworks.api.contract;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.jvj28.homeworks.model.db.entity.CircuitEntity;
 import lombok.Data;
 

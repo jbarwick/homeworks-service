@@ -1,6 +1,5 @@
 package com.jvj28.homeworks.api.contract;
 
-import com.jvj28.homeworks.model.db.entity.UsageByDayEntity;
 import com.jvj28.homeworks.model.db.entity.UsageByMinuteEntity;
 import lombok.Data;
 import lombok.NonNull;
