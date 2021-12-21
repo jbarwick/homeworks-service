@@ -6,6 +6,7 @@ import com.jvj28.homeworks.model.data.NetstatData;
 import com.jvj28.homeworks.model.data.StatusData;
 import com.jvj28.homeworks.model.data.TotalUsageData;
 import com.jvj28.homeworks.model.db.entity.CircuitEntity;
+import com.jvj28.homeworks.model.db.entity.UsersEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -140,6 +141,20 @@ public class HwApiController {
         TotalUsageData usage = new TotalUsageData();
         usage.setWatts(service.getCurrentUsage());
         return usage;
+    }
+
+    @GetMapping("/user")
+    public UserResponse getUser() {
+        Thread.currentThread().setName("/user");
+        log.debug("Request user details");
+        UsersEntity user = service.getCurrentUser();
+        if (user == null)
+            throw new BadRequestException("Not Authenticated");
+        UserResponse response = new UserResponse();
+        response.setFirstName(user.getFirstName());
+        response.setLastName(user.getLastName());
+        response.setInfo(user.getInfo());
+        return response;
     }
 
     public static Date convertToDate(String relative) {

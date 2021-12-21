@@ -21,12 +21,12 @@ class TestJwtTokenUtil {
     @BeforeEach
     public void generateUserDetails() {
         this.userDetails = new UsersEntity();
-        this.userDetails.setId(UUID.randomUUID());
+        this.userDetails.setUid(UUID.randomUUID());
         this.userDetails.setUsername("test-user");
         this.userDetails.setPassword(new BCryptPasswordEncoder().encode("sample-password"));
         this.userDetails.setFirstName("Test");
         this.userDetails.setLastName("User");
-        this.userDetails.setEnabled(true);
+        this.userDetails.setEnabled(1);
         this.userDetails.setInfo("Other Information");
 
         this.jwtTokenUtil = new JwtTokenUtil();
@@ -57,7 +57,7 @@ class TestJwtTokenUtil {
         assertEquals(this.userDetails.getUsername(), subject);
         String id = this.jwtTokenUtil.getClaimFromToken(this.token, Claims::getId);
         System.out.println("Validate Id: " + id);
-        assertEquals(this.userDetails.getId().toString(), id);
+        assertEquals(this.userDetails.getUid().toString(), id);
         String issuer = this.jwtTokenUtil.getClaimFromToken(this.token, Claims::getIssuer);
         assertEquals("Homeworks Service", issuer);
     }
@@ -66,7 +66,7 @@ class TestJwtTokenUtil {
     void validateToken() {
         boolean result = this.jwtTokenUtil.validateSubject(this.token, this.userDetails);
         assertTrue(result);
-        result = this.jwtTokenUtil.validateUUID(this.token, this.userDetails.getId());
+        result = this.jwtTokenUtil.validateUUID(this.token, this.userDetails.getUid());
         assertTrue(result);
     }
 }

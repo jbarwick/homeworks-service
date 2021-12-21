@@ -67,7 +67,7 @@ public class HwApiControllerService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
         if (principal instanceof UsersEntity) {
-            return ((UsersEntity) principal).getId();
+            return ((UsersEntity) principal).getUid();
         }
         return UUID.fromString("aad7b0bf-b210-4fbb-8a1b-b01622df52df");
     }
@@ -147,4 +147,11 @@ public class HwApiControllerService {
         return newRank;
     }
 
+    public UsersEntity getCurrentUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if ((authentication == null) || (!(authentication.getPrincipal() instanceof UsersEntity)))
+            return null;
+        return (UsersEntity) authentication.getPrincipal();
+    }
 }

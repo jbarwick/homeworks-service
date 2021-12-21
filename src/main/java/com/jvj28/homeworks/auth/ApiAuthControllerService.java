@@ -10,23 +10,33 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ApiAuthService implements UserDetailsService {
+public class ApiAuthControllerService implements UserDetailsService {
 
-    private final Logger log = LoggerFactory.getLogger(ApiAuthService.class);
+    private final Logger log = LoggerFactory.getLogger(ApiAuthControllerService.class);
 
     private final Model model;
 
-    public ApiAuthService(Model model) {
+    public ApiAuthControllerService(Model model) {
         this.model = model;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UsersEntity user = this.model.getUserByUsername(username);
+        return loadUserByUsername(username, false);
+    }
+
+    public UserDetails loadUserByUsername(String username, boolean cached) {
+        UsersEntity user = this.model.getUserByUsername(username, cached);
         if (user == null)
             throw new UsernameNotFoundException(String.format("User [%s] not found", username));
         if (log.isDebugEnabled())
             log.debug(user.toString());
         return user;
+    }
+
+    public void saveUserDetails(UserDetails userDetails) {
+        if (userDetails instanceof UsersEntity) {
+            this.model.saveUserToCache((UsersEntity)userDetails);
+        }
     }
 }

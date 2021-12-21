@@ -562,20 +562,41 @@ public class Model {
      * @param username the <i>username</i> of the user to retrieve
      * @return a {@link UsersEntity} object or null if not found
      */
+    public UsersEntity getUserByUsername(String username, boolean cached) {
+        if (!cached) {
+            log.debug("Loading user [{}] from database", username);
+            UsersEntity user = users.findByUsername(username);
+            user.setEnabled(1);
+            return user;
+        } else {
+            return getUserByUsername(username);
+        }
+    }
+
+    /**
+     *
+     * Save UserDetails to REDIS.  This user object might include dates
+     * such as credentialsExpiration or other Transient fields
+     *
+     * @param user UsersEntity to save to REDIS
+     */
+    public void saveUserToCache(UsersEntity user) {
+        String username = user.getUsername();
+        if (log.isDebugEnabled())
+            log.debug("Saving user [{}] to REDIS: {}", username, user);
+        RBucket<UsersEntity> userData = redis.getBucket(username);
+        userData.set(user, 5, TimeUnit.MINUTES);
+    }
+
     public UsersEntity getUserByUsername(String username) {
         // first check if this user is in REDIS.
+        log.debug("Loading user [{}] from REDIS", username);
         RBucket<UsersEntity> userData = redis.getBucket(username);
-        UsersEntity user;
         if (userData.isExists()) {
-            user = userData.get();
+            return userData.get();
         } else {
-            user = users.findByUsername(username);
-            if (user != null)
-                userData.set(user, 5, TimeUnit.MINUTES);
+            return getUserByUsername(username, false);
         }
-        if (user != null)
-            user.setEnabled(true); // force this until we begin to really use it.
-        return user;
     }
 
     @NonNull
@@ -671,4 +692,5 @@ public class Model {
     public void saveRank(CircuitRankEntity rank) {
         ranks.save(rank);
     }
+
 }

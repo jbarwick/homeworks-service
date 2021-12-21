@@ -1,7 +1,6 @@
 package com.jvj28.homeworks.auth;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -15,15 +14,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration
 @EnableWebSecurity
-//@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final ApiAuthService userDetailsService;
+    private final ApiAuthControllerService userDetailsService;
     private final ApiRequestAuthorizationFilter authorizationFilter;
 
-    public WebSecurityConfig(ApiAuthService userDetailsService, ApiRequestAuthorizationFilter authorizationFilter) {
+    public WebSecurityConfig(ApiAuthControllerService userDetailsService, ApiRequestAuthorizationFilter authorizationFilter) {
         this.userDetailsService = userDetailsService;
         this.authorizationFilter = authorizationFilter;
     }
@@ -55,12 +52,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .httpBasic().realmName(Realm.BASIC).authenticationEntryPoint(authBasicFailedEntryPoint())
                 .and()
-                    .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
+                    .exceptionHandling().authenticationEntryPoint(authJwtFailedEntryPoint())
                 .and()
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                     .formLogin().disable();
-                // all other requests need to be authenticated
 
         // Add a filter to validate the tokens with every request
         http.addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -72,12 +68,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
+    public AuthenticationEntryPoint authJwtFailedEntryPoint() {
         return new ApiAuthJwtEntryPoint();
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
+    public void configure(WebSecurity web) {
         web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
     }
 }

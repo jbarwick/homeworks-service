@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 @Component
-@ConfigurationProperties(prefix = "homeworks.api")
+@ConfigurationProperties(prefix="homeworks.api.encryption")
 public class JwtTokenUtil implements Serializable {
 
     private static final long serialVersionUID = -2550185165626007488L;
@@ -58,13 +58,20 @@ public class JwtTokenUtil implements Serializable {
     }
 
     //generate token for user
+
+    /**
+     * This function mutates userDetails by setting the CredentialsExpires
+     * @param userDetails mutated UsersEntity (if a UsersEntity)
+     * @return the JWT Token String
+     */
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        Date expiry = new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY_SECONDS * 1000L);
+        UUID uuid = null;
         if (userDetails instanceof UsersEntity) {
-            UsersEntity u = (UsersEntity) userDetails;
-            return doGenerateToken(claims, u.getId(), u.getUsername());
+            uuid = ((UsersEntity)userDetails).getUid();
         }
-        return doGenerateToken(claims, null, userDetails.getUsername());
+        return doGenerateToken(claims, uuid, userDetails.getUsername(), expiry);
     }
 
     //while creating the token -
@@ -72,14 +79,14 @@ public class JwtTokenUtil implements Serializable {
     //2. Sign the JWT using the HS512 algorithm and secret key.
     //3. According to JWS Compact Serialization(https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-3.1)
     //   compaction of the JWT to a URL-safe string
-    private String doGenerateToken(Map<String, Object> claims, UUID uuid,  String subject) {
+    private String doGenerateToken(Map<String, Object> claims, UUID uuid,  String subject, Date expiry) {
 
         return Jwts.builder().setClaims(claims)
                 .setIssuer(ISSUER)
                 .setSubject(subject)
                 .setId(uuid == null ? null : uuid.toString())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY_SECONDS * 1000L))
+                .setExpiration(expiry)
                 .signWith(SignatureAlgorithm.HS512, secret).compact();
     }
 
@@ -92,7 +99,8 @@ public class JwtTokenUtil implements Serializable {
     }
 
     public boolean isValidIssuer(String token) {
-        return ISSUER.equals(getIssuerFromToken(token));
+        String issuer = getIssuerFromToken(token);
+        return ISSUER.equals(issuer);
     }
 
     public String getIssuerFromToken(String token) {

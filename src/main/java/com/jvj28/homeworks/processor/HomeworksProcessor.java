@@ -268,6 +268,9 @@ public class HomeworksProcessor {
         log.debug("LNET> prompt received");
         if (currentPromise != null) {
             // Causes the onComplete to call the Callbacks.  When we receive the LNET, this means that we have completed a command
+            // since all operations are performed on a SINGLE "Queue Thread", the thread making this call is blocked.  So,
+            // the expectation is that we unblock it to tell the calling thread waiting on this latch to continue.
+            // See HomeworksPromiseImpl class
             currentPromise.markComplete();
             currentPromise = null;
         }

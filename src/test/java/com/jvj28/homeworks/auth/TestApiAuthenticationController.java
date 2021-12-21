@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         ApiAuthController.class,
         ApiAuthControllerAdvice.class,
         JwtTokenUtil.class,
-        ApiAuthService.class,
+        ApiAuthControllerService.class,
         ApiRequestAuthorizationFilter.class})
 @WebMvcTest
 class TestApiAuthenticationController {
@@ -50,7 +50,7 @@ class TestApiAuthenticationController {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    ApiAuthService apiAuthService;
+    ApiAuthControllerService apiAuthService;
     @Autowired
     ApiAuthController controller;
     @Autowired

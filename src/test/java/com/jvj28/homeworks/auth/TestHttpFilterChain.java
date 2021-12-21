@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 class TestHttpFilterChain {
 
     @MockBean
-    private ApiAuthService authControllerService;
+    private ApiAuthControllerService authControllerService;
 
     private UsersEntity userDetails;
     private JwtTokenUtil jwtTokenUtil;
@@ -31,12 +31,12 @@ class TestHttpFilterChain {
     @BeforeEach
     public void generateUserDetails() {
         this.userDetails = new UsersEntity();
-        this.userDetails.setId(UUID.randomUUID());
+        this.userDetails.setUid(UUID.randomUUID());
         this.userDetails.setUsername("test-user");
         this.userDetails.setPassword(new BCryptPasswordEncoder().encode("sample-password"));
         this.userDetails.setFirstName("Test");
         this.userDetails.setLastName("User");
-        this.userDetails.setEnabled(true);
+        this.userDetails.setEnabled(1);
         this.userDetails.setInfo("Other Information");
 
         this.jwtTokenUtil = new JwtTokenUtil();
@@ -44,7 +44,7 @@ class TestHttpFilterChain {
         this.token = this.jwtTokenUtil.generateToken(this.userDetails);
         assertNotNull(this.token);
 
-        authControllerService = mock(ApiAuthService.class);
+        authControllerService = mock(ApiAuthControllerService.class);
     }
 
     @Test

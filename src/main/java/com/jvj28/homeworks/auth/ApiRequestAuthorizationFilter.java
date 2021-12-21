@@ -5,11 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -21,15 +22,15 @@ import java.io.IOException;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.util.StringUtils.hasText;
 
-@Service
+@Component
 public class ApiRequestAuthorizationFilter extends OncePerRequestFilter {
 
     private final Logger log = LoggerFactory.getLogger(ApiRequestAuthorizationFilter.class);
 
-    private final ApiAuthService apiAuthService;
+    private final ApiAuthControllerService apiAuthService;
     private final JwtTokenUtil jwtTokenUtil;
 
-    public ApiRequestAuthorizationFilter(ApiAuthService jwtApiUserDetailsService, JwtTokenUtil jwtTokenUtil) {
+    public ApiRequestAuthorizationFilter(ApiAuthControllerService jwtApiUserDetailsService, JwtTokenUtil jwtTokenUtil) {
         this.apiAuthService = jwtApiUserDetailsService;
         this.jwtTokenUtil = jwtTokenUtil;
     }
@@ -63,14 +64,15 @@ public class ApiRequestAuthorizationFilter extends OncePerRequestFilter {
                 return;
 
             // Let's get all the user details from the auth controller
-            UserDetails userDetails = this.apiAuthService.loadUserByUsername(username);
+            UserDetails userDetails = this.apiAuthService.loadUserByUsername(username, true);
 
-            // if token is valid configure Spring Security to manually set
-            // authentication
+            // if token is valid configure Spring Security to manually set authentication
             if (userDetails.isEnabled() && userDetails.isAccountNonExpired() &&
                     userDetails.isAccountNonLocked() && userDetails.isCredentialsNonExpired() &&
                     this.jwtTokenUtil.validateSubject(token, userDetails)) {
-
+                if (userDetails instanceof CredentialsContainer) {
+                    ((CredentialsContainer) userDetails).eraseCredentials();
+                }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -96,7 +98,7 @@ public class ApiRequestAuthorizationFilter extends OncePerRequestFilter {
         if (authHeader == null || !authHeader.startsWith("Bearer "))
             throw new IllegalArgumentException("Bearer not specified in authorization header");
         String token = authHeader.substring(7);
-        if (jwtTokenUtil.isValidIssuer(token))
+        if (!jwtTokenUtil.isValidIssuer(token))
             throw new JwtException("Issuer does not match");
         if (jwtTokenUtil.isTokenExpired(token))
             throw new JwtException("Token is expired");

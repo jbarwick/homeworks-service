@@ -1,7 +1,9 @@
 package com.jvj28.homeworks.model.db.entity;
 
+import com.jvj28.homeworks.auth.ApiRequestAuthorizationFilter;
 import com.opencsv.bean.CsvBindByName;
 import org.springframework.data.redis.core.index.Indexed;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,11 +11,22 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * UsersEntity contains the user details.  This class implements 3 interfaces:
+ * <ul><li>@Entity - Stored in JPA database.  Also stored in REDIS</li>
+ * <li>{@link UserDetails} - Spring Security user API interface</li>
+ * <li>{@link CredentialsContainer} - Tells calling classes that this object may contain
+ * user credentials that should be erased.  Implements the eraseCredentials() API.</li>
+ * </ul>
+ * Known  consumers of this class are:
+ * {@link AuthenticationManager} and {@link ApiRequestAuthorizationFilter}
+ */
 @Table(name = "users", indexes = {
         @Index(name = "users_username_uindex", columnList = "username", unique = true)
 })
@@ -57,21 +70,13 @@ public class UsersEntity implements UserDetails, CredentialsContainer {
     private int enabled;
 
     @Transient
-    private boolean accountExpired;
+    private LocalDateTime accountExpires;
 
     @Transient
-    private boolean accountLocked;
+    private LocalDateTime accountLockedUntil;
 
     @Transient
-    private boolean credentialExpired;
-
-    public int getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(int enabled) {
-        this.enabled = enabled;
-    }
+    private LocalDateTime credentialsExpires;
 
     public UsersEntity() {
         // new entity doesn't need to initialize values.  But, there are constraints of not null on username and uuid
@@ -88,12 +93,12 @@ public class UsersEntity implements UserDetails, CredentialsContainer {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UsersEntity that = (UsersEntity) o;
-        return accountExpired == that.accountExpired && accountLocked == that.accountLocked && credentialExpired == that.credentialExpired && enabled == that.enabled && Objects.equals(uid, that.uid) && Objects.equals(username, that.username) && Objects.equals(password, that.password) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(info, that.info);
+        return enabled == that.enabled && uid.equals(that.uid) && username.equals(that.username) && Objects.equals(password, that.password) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(info, that.info) && Objects.equals(accountExpires, that.accountExpires) && Objects.equals(accountLockedUntil, that.accountLockedUntil) && Objects.equals(credentialsExpires, that.credentialsExpires);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uid, username, password, firstName, lastName, info, accountExpired, accountLocked, credentialExpired, enabled);
+        return Objects.hash(uid, username, password, firstName, lastName, info, enabled, accountExpires, accountLockedUntil, credentialsExpires);
     }
 
     @Override
@@ -105,19 +110,27 @@ public class UsersEntity implements UserDetails, CredentialsContainer {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", info='" + info + '\'' +
-                ", accountExpired=" + accountExpired +
-                ", accountLocked=" + accountLocked +
-                ", credentialExpired=" + credentialExpired +
                 ", enabled=" + enabled +
+                ", accountExpires=" + accountExpires +
+                ", accountLockedUntil=" + accountLockedUntil +
+                ", credentialsExpires=" + credentialsExpires +
                 '}';
     }
 
-    public UUID getId() {
+    public UUID getUid() {
         return uid;
     }
 
-    public void setId(UUID uid) {
+    public void setUid(UUID uid) {
         this.uid = uid;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     /**
@@ -159,29 +172,39 @@ public class UsersEntity implements UserDetails, CredentialsContainer {
         this.firstName = firstname;
     }
 
-    /**
-     * Returns the authorities granted to the user. Cannot return <code>null</code>.
-     *
-     * @return the authorities, sorted by natural key (never <code>null</code>)
-     */
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Set.of(new SimpleGrantedAuthority("ROLE_USER"));
+    public void setEnabled(int enabled) {
+        this.enabled = enabled;
     }
 
-    /**
-     * Returns the password used to authenticate the user.
-     *
-     * @return the password
-     */
-    @Override
-    public String getPassword() {
-        return this.password;
+    public int getEnabled() {
+        return this.enabled;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public LocalDateTime getAccountExpires() {
+        return accountExpires;
     }
+
+    public void setAccountExpires(LocalDateTime accountExpires) {
+        this.accountExpires = accountExpires;
+    }
+
+    public LocalDateTime getAccountLockedUntil() {
+        return accountLockedUntil;
+    }
+
+    public void setAccountLockedUntil(LocalDateTime accountLockedUntil) {
+        this.accountLockedUntil = accountLockedUntil;
+    }
+
+    public LocalDateTime getCredentialsExpires() {
+        return credentialsExpires;
+    }
+
+    public void setCredentialsExpires(LocalDateTime credentialsExpires) {
+        this.credentialsExpires = credentialsExpires;
+    }
+
+    // --------------  Interface For UserDetails -------------------------
 
     /**
      * Returns the username used to authenticate the user. Cannot return
@@ -194,8 +217,16 @@ public class UsersEntity implements UserDetails, CredentialsContainer {
         return this.username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    /**
+     * Returns the password used to authenticate the user. This password
+     * may be erased by a service because this class implements the
+     * {@link CredentialsContainer} interface.
+     *
+     * @return the password
+     */
+    @Override
+    public String getPassword() {
+        return this.password;
     }
 
     /**
@@ -207,7 +238,7 @@ public class UsersEntity implements UserDetails, CredentialsContainer {
      */
     @Override
     public boolean isAccountNonExpired() {
-        return !this.accountExpired;
+        return this.accountExpires == null || LocalDateTime.now().isBefore(this.accountExpires);
     }
 
     /**
@@ -218,7 +249,7 @@ public class UsersEntity implements UserDetails, CredentialsContainer {
      */
     @Override
     public boolean isAccountNonLocked() {
-        return !this.accountLocked;
+        return this.accountLockedUntil == null || LocalDateTime.now().isBefore(this.accountLockedUntil);
     }
 
     /**
@@ -230,7 +261,7 @@ public class UsersEntity implements UserDetails, CredentialsContainer {
      */
     @Override
     public boolean isCredentialsNonExpired() {
-        return !this.credentialExpired;
+        return this.credentialsExpires == null || LocalDateTime.now().isBefore(this.credentialsExpires);
     }
 
     /**
@@ -244,12 +275,20 @@ public class UsersEntity implements UserDetails, CredentialsContainer {
         return this.enabled == 1;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled ? 1 : 0;
+    /**
+     * Returns the authorities granted to the user. Cannot return <code>null</code>.
+     *
+     * @return the authorities, sorted by natural key (never <code>null</code>)
+     */
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Set.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
+    // --------------  Interface For CredentialsContainer -------------------------
     @Override
     public void eraseCredentials() {
         this.password = null;
     }
+
 }
