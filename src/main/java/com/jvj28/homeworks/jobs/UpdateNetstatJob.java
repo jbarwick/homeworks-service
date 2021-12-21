@@ -31,10 +31,14 @@ public class UpdateNetstatJob extends QuartzJobBean {
         log.debug("Scheduler Update Network Status (with forUpdate)");
         NetstatData ns = model.get(NetstatData.class, true);
         try {
-            processor.waitForReady();
+
+            //noinspection StatementWithEmptyBody
+            while (processor.isNotReady());
+
             log.debug("Generating new Netstat Data");
             ns.generate(processor);
             model.save(ns); // Save and release the lock
+
         } catch (ExecutionException ee) {
             log.warn("Could not generate data object: {}", ee.getMessage());
         } catch (InterruptedException e) {

@@ -1,6 +1,8 @@
 package com.jvj28.homeworks.processor;
 
+import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * This configuration file is for all "HomeWorks Processor" configuration variables.
@@ -18,6 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
  * hw.password=ENC(RgQZi8o6Y9XEW4rGfqFyOQ==)
  *
  */
+@Configuration
+@EnableEncryptableProperties
 public class ProcessorConfiguration {
 
     @Value("${homeworks.processor.username}")

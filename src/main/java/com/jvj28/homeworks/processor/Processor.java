@@ -12,6 +12,7 @@ import reactor.util.annotation.NonNull;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,63 +24,71 @@ import java.util.concurrent.TimeUnit;
 public class Processor {
 
     private final Logger log = LoggerFactory.getLogger(Processor.class);
-
-    private Thread queueProcessorThread;
-    private Thread dataReceiverThread;
-
     private final TelnetClient telnetClient = new TelnetClient();
     private final ProcessorConfiguration config;
-
     // Monitors.  In the future, will replace with a List of Listener objects and a register/deregister listener process
     private final List<ProcessorMonitor> processorMonitors = new ArrayList<>();
-
+    // Command Queue and promise. Which is more like a Future.  Maybe can replace with a standard pattern
+    private final LinkedBlockingQueue<Promise<? extends HomeworksCommand>> commandQueue = new LinkedBlockingQueue<>();
+    private Thread queueProcessorThread;
+    private Thread dataReceiverThread;
     // Data receiver buffer
     private StringBuilder receiveBuffer = new StringBuilder();
-
-    // Command Queue and promise. Which is more like a Future.  Maybe can replace with a standard pattern
-    private final LinkedBlockingQueue<Promise<? extends HomeworksCommand>> queue = new LinkedBlockingQueue<>();
     private Promise<? extends HomeworksCommand> currentPromise;
 
     // Ready Latches
     private CountDownLatch commandPromptLatch = new CountDownLatch(1);
     private CountDownLatch readyLatch = new CountDownLatch(1);
     private CountDownLatch loginPromptLatch = new CountDownLatch(1);
-    private boolean stoppedOnPurpose = false;
+    private boolean stoppedOnPurpose;
 
     public Processor(ProcessorConfiguration config) {
         this.config = config;
     }
 
-    private void connect() throws IOException {
+    void connect() throws IOException {
         if (!isConnected()) {
             log.debug("Connecting to server {} on port {}", config.getConsoleHost(), config.getPort());
-            telnetClient.connect(config.getConsoleHost(), config.getPort());
+            resetLatches();
+            try {
+                telnetClient.connect(config.getConsoleHost(), config.getPort());
+            } catch (SocketException se) {
+                throw new IOException(se);
+            }
+            try {
+                startPromiseQueueProcessor();
+                startDataReceiverProcessor();
+            } catch (IllegalStateException ise) {
+                disconnect();
+                throw new IOException(ise);
+            }
             log.debug("Connected");
-            startPromiseQueueProcessor();
-            startDataReceiverProcessor();
         }
     }
 
     void disconnect() throws IOException {
         if (isConnected()) {
-            resetLatches();
             log.debug("Disconnecting from server");
-            queue.clear();
+            if (dataReceiverThread != null)
+                dataReceiverThread.interrupt();
+            if (queueProcessorThread != null)
+                queueProcessorThread.interrupt();
             telnetClient.disconnect();
-            log.debug("Disconnected");
+            resetLatches();
         }
+        log.debug("Disconnected");
     }
 
     private boolean waitForCommandPrompt() throws InterruptedException {
         return commandPromptLatch.await(30, TimeUnit.SECONDS);
     }
 
-    public boolean waitForReady() throws InterruptedException {
-        return readyLatch.await(60, TimeUnit.SECONDS);
+    public boolean isNotReady() throws InterruptedException {
+        return !readyLatch.await(30, TimeUnit.SECONDS);
     }
 
     public boolean waitForLoginPrompt() throws InterruptedException {
-        return loginPromptLatch.await(60, TimeUnit.SECONDS);
+        return loginPromptLatch.await(30, TimeUnit.SECONDS);
     }
 
     /**
@@ -94,22 +103,28 @@ public class Processor {
         if (queueProcessorThread != null)
             return;
 
+        commandQueue.clear();
+
         queueProcessorThread = new Thread(() -> {
-            log.debug("Started Queue Processor");
-            while (isNotStoppedByOnPurpose()) {
-                try {
-                    // Wait for command prompt
-                    if (waitForCommandPrompt()) { // This may timeout.  But if it does, just keep waiting
-                        Promise<? extends HomeworksCommand> command = queue.take();
-                        if (!sendCommandToProcessor(command))
-                            queue.put(command);
+            try {
+                log.debug("Started Queue Processor");
+                while (!queueProcessorThread.isInterrupted()) {
+                    try {
+                        // Wait for command prompt
+                        if (waitForCommandPrompt()) { // This may timeout.  But if it does, just keep waiting
+                            Promise<? extends HomeworksCommand> command = commandQueue.take();
+                            if (!sendCommandToProcessor(command))
+                                commandQueue.put(command);
+                        }
+                    } catch (InterruptedException e) {
+                        log.warn("Queue processor interrupted. Stopping.");
+                        Thread.currentThread().interrupt();
                     }
-                } catch (InterruptedException e) {
-                    log.warn("Queue processor interrupted. Stopping.");
-                    Thread.currentThread().interrupt();
                 }
+            } finally {
+                log.debug("Queue Processor stopped");
+                queueProcessorThread = null;
             }
-            log.debug("Queue Processor stopped");
         });
         queueProcessorThread.setName("Queue Runner");
         queueProcessorThread.setDaemon(true);
@@ -117,6 +132,9 @@ public class Processor {
     }
 
     private boolean sendCommandToProcessor(@NonNull Promise<? extends HomeworksCommand> promise) {
+
+        if (!isConnected())
+            return false;
 
         try {
             // Reset the latch because we cannot send another command until a command prompt has been received
@@ -154,21 +172,24 @@ public class Processor {
             return;
 
         dataReceiverThread = new Thread(() -> {
-            log.debug("Data reader started");
-            int ch;
-            do {
-                try {
-                    ch = telnetClient.getInputStream().read();
-                    appendToReceiveBuffer((char) ch);
-                } catch (IOException e) {
+            try {
+                log.debug("Data reader started");
+                while (!dataReceiverThread.isInterrupted()) {
                     try {
-                        TimeUnit.SECONDS.sleep(3);
-                    } catch (InterruptedException ex) {
-                        Thread.currentThread().interrupt();
+                        int ch = telnetClient.getInputStream().read();
+                        appendToReceiveBuffer((char) ch);
+                    } catch (IOException e) {
+                        try {
+                            TimeUnit.SECONDS.sleep(3);
+                        } catch (InterruptedException ex) {
+                            Thread.currentThread().interrupt();
+                        }
                     }
                 }
-            } while (isNotStoppedByOnPurpose());
-            log.debug("Data reader stopped");
+            } finally {
+                log.debug("Data reader stopped");
+                dataReceiverThread = null;
+            }
         });
         dataReceiverThread.setName("Data Receiver");
         dataReceiverThread.setDaemon(true);
@@ -202,7 +223,7 @@ public class Processor {
                 testLoginResult((Login) currentPromise.getCommand());
         }
 
-        for (ProcessorMonitor m: processorMonitors) {
+        for (ProcessorMonitor m : processorMonitors) {
             if (m.isEnabled())
                 m.parseLine(receiveBuffer.toString());
         }
@@ -229,12 +250,12 @@ public class Processor {
     public <S extends HomeworksCommand> Promise<S> sendCommand(S command) {
         Promise<S> promise = new PromiseImpl<>(command);
         log.debug("Adding command to queue: [{}]", command.getCommand());
-        queue.add(promise);
+        commandQueue.add(promise);
         return promise;
     }
 
     public boolean queueIsNotEmpty() {
-        return !queue.isEmpty();
+        return !commandQueue.isEmpty();
     }
 
     void addMonitor(ProcessorMonitor processorMonitor) {
@@ -285,22 +306,29 @@ public class Processor {
 
     private void resetLatches() {
 
-        loginPromptLatch = new CountDownLatch(1);
-        readyLatch = new CountDownLatch(1);
-        commandPromptLatch = new CountDownLatch(1);
+        if (loginPromptLatch.getCount() == 0)
+            loginPromptLatch = new CountDownLatch(1);
+        if (readyLatch.getCount() == 0)
+            readyLatch = new CountDownLatch(1);
+        if (commandPromptLatch.getCount() == 0)
+            commandPromptLatch = new CountDownLatch(1);
     }
 
-    public void start() throws IOException {
-        stoppedOnPurpose = false;
-        connect();
+    public void start() {
+        log.info("Start Requested");
+        stoppedOnPurpose = false;  // processorMonitor will attempt to login
     }
 
-    public void stop() throws IOException {
-        stoppedOnPurpose = true;
-        disconnect();
+    public void stop() {
+        log.info("Stop Requested");
+        stoppedOnPurpose = true;  // processorMonitor will attempt to disconnect
     }
 
-    public boolean isNotStoppedByOnPurpose() {
+    public boolean isNotStopRequested() {
         return !stoppedOnPurpose;
+    }
+
+    public int getQueueSize() {
+        return commandQueue.size();
     }
 }

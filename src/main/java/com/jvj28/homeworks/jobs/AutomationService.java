@@ -37,7 +37,9 @@ public class AutomationService {
         asyncExecutor.execute(() -> {
             try {
                 Thread.currentThread().setName("Job Initializer");
-                processor.waitForReady();
+
+                //noinspection StatementWithEmptyBody
+                while (processor.isNotReady());
 
                 log.debug("Enabling Processor Status Refresh Job (Refresh every hour)");
                 JobDetail statusUpdate = getJobDetail(UpdateStatusJob.class);

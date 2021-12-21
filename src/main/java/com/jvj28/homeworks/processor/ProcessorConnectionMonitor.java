@@ -12,7 +12,6 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -40,43 +39,35 @@ public class ProcessorConnectionMonitor {
 
     @PostConstruct
     private void startMonitor() {
-        log.debug("Starting connection monitor");
         asyncExecutor.execute(() -> {
             Thread.currentThread().setName(CONNECTION_MONITOR_THREAD);
             try {
                 runConnectionMonitorSteps();
             } catch (InterruptedException e) {
                 log.warn("Monitor Thread Interrupted");
-                try {
-                    processor.stop();
-                } catch (IOException ex) {
-                    log.warn("Could not stop processor client");
-                }
+                processor.stop();
                 Thread.currentThread().interrupt();
             }
         });
     }
 
     private void runConnectionMonitorSteps() throws InterruptedException {
-        while (processor.isNotStoppedByOnPurpose()) {
-            try {
-                attemptConnection();
-                attemptLogin();
-                attemptKeepAlive();
-            } catch (IOException e) {
-                log.error("Monitor Exception: {}", e.getMessage());
+        while (!Thread.currentThread().isInterrupted()) {
+            log.debug("Starting connection monitor");
+            if (processor.isNotStopRequested()) {
+                try {
+                    attemptConnection();
+                    attemptLogin();
+                    attemptKeepAlive();
+                } catch (IOException e) {
+                    log.error("Monitor Exception: {}", e.getMessage());
+                } finally {
+                    attemptDisconnect();
+                }
+            } else {
+                log.warn("Processor is stopped on purpose.  Waiting.");
             }
-            attemptDisconnect();
             TimeUnit.SECONDS.sleep(5);
-        }
-    }
-
-    private void attemptDisconnect() {
-        try {
-            log.error("Closing Connection and retrying");
-            processor.disconnect();
-        } catch (IOException e) {
-            log.warn("Error during disconnect: {}", e.getMessage());
         }
     }
 
@@ -85,57 +76,59 @@ public class ProcessorConnectionMonitor {
      * If not, then let's reset the system, exit, and the loop above will attempt to reconnect
      */
     private void attemptKeepAlive() throws InterruptedException, IOException {
-        while (processor.isConnected()) {
+        while (processor.isNotStopRequested()) {
+
+            if (!processor.isConnected())
+                throw new IOException("Login process exiting due to disconnect");
+
             try {
-                TimeUnit.SECONDS.sleep(DELAY);
+
                 RequestSystemTime ptime = processor.sendCommand(RequestSystemTime.class)
                         .onComplete(p -> log.debug("Time result: {}", p.getTime())).get();
                 RequestSystemDate pDate = processor.sendCommand(RequestSystemDate.class)
                         .onComplete(p -> log.debug("Date result: {}", p.getDate())).get();
                 String dts = String.format("%s %s", pDate.getDate(), ptime.getTime());
                 log.debug("Storing processor time: {}", dts);
+
                 SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm");
                 model.setProcessorDate(sdf.parse(dts));
-            } catch (ParseException | ExecutionException e) {
-                model.setProcessorDate(new Date());
-                if (e.getMessage() == null)
-                    log.warn("Retrying....");
-                else
-                    log.warn("Retrying: {}", e.getMessage());
-                processor.disconnect(); // remove this?
+
+            } catch (ParseException pe) {
+                log.error(pe.getMessage());
+            } catch (ExecutionException e) {
+                throw new IOException(e);
             }
+            TimeUnit.SECONDS.sleep(DELAY);
         }
-        if (!processor.isNotStoppedByOnPurpose())
-            throw new IOException("Login process exiting due to disconnect");
+        log.warn("Keep-Alive has stopped");
     }
 
     private void attemptLogin() throws InterruptedException, IOException {
 
         // Tell the processor object to connect
-        Login loginResult = null;
-        do {
-            if (!processor.isConnected())
-                throw new IOException("Login process exiting due to disconnect");
-            try {
-                log.info("Waiting for login prompt");
-                if (!processor.waitForLoginPrompt()) {
-                    log.warn("Did not receive login prompt for 30 seconds");
-                    continue;
-                }
-                log.debug("Performing login to processor");
-                loginResult = processor.sendCommand(
-                        new Login(config.getUsername(), config.getConsolePassword())).onComplete(p -> {
-                    StatusData hw = model.get(StatusData.class, true);
-                    hw.setLoggedIn(p.isSucceeded());
-                    model.save(hw);
-                }).get();
-                if (!loginResult.isSucceeded()) {
-                    log.debug("Login failed.  Retrying...");
-                }
-            } catch (ExecutionException e) {
-                log.debug("Retrying login {}", e.getMessage());
-            }
-        } while (processor.isConnected() && ((loginResult == null) || !loginResult.isSucceeded()));
+        Login loginResult;
+
+        if (!processor.isConnected())
+            throw new IOException("Login process exiting due to disconnect");
+
+        log.info("Waiting for login prompt");
+        if (!processor.waitForLoginPrompt())
+            throw new IOException("Did not receive login prompt for 30 seconds");
+
+        try {
+            log.debug("Performing login to processor");
+            loginResult = processor.sendCommand(
+                    new Login(config.getUsername(), config.getConsolePassword())).onComplete(p -> {
+                StatusData hw = model.get(StatusData.class, true);
+                hw.setLoggedIn(p.isSucceeded());
+                model.save(hw);
+            }).get();
+        } catch (ExecutionException e) {
+            throw new IOException(e.getMessage());
+        }
+
+        if (loginResult == null || !loginResult.isSucceeded())
+            throw new IOException("Login failed.  Retrying...");
 
         log.info("Model beginning initialization");
         processor.sendCommand(PromptOn.class);
@@ -173,6 +166,15 @@ public class ProcessorConnectionMonitor {
 
     private void attemptConnection() throws IOException {
         log.debug("Connecting to and Starting processor");
-        processor.start();
+        processor.connect();
+    }
+
+    private void attemptDisconnect() {
+        try {
+            log.error("Closing Connections");
+            processor.disconnect();
+        } catch (IOException e) {
+            log.warn("Error during disconnect: {}", e.getMessage());
+        }
     }
 }

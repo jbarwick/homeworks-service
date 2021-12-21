@@ -1,25 +1,55 @@
 package com.jvj28.homeworks;
 
+import com.jvj28.homeworks.model.Model;
 import com.jvj28.homeworks.model.ModelConfiguration;
-import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
+import com.jvj28.homeworks.model.db.entity.CircuitEntity;
 import org.redisson.api.RKeys;
-import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
-@EnableEncryptableProperties
-public class HomeworksModel extends ModelConfiguration implements HomeworksModelMXBean {
+import java.util.List;
 
+@Component
+public class HomeworksModel implements HomeworksModelMXBean {
+
+    private final ModelConfiguration config;
+    private final Model model;
     private final RedissonClient redis;
 
-    public HomeworksModel(RedissonClient redis) {
+    public HomeworksModel(ModelConfiguration config, Model model, RedissonClient redis) {
+        this.config = config;
+        this.model = model;
         this.redis = redis;
+    }
+
+    @Override
+    public String getCircuitsSeedFilename() {
+        return config.getCircuitsSeedFilename();
+    }
+
+    @Override
+    public String getKeypadSeedFilename() {
+        return config.getKeypadSeedFilename();
+    }
+
+    @Override
+    public String getUsersSeedFilename() {
+        return config.getUsersSeedFilename();
     }
 
     @Override
     public String getRedisId() {
         return redis.getId();
+    }
+
+    @Override
+    public String getRedisHost() {
+        return config.getRedisHost();
+    }
+
+    @Override
+    public int getRedisPort() {
+        return config.getRedisPort();
     }
 
     @Override
@@ -42,9 +72,9 @@ public class HomeworksModel extends ModelConfiguration implements HomeworksModel
 
     @Override
     public void printCircuits() {
-        RMap<String, Object> list = redis.getMap("com.jvj28.homeworks.model.data.CircuitList");
-        for (Object circuit: list.values()) {
-            System.out.println(circuit.toString());
+        List<CircuitEntity> circuits = model.getCircuits();
+        for (CircuitEntity circuit: circuits) {
+            System.out.println(circuit);
         }
     }
 }

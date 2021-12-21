@@ -10,4 +10,9 @@ public interface HomeworksProcessorMXBean {
 
     int getPort();
 
+    int getQueueDepth();
+
+    void startProcessor();
+
+    void stopProcessor();
 }

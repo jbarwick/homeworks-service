@@ -1,7 +1,11 @@
 package com.jvj28.homeworks.model;
 
+import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
+@EnableEncryptableProperties
 public class ModelConfiguration {
 
     @Value("${hw.circuits.seed:circuit_zones.csv}")

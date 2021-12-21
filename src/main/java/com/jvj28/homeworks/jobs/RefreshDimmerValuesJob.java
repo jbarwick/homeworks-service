@@ -31,10 +31,13 @@ public class RefreshDimmerValuesJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(@NonNull JobExecutionContext jobExecutionContext) {
-        Thread.currentThread().setName("Refresh Dimmers");
         try {
-            processor.waitForReady();
-            log.debug("Dimmer refresh job execute");
+            Thread.currentThread().setName("Refresh Dimmers");
+
+            //noinspection StatementWithEmptyBody
+            while (processor.isNotReady());
+
+            log.info("Dimmer refresh job execute");
             dimmerMonitor.setEnabled(false);
             model.getCircuits().forEach(circuit -> processor.sendCommand(
                     new RequestZoneLevel(circuit.getAddress())).onComplete(request -> {

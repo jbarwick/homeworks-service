@@ -95,14 +95,14 @@ class PromiseImpl<T extends HomeworksCommand> implements Promise<T> {
         try {
             return get(TIMEOUT, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
-           throw new ExecutionException(new Exception("Default time limit exceeded"));
+           throw new ExecutionException("Execution Failed", e);
         }
     }
 
     @Override
     public T get(long timeout, @NonNull TimeUnit unit) throws InterruptedException, TimeoutException {
         if (!this.callbackLatch.await(timeout, unit))
-            throw new TimeoutException("No response");
+            throw new TimeoutException("No response after time limit");
         return command;
     }
 }

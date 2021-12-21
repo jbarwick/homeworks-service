@@ -79,19 +79,19 @@ public class Model {
     @PostConstruct
     private void modelStartupSequence() {
 
-        log.info("Clearing CIRCUITS cache");
-        RMap<String, CircuitEntity> finalList = redis.getMap(CIRCUITLIST);
-        finalList.clear();
+//        log.info("Clearing CIRCUITS cache");
+//        RMap<String, CircuitEntity> finalList = redis.getMap(CIRCUITLIST);
+//        finalList.clear();
+//
+//        log.info("Clearing KEYPADS cache");
+//        RMap<String, KeypadEntity> finalKeypads = redis.getMap(KEYPADLIST);
+//        finalKeypads.clear();
+//
+//        log.info("Clearing RANKS cache");
+//        RMap<String, KeypadEntity> finalRanks = redis.getMap(RANKLIST);
+//        finalRanks.clear();
 
-        log.info("Clearing KEYPADS cache");
-        RMap<String, KeypadEntity> finalKeypads = redis.getMap(KEYPADLIST);
-        finalKeypads.clear();
-
-        log.info("Clearing RANKS cache");
-        RMap<String, KeypadEntity> finalRanks = redis.getMap(RANKLIST);
-        finalRanks.clear();
-
-        log.info("Clearing USES cache");
+        log.info("Clearing REDIS cache");
         RKeys keys = redis.getKeys();
         keys.flushall();
     }
