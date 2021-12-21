@@ -1,6 +1,6 @@
 package com.jvj28.homeworks;
 
-import com.jvj28.homeworks.processor.HomeworksProcessor;
+import com.jvj28.homeworks.processor.Processor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,7 +23,7 @@ class TestMetrics {
     private MockMvc mockMvc;
 
     @Autowired
-    private HomeworksProcessor processor;
+    private Processor processor;
 
     @Test
     void TestServiceMetrics() {

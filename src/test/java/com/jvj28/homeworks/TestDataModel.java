@@ -4,8 +4,8 @@ import com.jvj28.homeworks.command.Netstat;
 import com.jvj28.homeworks.command.RequestZoneLevel;
 import com.jvj28.homeworks.model.Model;
 import com.jvj28.homeworks.model.db.entity.CircuitEntity;
-import com.jvj28.homeworks.processor.HomeworksConfiguration;
-import com.jvj28.homeworks.processor.HomeworksProcessor;
+import com.jvj28.homeworks.processor.Processor;
+import com.jvj28.homeworks.processor.ProcessorConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,10 +18,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class TestDataModel {
 
     @Autowired
-    private HomeworksConfiguration service;
+    private ProcessorConfiguration service;
 
     @Autowired
-    private HomeworksProcessor processor;
+    private Processor processor;
 
     @Autowired
     private Model model;

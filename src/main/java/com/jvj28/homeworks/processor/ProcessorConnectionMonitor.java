@@ -18,20 +18,20 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class HomeworksConnectionMonitor {
+public class ProcessorConnectionMonitor {
 
-    private static final Logger log = LoggerFactory.getLogger(HomeworksConnectionMonitor.class);
+    private static final Logger log = LoggerFactory.getLogger(ProcessorConnectionMonitor.class);
     private static final String CONNECTION_MONITOR_THREAD = "Connection Monitor";
     private static final long DELAY = 10;
 
     private final Executor asyncExecutor;
-    private final HomeworksProcessor processor;
+    private final Processor processor;
     private final Model model;
-    private final HomeworksConfiguration config;
+    private final ProcessorConfiguration config;
 
-    public HomeworksConnectionMonitor(@Qualifier("asyncExecutor") Executor asyncExecutor,
-                                      HomeworksProcessor processor,
-                                      Model model, HomeworksConfiguration config) {
+    public ProcessorConnectionMonitor(@Qualifier("asyncExecutor") Executor asyncExecutor,
+                                      Processor processor,
+                                      Model model, ProcessorConfiguration config) {
         this.asyncExecutor = asyncExecutor;
         this.processor = processor;
         this.model = model;

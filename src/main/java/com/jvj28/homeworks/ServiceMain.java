@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin
 public class ServiceMain {
 
+
     @Bean(name = "encryptorBean")
     public StringEncryptor stringEncryptor() {
         PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();

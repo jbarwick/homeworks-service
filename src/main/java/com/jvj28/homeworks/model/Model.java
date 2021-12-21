@@ -4,8 +4,7 @@ import com.jvj28.homeworks.metrics.Metric;
 import com.jvj28.homeworks.model.data.DataObject;
 import com.jvj28.homeworks.model.db.*;
 import com.jvj28.homeworks.model.db.entity.*;
-import com.jvj28.homeworks.processor.HomeworksConfiguration;
-import com.jvj28.homeworks.processor.HomeworksProcessor;
+import com.jvj28.homeworks.processor.Processor;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import org.redisson.api.*;
@@ -37,13 +36,13 @@ public class Model {
 
     private static final Logger log = LoggerFactory.getLogger(Model.class);
 
-    private static final String CIRCUITLIST = "CIRCUITSLIST";
-    private static final String KEYPADLIST = "KEYPADSLIST";
-    private static final String RANKLIST = "RANKSLIST";
+    private static final String CIRCUITLIST = "com.jvj28.homeworks.model.data.CircuitList";
+    private static final String KEYPADLIST = "com.jvj28.homeworks.model.data.KeypadList";
+    private static final String RANKLIST = "com.jvj28.homeworks.model.data.RanksList";
 
     private final RedissonClient redis;
-    private final HomeworksConfiguration config;
-    private final HomeworksProcessor processor;
+    private final ModelConfiguration config;
+    private final Processor processor;
     private final CircuitZoneRepository circuits;
     private final KeypadsRepository keypads;
     private final CircuitRankRepository ranks;
@@ -57,8 +56,8 @@ public class Model {
 
     @SuppressWarnings("java:S107")
     // Dude, this is springboot, I'll probably have 50 parameters when all is said and done
-    public Model(HomeworksConfiguration config,
-                 HomeworksProcessor processor,
+    public Model(ModelConfiguration config,
+                 Processor processor,
                  RedissonClient redis,
                  CircuitZoneRepository circuits,
                  CircuitRankRepository ranks,
@@ -176,7 +175,10 @@ public class Model {
 
         if (object == null) {
             log.debug("Object [{}] not found in REDIS.  Regenerating...", rkey);
-            return generate(clazz);
+            S item = generate(clazz);
+            if (item != null)
+                save(item);
+            return item;
         } else {
             return object;
         }
@@ -567,6 +569,8 @@ public class Model {
             log.debug("Loading user [{}] from database", username);
             UsersEntity user = users.findByUsername(username);
             user.setEnabled(1);
+            user.eraseCredentials();
+            saveUserToCache(user);
             return user;
         } else {
             return getUserByUsername(username);
@@ -582,16 +586,18 @@ public class Model {
      */
     public void saveUserToCache(UsersEntity user) {
         String username = user.getUsername();
+        String key = String.format("%s[%s]", UsersEntity.class.getName(), username);
         if (log.isDebugEnabled())
             log.debug("Saving user [{}] to REDIS: {}", username, user);
-        RBucket<UsersEntity> userData = redis.getBucket(username);
+        RBucket<UsersEntity> userData = redis.getBucket(key);
         userData.set(user, 5, TimeUnit.MINUTES);
     }
 
     public UsersEntity getUserByUsername(String username) {
         // first check if this user is in REDIS.
         log.debug("Loading user [{}] from REDIS", username);
-        RBucket<UsersEntity> userData = redis.getBucket(username);
+        String key = String.format("%s[%s]", UsersEntity.class.getName(), username);
+        RBucket<UsersEntity> userData = redis.getBucket(key);
         if (userData.isExists()) {
             return userData.get();
         } else {

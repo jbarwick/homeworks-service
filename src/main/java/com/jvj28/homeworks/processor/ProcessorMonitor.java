@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.processor;
 
-public interface HomeworksMonitor {
+public interface ProcessorMonitor {
 
     void parseLine(String line);
 

@@ -1,7 +1,7 @@
 package com.jvj28.homeworks.model.data;
 
 import com.jvj28.homeworks.command.RequestLinkShortStatus;
-import com.jvj28.homeworks.processor.HomeworksProcessor;
+import com.jvj28.homeworks.processor.Processor;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -16,7 +16,7 @@ public class LinkStatusData implements DataObject<LinkStatusData>, Serializable 
     private String linkStatus;
 
     @Override
-    public LinkStatusData generate(HomeworksProcessor processor) throws InterruptedException, ExecutionException {
+    public LinkStatusData generate(Processor processor) throws InterruptedException, ExecutionException {
         processor.sendCommand(RequestLinkShortStatus.class)
                 .onComplete(p -> {
                     this.setLinkStatus(p.getLinkStatus());

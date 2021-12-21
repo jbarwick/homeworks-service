@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class HomeworksKeypadLEDMonitor implements HomeworksMonitor {
+public class KeypadLEDProcessorMonitor implements ProcessorMonitor {
 
-    private final Logger log = LoggerFactory.getLogger(HomeworksKeypadLEDMonitor.class);
+    private final Logger log = LoggerFactory.getLogger(KeypadLEDProcessorMonitor.class);
 
-    private final HomeworksProcessor processor;
+    private final Processor processor;
     private boolean enabled;
 
-    public HomeworksKeypadLEDMonitor(HomeworksProcessor processor) {
+    public KeypadLEDProcessorMonitor(Processor processor) {
         this.processor = processor;
         this.processor.addMonitor(this);
     }

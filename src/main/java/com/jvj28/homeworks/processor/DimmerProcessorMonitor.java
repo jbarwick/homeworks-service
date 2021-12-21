@@ -16,16 +16,16 @@ import org.springframework.stereotype.Component;
  * The Quartz Job InitializeDimmerValuesJob enables or disabled this monitor.
  */
 @Component
-public class HomeworksDimmerMonitor implements HomeworksMonitor {
+public class DimmerProcessorMonitor implements ProcessorMonitor {
 
-    private static final Logger log = LoggerFactory.getLogger(HomeworksDimmerMonitor.class);
+    private static final Logger log = LoggerFactory.getLogger(DimmerProcessorMonitor.class);
 
     private final Model model;
-    private final HomeworksProcessor processor;
+    private final Processor processor;
 
     private boolean enabled = false;
 
-    public HomeworksDimmerMonitor(HomeworksProcessor processor, Model model) {
+    public DimmerProcessorMonitor(Processor processor, Model model) {
         this.model = model;
         this.processor = processor;
         this.processor.addMonitor(this);

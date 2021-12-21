@@ -3,8 +3,8 @@ package com.jvj28.homeworks.jobs;
 import com.jvj28.homeworks.command.RequestZoneLevel;
 import com.jvj28.homeworks.model.Model;
 import com.jvj28.homeworks.model.db.entity.CircuitEntity;
-import com.jvj28.homeworks.processor.HomeworksDimmerMonitor;
-import com.jvj28.homeworks.processor.HomeworksProcessor;
+import com.jvj28.homeworks.processor.DimmerProcessorMonitor;
+import com.jvj28.homeworks.processor.Processor;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +17,13 @@ public class RefreshDimmerValuesJob extends QuartzJobBean {
 
     private static final Logger log = LoggerFactory.getLogger(RefreshDimmerValuesJob.class);
 
-    private final HomeworksProcessor processor;
+    private final Processor processor;
     private final Model model;
-    private final HomeworksDimmerMonitor dimmerMonitor;
+    private final DimmerProcessorMonitor dimmerMonitor;
 
-    public RefreshDimmerValuesJob(HomeworksProcessor processor,
+    public RefreshDimmerValuesJob(Processor processor,
                                   Model model,
-                                  HomeworksDimmerMonitor dimmerMonitor) {
+                                  DimmerProcessorMonitor dimmerMonitor) {
         this.processor = processor;
         this.model = model;
         this.dimmerMonitor = dimmerMonitor;

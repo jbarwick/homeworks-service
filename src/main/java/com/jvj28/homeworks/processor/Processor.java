@@ -20,18 +20,18 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class HomeworksProcessor {
+public class Processor {
 
-    private final Logger log = LoggerFactory.getLogger(HomeworksProcessor.class);
+    private final Logger log = LoggerFactory.getLogger(Processor.class);
 
     private Thread queueProcessorThread;
     private Thread dataReceiverThread;
 
     private final TelnetClient telnetClient = new TelnetClient();
-    private final HomeworksConfiguration config;
+    private final ProcessorConfiguration config;
 
     // Monitors.  In the future, will replace with a List of Listener objects and a register/deregister listener process
-    private final List<HomeworksMonitor> monitors = new ArrayList<>();
+    private final List<ProcessorMonitor> processorMonitors = new ArrayList<>();
 
     // Data receiver buffer
     private StringBuilder receiveBuffer = new StringBuilder();
@@ -46,7 +46,7 @@ public class HomeworksProcessor {
     private CountDownLatch loginPromptLatch = new CountDownLatch(1);
     private boolean stoppedOnPurpose = false;
 
-    public HomeworksProcessor(HomeworksConfiguration config) {
+    public Processor(ProcessorConfiguration config) {
         this.config = config;
     }
 
@@ -202,7 +202,7 @@ public class HomeworksProcessor {
                 testLoginResult((Login) currentPromise.getCommand());
         }
 
-        for (HomeworksMonitor m: monitors) {
+        for (ProcessorMonitor m: processorMonitors) {
             if (m.isEnabled())
                 m.parseLine(receiveBuffer.toString());
         }
@@ -227,7 +227,7 @@ public class HomeworksProcessor {
     }
 
     public <S extends HomeworksCommand> Promise<S> sendCommand(S command) {
-        Promise<S> promise = new HomeworksPromiseImpl<>(command);
+        Promise<S> promise = new PromiseImpl<>(command);
         log.debug("Adding command to queue: [{}]", command.getCommand());
         queue.add(promise);
         return promise;
@@ -237,8 +237,8 @@ public class HomeworksProcessor {
         return !queue.isEmpty();
     }
 
-    void addMonitor(HomeworksMonitor monitor) {
-        monitors.add(monitor);
+    void addMonitor(ProcessorMonitor processorMonitor) {
+        processorMonitors.add(processorMonitor);
     }
 
     /**

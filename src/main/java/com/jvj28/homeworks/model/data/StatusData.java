@@ -4,7 +4,7 @@ import com.jvj28.homeworks.command.OSRevision;
 import com.jvj28.homeworks.command.ProcessorAddress;
 import com.jvj28.homeworks.command.RequestAllProcessorStatusInformation;
 import com.jvj28.homeworks.command.RequestBootRevisions;
-import com.jvj28.homeworks.processor.HomeworksProcessor;
+import com.jvj28.homeworks.processor.Processor;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -25,7 +25,7 @@ public class StatusData implements DataObject<StatusData>, Serializable {
     private String bootRevision;
 
     @Override
-    public StatusData generate(HomeworksProcessor processor) throws InterruptedException, ExecutionException {
+    public StatusData generate(Processor processor) throws InterruptedException, ExecutionException {
         // Queue the command
         processor.sendCommand(ProcessorAddress.class)
                 .onComplete(p -> {

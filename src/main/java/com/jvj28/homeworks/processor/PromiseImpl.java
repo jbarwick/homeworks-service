@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @Immutable
-class HomeworksPromiseImpl<T extends HomeworksCommand> implements Promise<T> {
+class PromiseImpl<T extends HomeworksCommand> implements Promise<T> {
 
     // Only allow a promise to run for 30 seconds.  Else, nothing will happen.  The callback will not execute.
     private static final int TIMEOUT = 30;
@@ -28,7 +28,7 @@ class HomeworksPromiseImpl<T extends HomeworksCommand> implements Promise<T> {
 
     private boolean cancelled;
 
-    public HomeworksPromiseImpl(T command) {
+    public PromiseImpl(T command) {
         this.command = command;
     }
 

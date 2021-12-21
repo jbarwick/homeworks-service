@@ -1,9 +1,6 @@
 package com.jvj28.homeworks.processor;
 
-import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * This configuration file is for all "HomeWorks Processor" configuration variables.
@@ -21,10 +18,7 @@ import org.springframework.context.annotation.Configuration;
  * hw.password=ENC(RgQZi8o6Y9XEW4rGfqFyOQ==)
  *
  */
-@Configuration
-@ConfigurationProperties(prefix = "homeworks.processor")
-@EnableEncryptableProperties
-public class HomeworksConfiguration {
+public class ProcessorConfiguration {
 
     @Value("${homeworks.processor.username}")
     private String username;
@@ -37,15 +31,6 @@ public class HomeworksConfiguration {
 
     @Value("${homeworks.processor.port:23}")
     private int port;
-
-    @Value("${hw.circuits.seed:circuit_zones.csv}")
-    private String seedCircuits;
-
-    @Value("${hw.keypads.seed:keypads.csv}")
-    private String seedKeypads;
-
-    @Value("${hw.users.seed:users.csv}")
-    private String seedUsers;
 
     public String getUsername() {
         return username;
@@ -61,15 +46,4 @@ public class HomeworksConfiguration {
 
     public int getPort() { return port; }
 
-    public String getCircuitsSeedFilename() {
-        return seedCircuits;
-    }
-
-    public String getKeypadSeedFilename() {
-        return seedKeypads;
-    }
-
-    public String getUsersSeedFilename() {
-        return seedUsers;
-    }
 }

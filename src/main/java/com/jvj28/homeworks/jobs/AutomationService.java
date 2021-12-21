@@ -1,6 +1,6 @@
 package com.jvj28.homeworks.jobs;
 
-import com.jvj28.homeworks.processor.HomeworksProcessor;
+import com.jvj28.homeworks.processor.Processor;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +21,11 @@ public class AutomationService {
     private static final Logger log = LoggerFactory.getLogger(AutomationService.class);
 
     private final Executor asyncExecutor;
-    private final HomeworksProcessor processor;
+    private final Processor processor;
     private final Scheduler scheduler;
 
     public AutomationService(@Qualifier("asyncExecutor") Executor asyncExecutor,
-                             HomeworksProcessor processor, @Qualifier("quartzScheduler") Scheduler scheduler) {
+                             Processor processor, @Qualifier("quartzScheduler") Scheduler scheduler) {
         this.asyncExecutor = asyncExecutor;
         this.processor = processor;
         this.scheduler = scheduler;

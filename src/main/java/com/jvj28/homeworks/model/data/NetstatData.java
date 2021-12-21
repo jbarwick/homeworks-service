@@ -1,7 +1,7 @@
 package com.jvj28.homeworks.model.data;
 
 import com.jvj28.homeworks.command.Netstat;
-import com.jvj28.homeworks.processor.HomeworksProcessor;
+import com.jvj28.homeworks.processor.Processor;
 
 import java.io.Serializable;
 import java.util.concurrent.ExecutionException;
@@ -11,7 +11,7 @@ public class NetstatData extends NetstatProperties implements DataObject<Netstat
     private static final long serialVersionUID = 6866420726145457381L;
 
     @Override
-    public NetstatData generate(HomeworksProcessor processor) throws ExecutionException, InterruptedException {
+    public NetstatData generate(Processor processor) throws ExecutionException, InterruptedException {
 
          processor.sendCommand(Netstat.class)
                 .onComplete(p -> {

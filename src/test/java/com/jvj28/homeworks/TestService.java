@@ -8,7 +8,7 @@ import com.jvj28.homeworks.model.Model;
 import com.jvj28.homeworks.model.data.StatusData;
 import com.jvj28.homeworks.model.db.entity.CircuitEntity;
 import com.jvj28.homeworks.model.db.entity.KeypadEntity;
-import com.jvj28.homeworks.processor.HomeworksProcessor;
+import com.jvj28.homeworks.processor.Processor;
 import com.jvj28.homeworks.util.Promise;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TestService {
 
     @Autowired
-    private HomeworksProcessor processor;
+    private Processor processor;
 
     @Autowired
     private Model model;

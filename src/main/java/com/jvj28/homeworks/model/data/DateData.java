@@ -1,7 +1,7 @@
 package com.jvj28.homeworks.model.data;
 
 import com.jvj28.homeworks.command.RequestSystemDate;
-import com.jvj28.homeworks.processor.HomeworksProcessor;
+import com.jvj28.homeworks.processor.Processor;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -16,7 +16,7 @@ public class DateData implements DataObject<DateData>, Serializable {
     private String dayOfWeek;
 
     @Override
-    public DateData generate(HomeworksProcessor processor) throws InterruptedException, ExecutionException {
+    public DateData generate(Processor processor) throws InterruptedException, ExecutionException {
         processor.sendCommand(RequestSystemDate.class).onComplete(p -> {
             setProcessorDate(p.getDate());
             setDayOfWeek(p.getDayOfWeek());

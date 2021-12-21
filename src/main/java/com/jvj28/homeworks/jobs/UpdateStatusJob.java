@@ -1,7 +1,7 @@
 package com.jvj28.homeworks.jobs;
 
 import com.jvj28.homeworks.command.RequestAllProcessorStatusInformation;
-import com.jvj28.homeworks.processor.HomeworksProcessor;
+import com.jvj28.homeworks.processor.Processor;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +14,9 @@ public class UpdateStatusJob extends QuartzJobBean {
 
     private final Logger log = LoggerFactory.getLogger(UpdateStatusJob.class);
 
-    private final HomeworksProcessor processor;
+    private final Processor processor;
 
-    public UpdateStatusJob(HomeworksProcessor processor) {
+    public UpdateStatusJob(Processor processor) {
         this.processor = processor;
     }
 
