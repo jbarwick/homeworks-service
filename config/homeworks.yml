@@ -1,0 +1,27 @@
+---
+homeworks:
+  api:
+    encryption:
+      secret: ENC(G84VnDYyZoQ94UDBfpgMdjV+1fA0DcpFrUP7rDBajbCCveesuT4T8NQzorgMxoTldKC+qpurz3cGk+NNPqKOgimUJ1nFwhO7)
+  processor:
+    username: ENC(LLWrHy3XK+8QcLcF0jbK4XrG5EAkTtsy)
+    password: ENC(RgQZi8o6Y9XEW4rGfqFyOQ==)
+    host: lutron.jvj28.com
+    port: 23
+  log:
+    level: INFO
+  data:
+    users: config/users.csv
+    circuits: config/circuit_zones.csv
+    keypads: config/keypads.csv
+    floorplan: config/rooms.csv
+server:
+  port: 9992
+spring:
+  datasource:
+    url: jdbc:postgresql://monster-jj.jvj28.com:32771/lutron
+    username: ENC(JbfmN6UsZOb+JAH5h/Qmew==)
+    password: ENC(jARbYej/2P08hvKfSQcjGQ==)
+  redis:
+    host: monster-jj.jvj28.com
+    port: 6379

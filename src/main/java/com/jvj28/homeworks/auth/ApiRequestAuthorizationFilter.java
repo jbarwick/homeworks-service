@@ -3,6 +3,7 @@ package com.jvj28.homeworks.auth;
 import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.CredentialsContainer;
@@ -18,6 +19,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.util.StringUtils.hasText;
@@ -30,8 +33,8 @@ public class ApiRequestAuthorizationFilter extends OncePerRequestFilter {
     private final ApiAuthControllerService apiAuthService;
     private final JwtTokenUtil jwtTokenUtil;
 
-    public ApiRequestAuthorizationFilter(ApiAuthControllerService jwtApiUserDetailsService, JwtTokenUtil jwtTokenUtil) {
-        this.apiAuthService = jwtApiUserDetailsService;
+    public ApiRequestAuthorizationFilter(ApiAuthControllerService apiAuthControllerService, JwtTokenUtil jwtTokenUtil) {
+        this.apiAuthService = apiAuthControllerService;
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
@@ -39,9 +42,43 @@ public class ApiRequestAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain)
             throws ServletException, IOException {
 
-        if (SecurityContextHolder.getContext().getAuthentication() == null)
-            doAttemptAuthentication(request);
-        chain.doFilter(request, response);
+        Thread.currentThread().setName("Authorization");
+
+        try {
+
+            if (SecurityContextHolder.getContext().getAuthentication() == null)
+                doAttemptAuthentication(request);
+
+            chain.doFilter(request, response);
+
+        } finally {
+
+            if (log.isInfoEnabled()) {
+                String agent = request.getHeader(HttpHeaders.USER_AGENT);
+                String referer = request.getHeader(HttpHeaders.REFERER);
+                String xForwardedFor = request.getHeader("X-Forwarded-For");
+                String path;
+                try {
+                    URL url = new URL(request.getRequestURL().toString());
+                    path = url.getPath();
+                    if (url.getQuery() != null)
+                        path = path + "?" + url.getQuery();
+                } catch (MalformedURLException me) {
+                    path = "";
+                }
+                String cl = response.getHeader(HttpHeaders.CONTENT_LENGTH);
+                Integer size = cl == null ? 0 : Integer.parseInt(cl);
+                log.info(String.format("%s %s:%d \"%s %s %s\" \"%s\" \"%s\" %d %d",
+                        orBlank(xForwardedFor),
+                        request.getRemoteHost(), request.getRemotePort(),
+                        request.getMethod(), path, request.getProtocol(),
+                        orBlank(referer), orBlank(agent), response.getStatus(), size).trim());
+            }
+        }
+    }
+
+    private String orBlank(String value) {
+        return value == null ? "" : value;
     }
 
     private void doAttemptAuthentication(HttpServletRequest request) {

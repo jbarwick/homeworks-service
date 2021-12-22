@@ -7,9 +7,14 @@ import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.filter.CommonsRequestLoggingFilter;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
+
+import java.util.Set;
 
 @SpringBootApplication(scanBasePackages = {"com.jvj28.homeworks"})
 @EnableEncryptableProperties
@@ -17,6 +22,23 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin
 public class ServiceMain {
 
+    @Bean
+    public FilterRegistrationBean<ShallowEtagHeaderFilter> filterRegistrationBean() {
+        FilterRegistrationBean<ShallowEtagHeaderFilter> filterBean = new FilterRegistrationBean<>();
+        filterBean.setFilter(new ShallowEtagHeaderFilter());
+        filterBean.setUrlPatterns(Set.of("*"));
+        return filterBean;
+    }
+
+    @Bean
+    public CommonsRequestLoggingFilter requestLoggingFilter() {
+        CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
+        loggingFilter.setIncludeClientInfo(true);
+        loggingFilter.setIncludeQueryString(true);
+        loggingFilter.setIncludePayload(true);
+        loggingFilter.setMaxPayloadLength(64000);
+        return loggingFilter;
+    }
 
     @Bean(name = "encryptorBean")
     public StringEncryptor stringEncryptor() {

@@ -78,10 +78,16 @@ public class ProcessorConnectionMonitor {
     private void attemptKeepAlive() throws InterruptedException, IOException {
         while (processor.isNotStopRequested()) {
 
+            log.info("Keep-Alive ping...");
+
             if (!processor.isConnected())
-                throw new IOException("Login process exiting due to disconnect");
+                throw new IOException("Keep-Alive process exiting due to disconnect");
 
             try {
+
+                // This is the current "ping" process to keep the connection alive.
+                // This could be replaced by simply sending a CRLF to the processor. But
+                // I think getting the system time is cool.  And we pass it to Pegasus
 
                 RequestSystemTime ptime = processor.sendCommand(RequestSystemTime.class)
                         .onComplete(p -> log.debug("Time result: {}", p.getTime())).get();
@@ -105,13 +111,14 @@ public class ProcessorConnectionMonitor {
 
     private void attemptLogin() throws InterruptedException, IOException {
 
+        log.info("Login to processor");
+
         // Tell the processor object to connect
         Login loginResult;
 
         if (!processor.isConnected())
             throw new IOException("Login process exiting due to disconnect");
 
-        log.info("Waiting for login prompt");
         if (!processor.waitForLoginPrompt())
             throw new IOException("Did not receive login prompt for 30 seconds");
 
@@ -131,6 +138,7 @@ public class ProcessorConnectionMonitor {
             throw new IOException("Login failed.  Retrying...");
 
         log.info("Model beginning initialization");
+
         processor.sendCommand(PromptOn.class);
         processor.sendCommand(ReplyOn.class);
         processor.sendCommand(ProcessorAddress.class)
@@ -165,13 +173,13 @@ public class ProcessorConnectionMonitor {
     }
 
     private void attemptConnection() throws IOException {
-        log.debug("Connecting to and Starting processor");
+        log.info("Connecting to and Starting processor");
         processor.connect();
     }
 
     private void attemptDisconnect() {
+        log.info("Close/Reset Connections");
         try {
-            log.error("Closing Connections");
             processor.disconnect();
         } catch (IOException e) {
             log.warn("Error during disconnect: {}", e.getMessage());

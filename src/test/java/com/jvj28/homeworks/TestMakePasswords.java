@@ -20,10 +20,10 @@ class TestMakePasswords {
         String original = encryptor.decrypt(result);
         assertEquals("LutronGUI", original);
 
-        result = encryptor.encrypt("xxxx");
+        result = encryptor.encrypt("b36ac9fd3c96cf5ea349a6dbf1e2c9aca044058304284762a9f32499");
         System.out.println("hw.password=ENC(" + result + ")");
         original = encryptor.decrypt(result);
-        assertEquals("xxxx", original);
+        assertEquals("b36ac9fd3c96cf5ea349a6dbf1e2c9aca044058304284762a9f32499", original);
 
         result = encryptor.encrypt("lutron");
         System.out.println("spring.datasource.username=ENC(" + result + ")");
@@ -43,7 +43,7 @@ class TestMakePasswords {
     StringEncryptor stringEncryptor() {
         PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
         SimpleStringPBEConfig config = new SimpleStringPBEConfig();
-        config.setPassword(System.getProperty("jasypt.encryptor.password"));
+        config.setPassword(System.getenv("JASYPT_ENCRYPTOR_PASSWORD"));
         config.setAlgorithm("PBEWithMD5AndDES");
         config.setKeyObtentionIterations("1000");
         config.setPoolSize("1");

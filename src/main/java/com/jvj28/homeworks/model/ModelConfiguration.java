@@ -8,13 +8,13 @@ import org.springframework.context.annotation.Configuration;
 @EnableEncryptableProperties
 public class ModelConfiguration {
 
-    @Value("${hw.circuits.seed:circuit_zones.csv}")
+    @Value("${homeworks.data.circuits:circuit_zones.csv}")
     private String seedCircuits;
 
-    @Value("${hw.keypads.seed:keypads.csv}")
+    @Value("${homeworks.data.keypads:keypads.csv}")
     private String seedKeypads;
 
-    @Value("${hw.users.seed:users.csv}")
+    @Value("${homeworks.data.users:users.csv}")
     private String seedUsers;
 
     @Value("${spring.redis.host}")

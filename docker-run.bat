@@ -9,7 +9,7 @@ set /p PVERSION=<version-prev.txt
 set PORT=9992
 set PUSH=0
 set SCAN=0
-set RUN=1
+set RUN=0
 set BUILD=1
 IF "%VERSION%" == "%PVERSION%" GOTO SKIPVERSION
 ECHO Version is updated to %VERSION%

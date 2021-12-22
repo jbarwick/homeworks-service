@@ -314,8 +314,9 @@ public class Model {
         String seedFile = config.getKeypadSeedFilename();
 
         if (seedFile == null) {
-            log.info("Seed file not specified.  Skipping DB initialization of keypads");
+            log.info("Keypads Seed file not specified.  Skipping DB initialization of keypads");
         } else {
+            log.info("Loading Keypads data from configuration");
             try (Reader reader = new FileReader(seedFile)) {
                 // create csv bean reader
                 CsvToBean<KeypadEntity> csvToBean = new CsvToBeanBuilder<KeypadEntity>(reader)
@@ -418,6 +419,18 @@ public class Model {
         }
     }
 
+    public void saveCircuits(List<CircuitEntity> circuitList) {
+        RLock rlock = redis.getLock(CIRCUITLIST + "Lock");
+        rlock.lock();
+        try {
+            RMap<String, CircuitEntity> map = getCircuitMap();
+            circuitList.forEach(c -> map.put(c.getAddress(), c));
+        } finally {
+            rlock.unlock();
+        }
+    }
+
+
     // The way MapLoader works is nonsense.  So, we will not use the map.loadAll() function.  We will write our own loader.
     private void loadAllCircuits(RMap<String, CircuitEntity> map) {
         // ALWAYS seed from the CSV file.  Why? well, we want to give the users
@@ -437,8 +450,9 @@ public class Model {
         String seedFile = config.getCircuitsSeedFilename();
 
         if (seedFile == null) {
-            log.info("Seed file not specified.  Skipping DB initialization of circuits");
+            log.info("Circuits Seed file not specified.  Skipping DB initialization of circuits");
         } else {
+            log.info("Loading Circuits data from configuration");
             try (Reader reader = new FileReader(seedFile)) {
                 // create csv bean reader
                 CsvToBean<CircuitEntity> csvToBean = new CsvToBeanBuilder<CircuitEntity>(reader)
@@ -569,7 +583,6 @@ public class Model {
             log.debug("Loading user [{}] from database", username);
             UsersEntity user = users.findByUsername(username);
             user.setEnabled(1);
-            user.eraseCredentials();
             saveUserToCache(user);
             return user;
         } else {
@@ -611,8 +624,9 @@ public class Model {
         String seedFile = config.getUsersSeedFilename();
 
         if (seedFile == null) {
-            log.info("Seed file not specified.  Skipping DB initialization of users");
+            log.info("Users Seed file not specified.  Skipping DB initialization of users");
         } else {
+            log.info("Loading Users data from configuration");
             try (Reader reader = new FileReader(seedFile)) {
                 // create csv bean reader
                 CsvToBean<UsersEntity> csvToBean = new CsvToBeanBuilder<UsersEntity>(reader)
@@ -635,6 +649,11 @@ public class Model {
         if (!data.isEmpty()) {
             users.deleteAll();
             users.saveAll(data);
+        }
+
+        List<KeypadEntity> pads = getKeypadsSeedData();
+        if (!pads.isEmpty()) {
+            saveKeypads(pads);
         }
     }
 

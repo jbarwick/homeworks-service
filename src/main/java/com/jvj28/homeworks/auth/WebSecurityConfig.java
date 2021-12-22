@@ -20,7 +20,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final ApiAuthControllerService userDetailsService;
     private final ApiRequestAuthorizationFilter authorizationFilter;
 
-    public WebSecurityConfig(ApiAuthControllerService userDetailsService, ApiRequestAuthorizationFilter authorizationFilter) {
+    public WebSecurityConfig(ApiAuthControllerService userDetailsService,
+                             ApiRequestAuthorizationFilter authorizationFilter) {
         this.userDetailsService = userDetailsService;
         this.authorizationFilter = authorizationFilter;
     }
@@ -76,4 +77,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
     }
+
 }
