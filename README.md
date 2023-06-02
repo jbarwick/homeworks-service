@@ -1,3 +1,60 @@
+# UPDATE As Of June 2023
+
+Ok, the Homeworks processor is called Lutron Homeworks Processor 4.  And mine died.
+
+So, for this prometheus exporter, I'm going to dumb down this and simplify.
+
+Since I've upgraded from HW4 to HomeWorks QS HQP6-2 processor, the first thing I want to do is change this from Java SpringBoot to Python and simply use uvicorn to publish a FastAPI endpoint.  And, I'll document the Guages and Metrics that I'll export.
+
+SUGGESTIONS WELCOME
+
+## COMING SOON
+
+```dockerfile
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+# Set the working directory in the container to /app
+WORKDIR /app
+
+# Add the current directory contents into the container at /app
+ADD . /app
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Make port 80 available to the world outside this container
+EXPOSE 80
+
+# Define environment variable
+ENV NAME FastAPIApp
+
+# Run main.py when the container launches
+CMD ["uvicorn", "asgi:app", "--host", "0.0.0.0", "--port", "80"]
+```
+
+This works very well on my bench and I get my metrics from the processor.
+
+TODO:  figure out how to get the database. (Areas/Zones configuration).  Right now, on my test program, they are hardcoded in a json file:
+
+```json
+[
+  {
+    "area_id": 8,
+    "area": "Area Name",
+    "zones": [
+      {
+        "zone_id": 28,
+        "name": "Zone Name",
+        "watts": 200.0
+      }
+    ]
+  }
+]
+```
+
+COME BACK SOON!!!!
+
 # Homeworks Service
 
 ---
