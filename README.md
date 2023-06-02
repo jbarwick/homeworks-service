@@ -53,6 +53,33 @@ TODO:  figure out how to get the database. (Areas/Zones configuration).  Right n
 ]
 ```
 
+I ran this like this:
+
+```powershell
+# Define image and container name
+$ImageName = "lutron_qs_exporter"
+$ContainerName = "lutron_qs_exporter_container"
+
+Write-Output "Building Docker image: $ImageName"
+
+# Build the Docker image
+docker build -t $ImageName .
+
+Write-Output "Image $ImageName built successfully."
+
+# Run the Docker container
+docker run -d -p 9992:80 -v data.json:app/static/data.json --name $ContainerName $ImageName
+
+Write-Output "Container $ContainerName running successfully."
+```
+
+And, simply get the metrics with
+```
+curl http://localhost:9992/metrics
+```
+
+I'll figure out credentials injection in a moment....
+
 COME BACK SOON!!!!
 
 # Homeworks Service
