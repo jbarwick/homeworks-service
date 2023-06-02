@@ -67,7 +67,7 @@ docker build -t $ImageName .
 
 Write-Output "Image $ImageName built successfully."
 
-# Run the Docker container
+# Run the Docker container using HTTP port of the defined Lutron Homeworks/QS Exporter defined on GitHub
 docker run -d -p 9992:80 -v data.json:app/static/data.json --name $ContainerName $ImageName
 
 Write-Output "Container $ContainerName running successfully."
