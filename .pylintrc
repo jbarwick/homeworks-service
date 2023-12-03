@@ -1,0 +1,41 @@
+[MASTER]
+
+# Specify the maximum number of undecorated parent classes for a class.
+max-parents = 7
+
+[MESSAGES CONTROL]
+
+# Enable all messages.
+enable = all
+
+# Disable specific message globally
+disable = W0603,I0011,I0020,R0911
+
+[REPORTS]
+
+# Set the output format to text.
+output-format=text
+
+[FORMAT]
+
+# Set the naming style to snake_case.
+good-names=_
+
+[BASIC]
+max-args=8
+
+[TYPECHECK]
+
+
+[VARIABLES]
+
+# Enable checking of variable names.
+init-import=no
+
+[FLOG]
+
+# Enable logging format checking.
+max-line-length = 120
+
+[DESIGN]
+

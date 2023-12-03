@@ -128,11 +128,13 @@ public enum Cmd {
     SETAMX("SETAMX", "Enables or disables the AMX beacon", Unknown.class),
     SETNAME("SETNAME", "Sets the processor's NetBIOS name", Unknown.class),
     ENABLENAME("ENABLENAME", "Enables one of the processor's NetBIOS names", Unknown.class),
-    RELNAME("RELNAME", "Releases one of the processor's NetBIOS names", Unknown.class);
+    RELNAME("RELNAME", "Releases one of the processor's NetBIOS names", Unknown.class),
+    GETLUT("GETLUT", "Get lutron information", Unknown.class);
 
     private final String name;
     private final String description;
     private final Class<? extends HomeworksCommand> clazz;
+
 
     Cmd(String name, String s, Class<? extends HomeworksCommand> c) {
         this.name = name;

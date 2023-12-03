@@ -1,0 +1,1 @@
+hypercorn asgi:app --reload

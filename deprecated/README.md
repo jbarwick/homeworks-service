@@ -1,10 +1,4 @@
-# Homeworks Service
-
-I am writing this GPLv3.  Let's all keep it in the community and share the code.  DO NOT steal this code.  Let's share.
-
-As such, it's on GitHub here:  https://github.com/jbarwick/homeworks-service
-
-### Lutron QS Prometheus Exporter
+## Lutron QS Prometheus Exporter
 
 #### UPDATE As Of June 2023
 
@@ -13,12 +7,6 @@ Ok, the Homeworks processor is called Lutron Homeworks Processor 4.  And mine di
 So, for this prometheus exporter, I'm going to dumb down this and simplify.
 
 Since I've upgraded from HW4 to HomeWorks QS HQP6-2 processor, the first thing I want to do is change this from Java SpringBoot to Python and simply use uvicorn to publish a FastAPI endpoint.  And, I'll document the Guages and Metrics that I'll export.
-
-#### UPDATE December 2023
-
-First release of the python FastAPI application.
-
-The application will read your database from the QS processor directly.
 
 ### Dockerfile
 
@@ -49,43 +37,45 @@ CMD ["hypercorn", "asgi:app", "--bind", "0.0.0.0:9992"]
 
 Scripts are available in the root folder demonstrating how the docker file is built.
 
-### Configration
+# Homeworks Service
 
-Create a file called 'config.json' and mount it when you start the docker container
+---
 
-```json
-{
-  "address": "192.168.x.x",
-  "port": 23,
-  "username": "default",
-  "password": "default",
-  "log_level": "INFO"
-}
-```
+I am writing this GPLv3.  Let's all keep it in the community and share the code.  DO NOT steal this code.  Let's share.
 
-### Docker Compose
+As such, it's on GitHub here:  https://github.com/jbarwick/homeworks-service
 
-Here's my compose file describing the build and run of the docker image
+Do note that inside the Docker image is "seed data" that is the Circuit names/addresses for my home system.  I have not written a generic method to have you define our own network and seed data.  This module does NOT FTP to the Lutron system to download configuration files or a map of your system.
 
-```yaml
-version: '3'
+### Notes
 
-services:
-  lutron-qs-exporter:
-    image: lutron_qs_exporter:1.1.12
-    container_name: lutron-qs-exporter
-    restart: unless-stopped
-    ports:
-      - 9992:9992
-    volumes:
-      - /volume1/docker/lutron/config.json:/app/config.json
-```
+In the image are three files:
+
+* circuit_zones.csv - all the circuits on your system.  name, address, room, total_watts, dimmer_type
+* keypads.csv - all the keypads on your system.  name, address (stored to postgresql, but not used  yet)
+* users.csv - all the user accounts that can access the api.  uuid, name, firstname, password (stored to postgresql, but not used yet)
+
+Although keypads are not used in the program yet, the seed data is loaded.
+
+Also, the configuration file is setup to connect to MY PostgreSQL server on my Synology NAS.
+
+If you download this image, you will need to boot up the container and change ALL the configurations manually in application.properties
+
+Share your ideas for the next features to add.
+
+### Help Wanted!
+
+I need YOUR help.  I need advise on how I would make this container more configurable.  It is up to the user of this container to set a bunch of properties, Have a REDIS and Postgresql server up and running (not included in this container).
+
+To make this more generic and adoptable by users, should I do what other's do and build in EVERYTHING in the Container?  Let me know your recommendations.  Create the issue on GitHub https://github.com/jbarwick/homeworks-service/issues
 
 ### Prometheus
 
 This program provides a /metrics URL for Prometheus to read and I've a sample Graphana dashboard if you like.
 
 I've added this application to target port 9992 as registered here: https://github.com/prometheus/prometheus/wiki/Default-port-allocations
+
+Currently, we're on 8080.  Will change soon!
 
 ##### Example of my Prometheus config
 
@@ -112,9 +102,24 @@ scrape_configs:
     - targets: ['localhost:9090']
   - job_name: 'lutron'
     static_configs:
-    - targets: ['localhost:9992']
+    - targets: ['192.168.1.248:8080']
 
 ```
+
+### Client UI's
+
+And, I've a React web application that I'm writing to consume the /api in this program.  Not included in this docker image
+
+### OpenAPI (Swagger)
+
+Specifications and Documenation
+
+    http://localhost:9992/api-docs    
+    http://localhost:9992/api-docs.yaml
+
+Working with Swagger
+
+    http://localhost:9992/swagger-ui.html
 
 ### Comments
 

@@ -1,23 +1,20 @@
-FROM ubuntu
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
 
-ARG VERSION
-ARG MASTER_PASSWORD
-ARG JAVA_HOME=/opt/java/jdk-17.0.1
+# Set the working directory in the container to /app
+WORKDIR /app
 
-ENV CONFIG_DIR=/opt/homeworks/config
-ENV JASYPT_ENCRYPTOR_PASSWORD=${MASTER_PASSWORD}
+# Add the current directory contents into the container at /app
+ADD . /app
 
-RUN export JAVA_HOME=${JAVA_HOME}
-RUN export PATH=${JAVA_HOME}/bin:${PATH}
-RUN export JASYPT_ENCRYPTOR_PASSWORD
+# Install any needed packages specified in requirements.txt
+RUN pip install -q --no-cache-dir -r requirements.txt
 
-RUN apt update && apt upgrade -y
-ADD /files/openjdk-17.0.1_linux-x64_bin.tar.gz /opt/java
+# Make port 80 available to the world outside this container
+EXPOSE 9992
 
-COPY /config/circuit_zones.csv /opt/homeworks/circuit_zones.csv
-COPY /config/keypads.csv /opt/homeworks/keypads.csv
-COPY /config/users.csv /opt/homeworks/users.csv
+# Define environment variable
+ENV NAME FastAPIApp
 
-COPY /target/homeworks-service-${VERSION}.jar /opt/homeworks/app.jar
-
-ENTRYPOINT ["/opt/java/jdk-17.0.1/bin/java","-jar","/opt/homeworks/app.jar", "--spring.config.location=file:config/homeworks.yaml"]
+# Run main.py when the container launches
+CMD ["hypercorn", "asgi:app", "--bind", "0.0.0.0:9992"]

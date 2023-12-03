@@ -5,3 +5,6 @@
 /files/
 mkpass.bat
 *.iml
+/venv/
+/.secret
+__pycache__
