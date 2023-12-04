@@ -113,7 +113,6 @@ scrape_configs:
   - job_name: 'lutron'
     static_configs:
     - targets: ['localhost:9992']
-
 ```
 
 ### Comments
