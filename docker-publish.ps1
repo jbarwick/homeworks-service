@@ -1,7 +1,10 @@
 
 $ImageName = "lutron_qs_exporter"
-$ImageVersion = Get-Content "version.txt"
+$RawImageVersion = poetry version -s
+$ImageVersion = $RawImageVersion -replace '[^a-zA-Z0-9_.-]', '_'
 $NexusPushRepositoryURL = "monster-jj.jvj28.com:9092"
+$Username = $env:NEXUS_USERNAME
+$Password = $env:NEXUS_PASSWORD
 
 Write-Output "Tagging Docker image for Nexus repository..."
 
@@ -11,12 +14,6 @@ docker tag $ImageName "$($NexusPushRepositoryURL)/$($ImageName):$($ImageVersion)
 Write-Output "Image tagged successfully."
 
 Write-Output "Pushing Docker image to Nexus repository..."
-
-$Username = "admin"
-$SecretFilePath = ".secret"
-
-# Read password from the .secret file
-$Password = Get-Content $SecretFilePath
 
 # Log in to Docker
 Write-Output $Password | docker login $NexusPushRepositoryURL --username $Username --password-stdin

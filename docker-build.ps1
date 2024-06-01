@@ -11,6 +11,9 @@ Write-Output "Running poetry build..."
 poetry build
 Write-Output "Poetry build completed."
 
+# I wanna do a nexusiq scan
+pip freeze > requirements.txt
+
 Write-Output "Building Docker image: $ImageName"
 
 # Build the Docker image
