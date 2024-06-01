@@ -80,7 +80,7 @@ def xml_to_dict_recursive(element):  # NOSONAR: python:S3776
     return result
 
 
-def convert_text(text):
+def convert_text1(text):  # noqa: C901
     """
     Converts the 'text' from an Etree element to a python primitive type.
     It will try to convert the text to an int, float, datetime, time, or timedelta.
@@ -123,4 +123,38 @@ def convert_text(text):
         pass
 
     # if everything fails, then just return the original text
+    return text.strip()
+
+def convert_text(text):
+    """
+    Converts the 'text' from an Etree element to a python primitive type.
+    It will try to convert the text to an int, float, datetime, time, or timedelta.
+
+    :param text: The text to convert.
+    :return: an integer, float, datetime, time, or timedelta representation
+    """
+    if not text:
+        return None
+
+    converters = [
+        int,
+        float,
+        lambda x: datetime.strptime(x, '%m/%d/%Y').date(),
+        lambda x: timedelta(
+            hours=int(x.split(':')[0]),
+            minutes=int(x.split(':')[1]),
+            seconds=float(x.split(':')[2])
+        ) if '.' in x.split(':')[2] else time(
+            int(x.split(':')[0]),
+            int(x.split(':')[1]),
+            int(x.split(':')[2])
+        )
+    ]
+
+    for convert in converters:
+        try:
+            return convert(text)
+        except (ValueError, IndexError):
+            pass
+
     return text.strip()

@@ -3,5 +3,5 @@
   "port": 23,
   "username": "default",
   "password": "default",
-  "log_level": "INFO"
+  "log_level": "DEBUG"
 }

@@ -1,1 +1,2 @@
-hypercorn asgi:app --reload
+$env:LOG_LEVEL = "WARN"
+uvicorn --reload asgi:app

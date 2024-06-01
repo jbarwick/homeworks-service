@@ -8,45 +8,45 @@ each area defined in the processor configuration.  It will also retrieve the key
 import json
 import os
 from typing import Optional
-
 from .logger import get_logger
 
-host_data: Optional[dict] = None
+
+logger = get_logger(__name__)
 
 
-def get_host_data() -> Optional[dict]:
-    """
-    Return the json configuration for the target host into a dictionary.
+class ConfigurationData:
+    """ manage the configuration data for the target host """
+    _instance: Optional[dict] = None
 
-    :return:
-    """
-    # pylint: disable=global-statement
-    global host_data
+    @classmethod
+    def get_instance(cls) -> dict:
+        """
+        Return the JSON configuration for the target host as a dictionary.
 
-    if host_data:
-        return host_data
+        :return: Configuration dictionary.
+        """
+        if cls._instance is None:
+            cls._instance = cls._load_config()
+            address = cls._instance.get('address', None)
+            if address:
+                logger.warning('Configuration loaded for %s', address)
+                logger.debug(cls._instance)
+        return cls._instance
 
-    try:
-
-        if os.path.exists('config.json'):
+    @staticmethod
+    def _load_config() -> dict:
+        """ Load the configuration file """
+        try:
+            if not os.path.exists('config.json'):
+                raise OSError('config.json not found')
             with open('config.json', 'r', encoding='utf-8') as f:
-                host_data = json.load(f)
-        else:
-            raise FileNotFoundError('config.json not found')
+                return json.load(f)
+        except OSError as e:
+            logger.critical("Configuration error: %s", str(e))
+        return {}
 
-    except FileNotFoundError:
-        host_data = {'log_level': 'INFO', 'error': 'The config.json file could not be found. '
-                                                   'Please create the system config file.'}
-    except OSError as e:
-        host_data = {'log_level': 'INFO', 'error': str(e)}
 
-    logger = get_logger(__name__, host_data.get('log_level', os.getenv('LOG_LEVEL', 'info')))
+def get_host_data() -> dict:
+    """ Return the json configuration for the target host into a dictionary. """
 
-    if 'error' in host_data:
-        logger.critical("Configuration error: %s", host_data.get('error'))
-    else:
-        host = host_data.get('address', '')
-        logger.info('Configuration loaded for %s', host)
-        logger.debug(host_data)
-
-    return host_data
+    return ConfigurationData.get_instance()
