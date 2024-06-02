@@ -23,7 +23,7 @@ class CustomFormatter(logging.Formatter):
     It will also convert the log message into JSON if the message is a dictionary.
     """
 
-    def __init__(self, datefmt='%Y-%m-%d %H:%M:%S', **kwargs):
+    def __init__(self, datefmt=None, **kwargs):
         super().__init__(**kwargs)
         self.datefmt = datefmt
 
@@ -36,19 +36,22 @@ class CustomFormatter(logging.Formatter):
         :return: Formatted log message.
         """
         # Get the log name
-        log_name = record.name.split('.')[-1].rjust(8)
+        log_name = record.name.split('.')[-1]
 
         # Format the timestamp
-        timestamp_datetime = datetime.fromtimestamp(record.created)
-        formatted_datetime = timestamp_datetime.strftime(self.datefmt)
+        if self.datefmt:
+            timestamp_datetime = datetime.fromtimestamp(record.created)
+            formatted_datetime = timestamp_datetime.strftime(self.datefmt) + " "
+        else:
+            formatted_datetime = ''
 
-        # Right-align [%(levelname)s] within a field of width 10
-        levelname = f"[{record.levelname}]".ljust(10)
+        # Right-align [%(levelname)s] within a field of width 9
+        levelname = f"{record.levelname}:".ljust(9)
 
         # Handle the log message
-        formatted_message = ': ' + self.format_message(record) if record.msg else ''
+        formatted_message = self.format_message(record) if record.msg else ''
 
-        return f"{formatted_datetime} {levelname} [{log_name}]{formatted_message}"
+        return f"{formatted_datetime}{levelname} {log_name}: {formatted_message}"
 
     def format_message(self, record):
         """

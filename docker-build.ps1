@@ -1,6 +1,5 @@
 # Define image and container name
 $ImageName = "lutron_qs_exporter"
-
 # Delete 'dist' folder if it exists
 if (Test-Path -Path .\dist -PathType Container) {
     Remove-Item -Path .\dist -Recurse -Force
@@ -8,6 +7,7 @@ if (Test-Path -Path .\dist -PathType Container) {
 
 # Run poetry build
 Write-Output "Running poetry build..."
+poetry config warnings.export false
 poetry build
 Write-Output "Poetry build completed."
 

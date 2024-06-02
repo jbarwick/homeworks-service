@@ -8,6 +8,7 @@ $currentDirectory = $PWD.Path
 docker run -d -p 9992:9992 `
   -v $currentDirectory\config.json:/app/config.json `
   --name $ContainerName `
+  -e LOG_LEVEL=INFO `
   $ImageName
 
 Write-Output "Container $ContainerName running successfully."
