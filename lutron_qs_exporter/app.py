@@ -1,8 +1,6 @@
 """
 Provides a fastapi application to serve the Prometheus metrics for the Lutron QS processor.
 """
-
-from datetime import datetime
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
