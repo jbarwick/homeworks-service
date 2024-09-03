@@ -7,8 +7,6 @@ import xml.etree.ElementTree as Etree
 import requests
 from .logger import get_logger
 
-logger = get_logger(__name__)
-
 
 def xml_to_dict(url: str) -> dict:
     """
@@ -17,6 +15,7 @@ def xml_to_dict(url: str) -> dict:
     :param url: The URL of the XML data.
     :return: The XML data as a dictionary.
     """
+    logger = get_logger(__name__)
 
     try:
         # Make a GET request to the URL and retrieve the XML content
@@ -49,6 +48,8 @@ def xml_to_dict_recursive(element):  # NOSONAR: python:S3776
     :param element: The ETree element to convert.
     :return: A Python dictionary representation of the ETree element.
     """
+    logger = get_logger(__name__)
+
     result = {}
 
     # Process attributes

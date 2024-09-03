@@ -1,5 +1,6 @@
 # Define image and container name
 $ImageName = "lutron_qs_exporter"
+
 # Delete 'dist' folder if it exists
 if (Test-Path -Path .\dist -PathType Container) {
     Remove-Item -Path .\dist -Recurse -Force
@@ -7,12 +8,9 @@ if (Test-Path -Path .\dist -PathType Container) {
 
 # Run poetry build
 Write-Output "Running poetry build..."
-poetry config warnings.export false
-poetry build
-Write-Output "Poetry build completed."
+poetry build -f wheel
 
-# I wanna do a nexusiq scan
-poetry export -f requirements.txt --without-hashes --output requirements.txt
+Write-Output "Poetry build completed."
 
 Write-Output "Building Docker image: $ImageName"
 

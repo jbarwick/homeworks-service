@@ -1,4 +1,4 @@
 """ The QS Exporter Module """
-from .app import app, logger
+from .app import app
 
-__all__ = ["app", "logger"]
+__all__ = ["app"]

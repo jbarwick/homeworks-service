@@ -1,2 +1,2 @@
-$env:LOG_LEVEL = "WARN"
+# $env:LOG_LEVEL = "WARN"
 uvicorn --reload asgi:app

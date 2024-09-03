@@ -15,6 +15,7 @@ from datetime import datetime, date, time, timedelta
 from decimal import Decimal
 from typing import Optional
 
+initialized: bool = False
 
 class CustomFormatter(logging.Formatter):
     """
@@ -112,25 +113,18 @@ def get_logger(logger_name: Optional[str] = None, log_level: Optional[str] = Non
     :param log_level:
     :return:
     """
+    global initialized
 
-    if not log_level:
-        log_level = os.getenv('LOG_LEVEL', 'INFO')
+    log_level = os.getenv('LOG_LEVEL', log_level)
 
-    # Turn off propegation on root logger.  Retrn it if no logger name is specified.
-
-    if not logger_name:
-        logger = logging.getLogger()
-    else:
-        logger = logging.getLogger(logger_name)
-
-    if not logger.handlers:
-
-        logger.setLevel(log_level)
-        logger.propagate = False
-
+    if not initialized:
         handler = logging.StreamHandler()
         handler.setFormatter(CustomFormatter())
+        logging.basicConfig(level=log_level, handlers=[handler])
+        initialized = True
+        logging.warning("Root %s Logger initialized within %s", log_level, logger_name)
 
-        logger.addHandler(handler)
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(log_level or 'INFO')
 
     return logger

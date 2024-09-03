@@ -45,21 +45,23 @@ class DesignData:
     """ Manage the design data singletons """
     _design_data: dict = {}
     _design_version: int = 0
-    _logger = get_logger("design")
 
     @classmethod
     def get_design_data(cls, dv: int = 0) -> dict:
         """ return the design data, or laod it """
+        logger = get_logger("design")
+
         if not dv:
             return cls._design_data
 
         if not cls._design_data or dv != cls._design_version:
+            logger.warning("Design version %s has changed. Reloading...", dv)
             cls._design_data = cls._load_design_data(dv)
             cls._design_version = dv if cls._design_data else 0
         else:
-            cls._logger.warning("Design version %s has not changed.", dv)
+            logger.warning("Design version %s has not changed.", dv)
 
-        cls._logger.debug(cls._design_data)
+        logger.debug(cls._design_data)
         return cls._design_data
 
     @classmethod
@@ -70,23 +72,25 @@ class DesignData:
     @classmethod
     def _load_design_data(cls, dv) -> dict:
         """ load the data from the processor """
+        logger = get_logger("design")
+
         host_data = get_host_data()
         if host_data:
             address = host_data.get('address')
             if address:
                 url = "http://" + address + "/DbXmlInfo.xml"
-                cls._logger.debug("Reading from %s", url)
+                logger.debug("Reading from %s", url)
                 design_data = xml_to_dict("http://" + address + "/DbXmlInfo.xml")
                 project_details = design_data.get('ProjectName', 'Unknown')
                 if project_details != 'Unknown':
                     name = project_details['ProjectName']
-                    cls._logger.warning("Design reloaded for %s. Design version: %s", name, dv)
+                    logger.warning("Design reloaded for %s. Design version: %s", name, dv)
                     return design_data
-                cls._logger.error("Cannot retrieve design from processor")
+                logger.error("Cannot retrieve design from processor")
             else:
-                cls._logger.error('No address information found in the configuration file')
+                logger.error('No address information found in the configuration file')
         else:
-            cls._logger.error("No configuration file could be loaded!")
+            logger.error("No configuration file could be loaded!")
         return {}
 
 
