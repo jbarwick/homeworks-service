@@ -1,4 +1,5 @@
 # How to contribute
+
 First of all, thank you for taking the time to contribute to this project. We've tried to make a stable project and try to fix bugs and add new features continuously. You can help us do more.
 
 ## Getting started
@@ -21,7 +22,7 @@ When you're done, submit a pull request and for one of the maintainers to check 
 
 ### Tests
 
-We've written tests and you can run them to assure the stability of the code, just try `command`. If you're adding a new functionality please write a test for it.
+We've written tests and you can run them to assure the stability of the code, just try `pytest`. If you're adding a new functionality please write a test for it. The tests must not contact a live processor.
 
 ### Documentation
 

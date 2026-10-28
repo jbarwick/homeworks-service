@@ -1,55 +1,75 @@
 """
-This is a prometheus exporter for the Lutron QS processor.
+Load Lutron QS connection settings from the process environment.
 
-It will login to the Lutron host and retrieve the configuration data as well as all zone levels for
-each area defined in the processor configuration.  It will also retrieve the keypad LED status for each button.
-
+Compose sets these variables. There is no config file.
 """
 
-import json
 import os
 from typing import Optional
+
 from .logger import get_logger
 
 
 class ConfigurationData:
-    """manage the configuration data for the target host"""
+    """Process-wide copy of the processor connection settings."""
 
     _instance: Optional[dict] = None
 
     @classmethod
     def get_instance(cls) -> dict:
         """
-        Return the JSON configuration for the target host as a dictionary.
+        Return the processor connection settings.
 
-        :return: Configuration dictionary.
+        Keys are address, port, username, password, and log_level.
+        An empty dict means required variables are missing.
         """
         if cls._instance is None:
             cls._instance = cls._load_config()
-            logger = get_logger(__name__, cls._instance.get("log_level", "INFO"))
-
-            address = cls._instance.get("address", None)
-            if address:
-                logger.warning("Configuration loaded for %s", address)
-                logger.debug(cls._instance)
-
         return cls._instance
 
     @staticmethod
     def _load_config() -> dict:
-        """Load the configuration file"""
+        """Read LUTRON_* and LOG_LEVEL from the environment."""
+        logger = get_logger(__name__, os.getenv("LOG_LEVEL", "INFO"))
+
+        address = os.getenv("LUTRON_ADDRESS", "").strip()
+        username = os.getenv("LUTRON_USERNAME", "").strip()
+        password = os.getenv("LUTRON_PASSWORD", "")
+        port_raw = os.getenv("LUTRON_PORT", "23").strip() or "23"
+        log_level = os.getenv("LOG_LEVEL", "INFO").strip() or "INFO"
+
+        missing = [
+            name
+            for name, value in (
+                ("LUTRON_ADDRESS", address),
+                ("LUTRON_USERNAME", username),
+                ("LUTRON_PASSWORD", password),
+            )
+            if value == ""
+        ]
+        if missing:
+            logger.critical(
+                "Missing required environment variables: %s", ", ".join(missing)
+            )
+            return {}
+
         try:
-            if not os.path.exists("config.json"):
-                raise OSError("config.json not found")
-            with open("config.json", "r", encoding="utf-8") as f:
-                return json.load(f)
-        except OSError as e:
-            logger = get_logger(__name__, "ERROR")
-            logger.critical("Configuration error: %s", str(e))
-        return {}
+            port = int(port_raw)
+        except ValueError:
+            logger.critical("LUTRON_PORT must be an integer, got %s", port_raw)
+            return {}
+
+        logger.warning("Configuration loaded for %s:%s", address, port)
+        return {
+            "address": address,
+            "port": port,
+            "username": username,
+            "password": password,
+            "log_level": log_level,
+        }
 
 
 def get_host_data() -> dict:
-    """Return the json configuration for the target host into a dictionary."""
+    """Return the processor connection settings."""
 
     return ConfigurationData.get_instance()

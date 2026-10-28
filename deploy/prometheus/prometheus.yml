@@ -1,0 +1,13 @@
+# Sample Prometheus config for the monitoring profile.
+# Scrapes the exporter on the Compose network. A large telnet walk can take
+# longer than a few seconds, so the timeout is most of the scrape interval.
+
+global:
+  scrape_interval: 60s
+  scrape_timeout: 55s
+
+scrape_configs:
+  - job_name: lutron
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["lutron-qs-exporter:9992"]

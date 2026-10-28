@@ -1,1 +1,0 @@
-curl -X 'POST' 'http://localhost:9992/authenticate' -H 'accept: */*' -H 'Content-Type: application/json' -d '{ "username": "jbarwick", "password": "master" }'

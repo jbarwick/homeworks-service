@@ -3,18 +3,28 @@ Provides a fastapi application to serve the Prometheus metrics for the Lutron QS
 """
 import logging
 from contextlib import asynccontextmanager
+from importlib.metadata import PackageNotFoundError, version
+
 from fastapi import FastAPI
 from prometheus_client import CollectorRegistry, generate_latest
 from starlette.responses import Response, RedirectResponse
-from ._version import __version__
 from .logger import get_logger
+
+try:
+    __version__ = version("lutron_qs_exporter")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
 from .metrics import (
     refresh_metrics,
     get_design_data,
     information_panel,
     lutron_zone_level,
     lutron_zone_watts,
+    lutron_zone_rated_watts,
     lutron_device_leds,
+    lutron_scrape_duration_seconds,
+    lutron_scrape_success,
+    lutron_last_success_timestamp_seconds,
 )
 from .config import get_host_data
 
@@ -30,7 +40,11 @@ async def lifespan(application: FastAPI):
 
     logger.warning("Starting FastAPI application...")
     logger.warning("Lutron QS Exporter v%s", __version__)
-    logger.warning("Lutron QS Server Address: {address}".format(**application.state.host_data))
+    address = application.state.host_data.get("address")
+    if address:
+        logger.warning("Lutron QS Server Address: %s", address)
+    else:
+        logger.error("Lutron processor address is not configured")
 
     yield
 
@@ -47,6 +61,12 @@ async def root():
     :return:
     """
     return RedirectResponse(url="/metrics", status_code=302)
+
+
+@app.get("/health")
+def health():
+    """Process is up. This route does not open a telnet session."""
+    return {"status": "ok"}
 
 
 @app.get("/metrics")
@@ -68,7 +88,11 @@ async def metrics():
     registry.register(information_panel)
     registry.register(lutron_zone_level)
     registry.register(lutron_zone_watts)
+    registry.register(lutron_zone_rated_watts)
     registry.register(lutron_device_leds)
+    registry.register(lutron_scrape_duration_seconds)
+    registry.register(lutron_scrape_success)
+    registry.register(lutron_last_success_timestamp_seconds)
 
     metrics_data = generate_latest(registry)
 
@@ -109,7 +133,8 @@ def get_config():
     logger.warning("Requested host configuration data")
     logger.warning("Lutron QS Exporter v%s", __version__)
 
-    host_data = get_host_data()
+    host_data = dict(get_host_data())
+    host_data.pop("password", None)
     host_data["version"] = __version__
 
     logger.debug(host_data)
